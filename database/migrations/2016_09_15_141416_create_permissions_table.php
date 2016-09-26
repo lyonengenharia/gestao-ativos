@@ -13,30 +13,34 @@ class CreatePermissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('permissions', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->string('name',50);
-            $table->string('label',200);
-            $table->timestamps();
-        });
-        Schema::create('permission_role', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->integer('permission_id')->unsigned();
-            $table->integer('role_id')->unsigned();
-            $table->foreign('permission_id')
-                ->references('id')
-                ->on('permissions')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->foreign('role_id')
-                ->references('id')
-                ->on('roles')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('permissions')) {
+            Schema::create('permissions', function (Blueprint $table) {
+                $table->engine = 'InnoDB';
+                $table->increments('id');
+                $table->string('name', 50);
+                $table->string('label', 200);
+                $table->timestamps();
+            });
+        }
+            if (!Schema::hasTable('permission_role')) {
+                Schema::create('permission_role', function (Blueprint $table) {
+                    $table->engine = 'InnoDB';
+                    $table->increments('id');
+                    $table->integer('permission_id')->unsigned();
+                    $table->integer('role_id')->unsigned();
+                    $table->foreign('permission_id')
+                        ->references('id')
+                        ->on('permissions')
+                        ->onDelete('cascade')
+                        ->onUpdate('cascade');
+                    $table->foreign('role_id')
+                        ->references('id')
+                        ->on('roles')
+                        ->onDelete('cascade')
+                        ->onUpdate('cascade');
+                    $table->timestamps();
+                });
+            }
     }
 
     /**

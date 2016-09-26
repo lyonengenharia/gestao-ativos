@@ -23,9 +23,9 @@ class AtivosController extends Controller
 
     public function index()
     {
-        if(Gate::denies('ativos')){
+        /*if(Gate::denies('ativos')){
             abort(403);
-        }
+        }*/
         return view("ativos.ativos", ["breadcrumbs" => array("Ativos" => "ativos"), "page" => "Ativos", "explanation" => " Busca de ativos"]);
 
 
