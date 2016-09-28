@@ -40,9 +40,8 @@ return [
             'driver' => 'session',
             'provider' => 'adldap',
         ],
-
         'api' => [
-            'driver' => 'session',
+            'driver' => 'token',
             'provider' => 'users',
         ],
     ],

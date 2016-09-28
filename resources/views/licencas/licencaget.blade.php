@@ -16,7 +16,11 @@
                         <select id="empresa" class="form-control" value="{{old('empresa') }}">
                             <option value="0"></option>
                             @foreach($empresas as $empresa)
-                                <option value="{{$empresa->id}}">{{$empresa->name}}</option>
+                                @if($empresa->id == $produtos->myCompany->id)
+                                    <option value="{{$empresa->id}}}" selected>{{$empresa->name}}</option>
+                                @else
+                                    <option value="{{$empresa->id}}}">{{$empresa->name}}</option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
@@ -28,6 +32,7 @@
                         @endif
                         <label>Produto</label>
                         <select name="produto_id" id="produto_id" class="form-control" value="{{old('produto_id') }}">
+                                <option value="{{$produtos->id}}}" selected>{{$produtos->model}}</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -37,7 +42,7 @@
                             </span>
                         @endif
                         <label>Chave</label>
-                        <input type="text" name="key" required class="form-control" value="{{old('key') }}" style="text-transform: uppercase">
+                        <input type="text" name="key" required class="form-control" value="{{empty(old('key'))?$key->key:old('key') }}" style="text-transform: uppercase">
                     </div>
                     <div class="form-group">
                         @if ($errors->has('quantity'))
@@ -46,7 +51,7 @@
                             </span>
                         @endif
                         <label>Quantidade de licenças</label>
-                        <input type="number" name="quantity" required class="form-control" value="{{old('quantity')}}"
+                        <input type="number" name="quantity" required class="form-control" value="{{empty(old('quantity'))?$key->quantity:old('quantity') }}"
                                required>
 
                     </div>
@@ -57,7 +62,7 @@
                             </span>
                         @endif
                         <label>Descrição</label>
-                        <textarea type="text" name="description" class="form-control" cols="5">{{old('description') }}</textarea>
+                        <textarea type="text" name="description" class="form-control" cols="5">{{empty(old('description'))?$key->description:old('description')}}</textarea>
                     </div>
 
 

@@ -133,7 +133,6 @@ class AtivosController extends Controller
             array_push($movimentation,$mov);
         }
         return response()->json(["Locations" => $retorno,'MovFinancial'=>$movimentation]);
-
-
     }
+
 }

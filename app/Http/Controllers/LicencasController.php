@@ -2,24 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Produto;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
 class LicencasController extends Controller
 {
-    public function index(){
+    public function index()
+    {
+        $licencas = DB::table('keys')
+            ->select(['keys.id as keyid','key', 'quantity', 'in_use', 'keys.description', 'produtos.id', 'produtos.model','empresas.name'])
+            ->join('produtos', function ($inner) {
+                $inner->on('produtos.id', '=', 'keys.produto_id');
+            })
+            ->join('empresas', function ($inner) {
+                $inner->on('empresas.id', '=', 'produtos.empresa_id');
+            })
+            ->paginate(15);
         return view("licencas.licencas", ["breadcrumbs" => array("Licenças" => "licencas"),
             "page" => "Licenças",
-            "explanation" => " Listagem de todas as licenças de software"]);
+            "explanation" => " Listagem de todas as licenças de software",
+            "licencas"=>$licencas]);
     }
-    public function empresa(){
-        return view("licencas.empresa", ["breadcrumbs" => array("Licenças" => "licencas","Empresa" => "empresa"),
+
+    public function empresa()
+    {
+        return view("licencas.empresa", ["breadcrumbs" => array("Licenças" => "licencas", "Empresa" => "empresa"),
             "page" => "Empresa",
             "explanation" => " Cadastro de empresa desenvolvedora de software"]);
     }
-    public function empresainsert(Request $request){
+
+    public function empresainsert(Request $request)
+    {
         $rules = [
             'name' => 'required|unique:empresas|max:200',
             'description' => 'max:500',
@@ -28,11 +45,11 @@ class LicencasController extends Controller
             'name.required' => "O nome da empresa é requerido",
             'name.unique' => "O nome da empresa já está cadastrado",
             'name.max' => "O tamanho máximo para esse campo é de 200 caracteres ",
-            'description.max'=>"O tamanho máximo para esse campo é de 500 caracteres "
+            'description.max' => "O tamanho máximo para esse campo é de 500 caracteres "
 
         ];
-        $validator = \Validator::make($request->all(),$rules,$messages);
-        if($validator->fails()){
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
             return redirect('licencas/empresa')
                 ->withErrors($validator)
                 ->withInput();
@@ -41,50 +58,101 @@ class LicencasController extends Controller
         $empresa->name = $request->get('name');
         $empresa->description = $request->get('description');
         $empresa->save();
-        return redirect('licencas/empresa')->with('status','Empresa '.$request->get('name').' incluida com sucesso!');
+        return redirect('licencas/empresa')->with('status', 'Empresa ' . $request->get('name') . ' incluida com sucesso!');
     }
-    public function produto(){
+
+    public function produto()
+    {
         $empresas = \App\Empresa::get();
-        return view("licencas.produto", ["breadcrumbs" => array("Licenças" => "licencas","Produto" => "licencas/produto"),
+        return view("licencas.produto", ["breadcrumbs" => array("Licenças" => "licencas", "Produto" => "licencas/produto"),
             "page" => "Produto",
             "explanation" => " Cadastro de softwares",
-            "empresas"=>$empresas]);
+            "empresas" => $empresas]);
 
     }
-    public function produtoinsert(Request $request){
+
+    public function produtoinsert(Request $request)
+    {
         $rules = [
             'model' => 'required|unique:produtos|max:200',
             'description' => 'max:500',
-            'empresa'=>'required',
+            'empresa' => 'required',
         ];
         $messages = [
             'model.required' => "O nome da empresa é requerido",
             'model.unique' => "O nome da empresa já está cadastrado",
             'model.max' => "O tamanho máximo para esse campo é de 200 caracteres ",
-            'description.max'=>"O tamanho máximo para esse campo é de 500 caracteres ",
-            'empresa.required'=>"A empresa é requerida."
+            'description.max' => "O tamanho máximo para esse campo é de 500 caracteres ",
+            'empresa.required' => "A empresa é requerida."
         ];
-        $validator = \Validator::make($request->all(),$rules,$messages);
-        if($validator->fails()){
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
             return redirect('licencas/empresa')
                 ->withErrors($validator)
                 ->withInput();
         }
-        $produto =  new \App\Produto();
+        $produto = new \App\Produto();
         $produto->model = $request->get('model');
         $produto->description = $request->get('description');
         $produto->empresa_id = $request->get('empresa');
         $produto->save();
-        return redirect('licencas/produto')->with('status','Produto '.$request->get('model').' incluido com sucesso!');
+        return redirect('licencas/produto')->with('status', 'Produto ' . $request->get('model') . ' incluido com sucesso!');
 
     }
-    public function licenca(){
+
+    public function licenca()
+    {
         $empresas = \App\Empresa::get();
-        return view("licencas.licenca", ["breadcrumbs" => array("Licenças" => "licencas","Novo" => "licencas/licenca"),
+        return view("licencas.licenca", ["breadcrumbs" => array("Licenças" => "licencas", "Novo" => "licencas/licenca"),
             "page" => "Nova licença",
             "explanation" => " Cadastro de licenças softwares",
-            "empresas"=>$empresas]);
-
+            "empresas" => $empresas
+        ]);
 
     }
+
+    public function licencainsert(Request $request)
+    {
+        $rules = [
+            'produto_id' => 'required|exists:produtos,id',
+            'key' => 'required|unique:keys',
+            'quantity' => 'required|min:1',
+        ];
+        $messages = [
+            'produto_id.required' => "O campo é obrigatório",
+            'produto_id.exists' => "O produto não existe no banco de dados",
+            'key.required' => "O campo é obrigatório",
+            'key.unique' => "A chave já está cadastrada.",
+            'quantity.required' => "O campo é obrigatório.",
+            'quantity.min' => "O valor mínimo é 1.",
+        ];
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
+            return redirect('licencas/licenca')
+                ->withErrors($validator)
+                ->withInput();
+        }
+        $Key = new \App\Key();
+        $Key->key = $request->get('key');
+        $Key->description = $request->get('description');
+        $Key->quantity = $request->get('quantity');
+        $Key->produto_id = $request->get('produto_id');
+        $Key->save();
+        return redirect('licencas/licenca')->with('status', 'Licença incluida com sucesso!');
+
+    }
+    public function licencaget($id){
+        $key = \App\Key::find($id);
+        $produtos = \App\Produto::find($key->produto_id);
+        $empresas = \App\Empresa::all();
+        return view("licencas.licencaget", ["breadcrumbs" => array("Licenças" => "licencas", "Edição" => "licencas/licenca"),
+            "page" => "Edição de licença",
+            "explanation" => "Edição de licenças softwares",
+            "key" => $key,
+            "empresas" => $empresas,
+            "produtos" =>$produtos
+
+        ]);
+    }
+
 }

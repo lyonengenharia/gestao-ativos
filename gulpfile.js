@@ -2,6 +2,7 @@ const elixir = require('laravel-elixir');
 
 require('laravel-elixir-vue');
 
+
 /*
  |--------------------------------------------------------------------------
  | Elixir Asset Management
@@ -12,8 +13,11 @@ require('laravel-elixir-vue');
  | file for our application, as well as publishing vendor resources.
  |
  */
-
-elixir(mix => {
+elixir(function(mix){
+    var bootstrapPath = 'node_modules/bootstrap-sass/assets';
     mix.sass('app.scss')
-       .webpack('app.js');
+     .copy(bootstrapPath + '/fonts', 'public/fonts')
+     .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js')
+     .webpack('app.js');
 });
+

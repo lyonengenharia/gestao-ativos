@@ -20,7 +20,7 @@ class CreateKeysTable extends Migration
                 $table->string('key')->unique();
                 $table->string('description', 500);
                 $table->integer('quantity')->default(1);
-                $table->integer('in_use');
+                $table->integer('in_use')->default(0);;
                 $table->integer('produto_id', false, true);
                 $table->foreign('produto_id')
                     ->references('id')

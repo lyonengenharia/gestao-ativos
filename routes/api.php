@@ -15,9 +15,12 @@ use \Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+    var_dump($request->user());
+});
 
-Route::get('/teste', function (Request $request) {
-    dd('oi');
+Route::get('/produtos/{id}', function (Request $request, $id) {
+    $Companies = new \App\Empresa();
+    $Companies = $Companies->find($id);
+    return ($Companies->AllProductOfCompany);
+
 });

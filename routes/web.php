@@ -33,8 +33,12 @@ Route::group(['middleware'=>['auth','acess']],function(){
     //Licences
     Route::get('/licencas', ['uses'=>'LicencasController@index'])->middleware('can:ativos');
     Route::get('/licencas/licenca', ['uses'=>'LicencasController@licenca'])->middleware('can:ativos');
+    Route::post('/licencas/licenca/insert', ['uses'=>'LicencasController@licencainsert'])->middleware('can:ativos');
+    Route::get('/licencas/licenca/{id}', ['uses'=>'LicencasController@licencaget'])->middleware('can:ativos');
+
     Route::get('/licencas/empresa', ['uses'=>'LicencasController@empresa'])->middleware('can:ativos');
     Route::post('/licencas/empresa/insert', ['uses'=>'LicencasController@empresainsert'])->middleware('can:ativos');
+
     Route::get('/licencas/produto', ['uses'=>'LicencasController@produto'])->middleware('can:ativos');
     Route::post('/licencas/produto/insert', ['uses'=>'LicencasController@produtoinsert'])->middleware('can:ativos');
 
@@ -51,5 +55,13 @@ Route::get('/teste', function () {
         }
         echo "<hr>";
     }
+
+});
+
+Route::get('/loguser/{id}',function ($id){
+
+        Log::info('Showing user profile for user: '.$id);
+
+        return Log::getMonolog();
 
 });
