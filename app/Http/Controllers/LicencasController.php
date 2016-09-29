@@ -154,5 +154,34 @@ class LicencasController extends Controller
 
         ]);
     }
+    public function licencaupdate(Request $request){
+        $rules = [
+            'produto_id' => 'required|exists:produtos,id',
+            'keyid' => 'required|exists:keys,id',
+            'quantity' => 'required|min:1',
+        ];
+        $messages = [
+            'produto_id.required' => "O campo é obrigatório",
+            'produto_id.exists' => "O produto não existe no banco de dados",
+            'key.required' => "O campo é obrigatório",
+            'key.exists' => "O registro da chave não existe no banco de dados",
+            'quantity.required' => "O campo é obrigatório.",
+            'quantity.min' => "O valor mínimo é 1.",
+        ];
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
+            return redirect('licencas/licenca/update')
+                ->withErrors($validator)
+                ->withInput();
+        }
+        $key = \App\Key::find($request->get('keyid'));
+        $key->key = $request->get('key');
+        $key->description = $request->get('description');
+        $key->quantity = $request->get('quantity');
+        $key->produto_id = $request->get('produto_id');
+        $key->save();
+        return redirect('licencas')->with('status','Chave atualizada');
+
+    }
 
 }

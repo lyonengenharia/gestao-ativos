@@ -35,6 +35,7 @@ Route::group(['middleware'=>['auth','acess']],function(){
     Route::get('/licencas/licenca', ['uses'=>'LicencasController@licenca'])->middleware('can:ativos');
     Route::post('/licencas/licenca/insert', ['uses'=>'LicencasController@licencainsert'])->middleware('can:ativos');
     Route::get('/licencas/licenca/{id}', ['uses'=>'LicencasController@licencaget'])->middleware('can:ativos');
+    Route::post('/licencas/licenca/update/', ['uses'=>'LicencasController@licencaupdate'])->middleware('can:ativos');
 
     Route::get('/licencas/empresa', ['uses'=>'LicencasController@empresa'])->middleware('can:ativos');
     Route::post('/licencas/empresa/insert', ['uses'=>'LicencasController@empresainsert'])->middleware('can:ativos');

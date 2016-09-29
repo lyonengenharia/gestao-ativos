@@ -3,7 +3,8 @@
 @section('content')
     <div class="row">
         <div class="container">
-            <form action="{{url('/licencas/licenca/insert')}}" method="post">
+            <form action="{{url('/licencas/licenca/update')}}" method="post">
+                <input type="hidden" name="keyid" value="{{$key->id}}">
                 {{  csrf_field() }}
                 <div class="col-md-6 col-md-offset-3">
                     @if (session('status'))
@@ -32,7 +33,7 @@
                         @endif
                         <label>Produto</label>
                         <select name="produto_id" id="produto_id" class="form-control" value="{{old('produto_id') }}">
-                                <option value="{{$produtos->id}}}" selected>{{$produtos->model}}</option>
+                                <option value="{{$produtos->id}}" selected>{{$produtos->model}}</option>
                         </select>
                     </div>
                     <div class="form-group">
