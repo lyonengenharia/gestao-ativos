@@ -18,7 +18,8 @@ class Benskeys extends Migration
                 $table->engine = 'InnoDB';
                 $table->increments('id');
                 $table->integer('key_id')->unsigned();
-                $table->integer('E670BEM_ID')->unsigned();
+                $table->string('E670BEM_CODBEM',20);
+                $table->integer('E070EMP_CODEMP')->unsigned();
                 $table->foreign('key_id')
                     ->references('id')
                     ->on('keys')

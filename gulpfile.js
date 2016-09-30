@@ -16,11 +16,11 @@ require("jquery");
  */
 elixir(function(mix){
     var bootstrapPath = 'node_modules/bootstrap-sass/assets';
-    var jqueryPath = 'node_modules/jquery/dist/jquery.js';
+    var jqueryPath = './node_modules/jquery/dist/jquery.js';
     mix.sass('app.scss')
      .copy(bootstrapPath + '/fonts', 'public/fonts')
      .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js');
     //mix.scripts([jqueryPath+"/"]);
-    mix.scripts([jqueryPath],'public/js/all.js');
+    mix.scripts(jqueryPath,'public/js/all.js');
 });
 

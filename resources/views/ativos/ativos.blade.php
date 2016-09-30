@@ -11,6 +11,9 @@
         .display-localizaoes {
             display: none;
         }
+        .panel-body p {
+            line-height:0.5;
+        }
 
     </style>
 
@@ -76,7 +79,9 @@
                         "</div>" +
                         "<div class=\"panel-body\">" +
                         "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESBEM + " </p>" +
+                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
+                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
+                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
                         "</div>" +
                         "<div class='panel-footer'> " +
                         "<button class=\"btn btn-primary localizacoes\" type=\"button\" data-toggle=\"collapse\" " +

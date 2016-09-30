@@ -183,5 +183,32 @@ class LicencasController extends Controller
         return redirect('licencas')->with('status','Chave atualizada');
 
     }
+    public function associar(Request $request){
+        $rules = [
+            'pat' => 'required',
+            'emp' => 'required',
+            'key' => 'required',
+        ];
+        $messages = [
+            'pat.required' => "O campo é obrigatório",
+            'emp.required' => "O campo é obrigatório",
+
+        ];
+        $validator = \Validator::make($request->all(), $rules, $messages);
+        if($request->ajax()){
+            if($validator->fails()){
+                return $request->all();
+                return response()->json(['erro'=>1]);
+            }
+            $BensKey = new \App\BensKeys();
+            $BensKey->key_id = $request->get('key');
+            $BensKey->E670BEM_CODBEM = $request->get('pat');
+            $BensKey->E070EMP_CODEMP =$request->get('emp');
+            //return $request->all();
+            var_dump($BensKey->save());
+            //return $request->all();
+        }
+
+    }
 
 }

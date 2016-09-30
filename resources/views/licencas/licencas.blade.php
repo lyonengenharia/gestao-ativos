@@ -1,6 +1,20 @@
 @extends('layouts.painel')
 
 @section('content')
+    <style>
+        .load-button {
+            background-image: url('{{asset("img/load/microload.gif")}}');
+            background-repeat: repeat-y;
+        }
+
+        .display-localizaoes {
+            display: none;
+        }
+
+        .panel-body p {
+            line-height: 0.5;
+        }
+    </style>
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -38,8 +52,10 @@
                             <td>
                                 <a href="{{url('/licencas/licenca/'.$licenca->keyid)}}"
                                    class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span> </a>
-                                <button class="btn btn-default btn-xs" data-toggle="modal" data-target="#associarkey">
-                                    <span class="glyphicon glyphicon-resize-small"></span></button>
+                                <button class="btn btn-default btn-xs associarkeymodal">
+                                    <span class="glyphicon glyphicon-resize-small"></span>
+                                </button>
+                                <span style="display: none" class="licencakeyid">{{$licenca->keyid}}</span>
                             </td>
                         </tr>
                     @endforeach
@@ -65,51 +81,59 @@
                                 <div class="form-group">
                                     <label>Patrimônio</label>
                                     <input type="text" id="patrimonio" class="form-control" required>
+
                                     <button type="submit" class="btn btn-info" id="buttonSearch">Pesquisar</button>
                                 </div>
-                                <div class="form-group">
-
-                                </div>
                             </form>
+
                         </div>
+
                     </div>
+                    <div id="resultOfSearch">
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
+        <div id="idkey" style="display: none"></div>
     </div><!-- /.modal -->
+    <script src="{{asset('js/jquery.js')}}"></script>
     <script>
         function handleData(data, textStatus, jqXHR) {
-            //console.log(data);
             $('#resultOfSearch').empty();
             $.each(data, function (i, item) {
                 //console.log(item);
                 var row = "<div class=\"panel panel-default\">" +
-                        "<div class=\"panel-heading\">" +
+                        "<div class=\"panel-heading\"><b>" +
                         item.CODBEM +
-                        "</div>" +
+                        "</b></div>" +
                         "<div class=\"panel-body\">" +
                         "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESBEM + " </p>" +
-                        "</div>" +
-                        "<div class='panel-footer'> " +
-                        "<button class=\"btn btn-primary localizacoes\" type=\"button\" data-toggle=\"collapse\" " +
+                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
+                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
+                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+                        "<button class=\"btn btn-primary  btn-xs selecao\" type=\"button\" data-toggle=\"collapse\" " +
                         "data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">" +
-                        "Localizações" +
+                        "Marcar" +
                         "</button>" +
                         "</div>" +
+                        "<div style='display: none' class='codemp'>" + item.CODEMP + "</div>" +
                         "</div>";
                 $('#resultOfSearch').append(row);
 
             });
             $("#buttonSearch").empty();
             $("#buttonSearch").append("Pesquisar");
+
         }
         $(document).ready(function () {
 
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+            });
             $('form').submit(function (e) {
                 if ($('#resultOfSearch').hasClass('col-md-4')) {
                     $('#resultOfSearch').toggleClass('col-md-12');
@@ -131,6 +155,71 @@
                     type: 'get',
                     dataType: 'json'
                 }).done(handleData);
+            });
+            $(document).on('click', '.selecao', function () {
+                var botaoSelecao = $(this);
+                var selecao = $(this).parent().parent();
+                selecao.toggleClass('panel-default');
+                selecao.toggleClass('panel-warning');
+                if (selecao.hasClass('panel-warning')) {
+                    var pat = selecao.find('.panel-heading').text();
+                    var emp = selecao.find('.codemp').text();
+                    botaoSelecao.text('Carregando...')
+                    $.ajax({
+                        url: '{{url('/api/licencas/associadas')}}/' + pat + "/" + emp,
+                        type: 'get',
+                        dataType: 'json',
+                        success:function (data) {
+                            if (data.length > 0) {
+                                $.each(data, function (i, item) {
+                                    console.log(item);
+                                    var rodape = "<div class='panel-footer'>" +
+                                            "<p>Empresa/Produto "+item.name+"/ "+item.model+" </p>"+
+                                            "<p style='line-height: 0.5;'><b>Chave:</b> "+item.key+" </p>"+
+
+                                            "</div> "
+                                    selecao.append(rodape);
+                                });
+                                selecao.append("<div class='panel-footer'><button class='btn btn-success btn-xs associarchave'>Associar chave</button></div>");
+
+                            }else{
+                                var rodape = "<div class='panel-footer'>" +
+                                        "<p>Nenhuma chave associada</p>" +
+                                        "<button class='btn btn-success btn-xs associarchave'>Associar chave</button>" +
+                                        "</div> "
+                                selecao.append(rodape);
+
+                            }
+
+                        },complete:function () {
+                            botaoSelecao.text('Desmarcar')
+                        }
+                    });
+                }else{
+                    botaoSelecao.text('Marcar')
+                    selecao.find('.panel-footer').remove();
+                }
+            });
+            $(document).on('click','.associarchave',function () {
+                var selecao = $(this).parent().parent();
+                var pat = selecao.find('.panel-heading').text();
+                var emp = selecao.find('.codemp').text();
+                var key = $('#associarkey #idkey').text();
+                $.ajax({
+                    url: '{{url('/licencas/associar')}}',
+                    type: 'post',
+                    data:{pat:pat,emp:emp,key:key},
+                    //dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                    }
+                });
+            });
+            $(document).on('click','.associarkeymodal',function () {
+                $('#associarkey #idkey').text($(this).parent().find('.licencakeyid').text());
+                $('#resultOfSearch').empty();
+                $('#patrimonio').val("");
+                $('#associarkey').modal('show');
             });
 
         });

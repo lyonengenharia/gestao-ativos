@@ -50,7 +50,10 @@ class AtivosController extends Controller
                 'E670BEM.DESBEM',
                 'E670LOC.CODCCU',
                 'E670BEM.SITPAT',
-                'E670BEM.CODEMP'
+                'E670BEM.CODEMP',
+                'E070EMP.NOMEMP',
+                'E674ESP.DESESP',
+                'E674ESP.ABRESP'
             ])
             ->join('E670LOC', function ($join) {
                 $join->on('E670LOC.CODEMP', '=', 'E670BEM.CODEMP');
@@ -62,7 +65,14 @@ class AtivosController extends Controller
             ->join('E044CCU', function ($join) {
                 $join->on('E044CCU.CODEMP', '=', 'E670DRA.CODEMP');
             })
-            ->where('E670BEM.CODEMP', '=', 1)
+            ->join('E070EMP', function ($join) {
+                $join->on('E070EMP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            ->join('E674ESP', function ($join) {
+                $join->on('E674ESP.CODESP', '=', 'E670BEM.CODESP')
+                ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            //->where('E670BEM.CODEMP', '=', 1)
             ->whereColumn('E670LOC.CODEMP', '=', 'E670BEM.CODEMP')
             ->whereColumn('E670LOC.CODBEM', '=', 'E670BEM.CODBEM')
             ->whereColumn('E670DRA.CODEMP', '=', 'E670LOC.CODEMP')
@@ -83,6 +93,10 @@ class AtivosController extends Controller
         foreach ($query as $row) {
             $row->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
             $row->DESBEM = iconv("ISO-8859-1", "UTF-8", $row->DESBEM);
+            $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
+            $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
+            $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
+
             array_push($retorno, $row);
         }
         return response()->json($retorno);
