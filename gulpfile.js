@@ -22,5 +22,6 @@ elixir(function(mix){
      .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js');
     //mix.scripts([jqueryPath+"/"]);
     mix.scripts(jqueryPath,'public/js/all.js');
+    mix.styles(['all.css'],'public/css/all.css');
 });
 

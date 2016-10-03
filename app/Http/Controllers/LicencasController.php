@@ -14,7 +14,7 @@ class LicencasController extends Controller
     public function index()
     {
         $licencas = DB::table('keys')
-            ->select(['keys.id as keyid','key', 'quantity', 'in_use', 'keys.description', 'produtos.id', 'produtos.model','empresas.name'])
+            ->select(['keys.id as keyid', 'key', 'quantity', 'in_use', 'keys.description', 'produtos.id', 'produtos.model', 'empresas.name'])
             ->join('produtos', function ($inner) {
                 $inner->on('produtos.id', '=', 'keys.produto_id');
             })
@@ -25,7 +25,7 @@ class LicencasController extends Controller
         return view("licencas.licencas", ["breadcrumbs" => array("Licenças" => "licencas"),
             "page" => "Licenças",
             "explanation" => " Listagem de todas as licenças de software",
-            "licencas"=>$licencas]);
+            "licencas" => $licencas]);
     }
 
     public function empresa()
@@ -141,7 +141,9 @@ class LicencasController extends Controller
         return redirect('licencas/licenca')->with('status', 'Licença incluida com sucesso!');
 
     }
-    public function licencaget($id){
+
+    public function licencaget($id)
+    {
         $key = \App\Key::find($id);
         $produtos = \App\Produto::find($key->produto_id);
         $empresas = \App\Empresa::all();
@@ -150,11 +152,12 @@ class LicencasController extends Controller
             "explanation" => "Edição de licenças softwares",
             "key" => $key,
             "empresas" => $empresas,
-            "produtos" =>$produtos
-
+            "produtos" => $produtos
         ]);
     }
-    public function licencaupdate(Request $request){
+
+    public function licencaupdate(Request $request)
+    {
         $rules = [
             'produto_id' => 'required|exists:produtos,id',
             'keyid' => 'required|exists:keys,id',
@@ -180,10 +183,12 @@ class LicencasController extends Controller
         $key->quantity = $request->get('quantity');
         $key->produto_id = $request->get('produto_id');
         $key->save();
-        return redirect('licencas')->with('status','Chave atualizada');
+        return redirect('licencas')->with('status', 'Chave atualizada');
 
     }
-    public function associar(Request $request){
+
+    public function associar(Request $request)
+    {
         $rules = [
             'pat' => 'required',
             'emp' => 'required',
@@ -195,18 +200,47 @@ class LicencasController extends Controller
 
         ];
         $validator = \Validator::make($request->all(), $rules, $messages);
-        if($request->ajax()){
-            if($validator->fails()){
-                return $request->all();
-                return response()->json(['erro'=>1]);
+        if ($request->ajax()) {
+            if ($validator->fails()) {
+                return response()->json(['erro' => 0]);
             }
+            //Verificar se existe um chave identica associada.
+
+            if (!$request->has('conf')) {
+                $checkKey = DB::table('Keys')->where('id', '=', $request->get('key'))->get();
+                $existekey = DB::table('benskeys')
+                    ->select(
+                        [
+                            'produtos.id', 'produtos.model', 'produtos.description',
+                            'produtos.empresa_id', 'produtos.created_at', 'produtos.updated_at'
+                        ]
+                    )->join('keys', function ($inner) {
+                        $inner->on('keys.ID', '=', 'benskeys.key_id');
+                    })->join('produtos', function ($inner) {
+                        $inner->on('produtos.id', '=', 'keys.produto_id');
+                    })->where('E670BEM_CODBEM', '=', $request->get('pat'))
+                    ->where('E070EMP_CODEMP', '=', $request->get('emp'));
+                foreach ($existekey->get() as $keys) {
+                    if ($keys->id == $checkKey[0]->produto_id) {
+                        return response()->json(['erro' => 2, 'msg' => 'Já existe uma licença desse tipo de software associado, desse continuar assim mesmo?']);
+                    }
+                }
+
+            }
+
+            //Associate the key
+            $key = \App\Key::find($request->get('key'));
+            $key->in_use += 1;
+            $key->save();
             $BensKey = new \App\BensKeys();
             $BensKey->key_id = $request->get('key');
             $BensKey->E670BEM_CODBEM = $request->get('pat');
-            $BensKey->E070EMP_CODEMP =$request->get('emp');
+            $BensKey->E070EMP_CODEMP = $request->get('emp');
+
+
             //return $request->all();
-            var_dump($BensKey->save());
-            //return $request->all();
+            $BensKey->save();
+            return response()->json(['erro' => 1, 'msg' => 'Chave associada!']);
         }
 
     }

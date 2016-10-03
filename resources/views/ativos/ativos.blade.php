@@ -5,16 +5,11 @@
         .load-button {
             background-image: url('{{asset("img/load/microload.gif")}}');
             background-repeat: repeat-y;
-
         }
 
         .display-localizaoes {
             display: none;
         }
-        .panel-body p {
-            line-height:0.5;
-        }
-
     </style>
 
     <script src="{{asset('js/jquery.js')}}"></script>

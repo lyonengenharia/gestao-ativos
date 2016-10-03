@@ -10,10 +10,6 @@
         .display-localizaoes {
             display: none;
         }
-
-        .panel-body p {
-            line-height: 0.5;
-        }
     </style>
     <div class="container">
         <div class="row">
@@ -125,9 +121,25 @@
                 $('#resultOfSearch').append(row);
 
             });
+
             $("#buttonSearch").empty();
             $("#buttonSearch").append("Pesquisar");
 
+        }
+        function trataRetorno(data) {
+            console.log(data);
+            if(data.erro==2){
+                if(confirm(data.msg)){
+                    $.ajax({
+                        url: '{{url('/licencas/associar')}}',
+                        type: 'post',
+                        data:{pat:pat,emp:emp,key:key,conf:1},
+                        dataType: 'json'
+                    }).done(trataRetorno);
+                }
+            }else{
+                alert(data.msg);
+            }
         }
         $(document).ready(function () {
 
@@ -172,7 +184,7 @@
                         success:function (data) {
                             if (data.length > 0) {
                                 $.each(data, function (i, item) {
-                                    console.log(item);
+                                    //console.log(item);
                                     var rodape = "<div class='panel-footer'>" +
                                             "<p>Empresa/Produto "+item.name+"/ "+item.model+" </p>"+
                                             "<p style='line-height: 0.5;'><b>Chave:</b> "+item.key+" </p>"+
@@ -209,11 +221,8 @@
                     url: '{{url('/licencas/associar')}}',
                     type: 'post',
                     data:{pat:pat,emp:emp,key:key},
-                    //dataType: 'json',
-                    success: function (data) {
-                        console.log(data);
-                    }
-                });
+                    dataType: 'json'
+                }).done(trataRetorno);
             });
             $(document).on('click','.associarkeymodal',function () {
                 $('#associarkey #idkey').text($(this).parent().find('.licencakeyid').text());
