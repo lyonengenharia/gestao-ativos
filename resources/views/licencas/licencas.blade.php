@@ -39,12 +39,12 @@
                     </thead>
                     <tbody>
                     @foreach($licencas as $licenca)
-                        <tr>
-                            <td>{{$licenca->name}}</td>
-                            <td>{{$licenca->model}}</td>
-                            <td>{{$licenca->key}}</td>
-                            <td>{{$licenca->quantity}}</td>
-                            <td>{{$licenca->in_use}}</td>
+                        <tr {{$licenca->in_use > $licenca->quantity ?"class=danger":""}}>
+                            <td class="Empresa-table">{{$licenca->name}}</td>
+                            <td class="Model-table">{{$licenca->model}}</td>
+                            <td class="Key-table">{{$licenca->key}}</td>
+                            <td class="Quantity-table">{{$licenca->quantity}}</td>
+                            <td class="InUse-table">{{$licenca->in_use}}</td>
                             <td>
                                 <a href="{{url('/licencas/licenca/'.$licenca->keyid)}}"
                                    class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span> </a>
@@ -69,8 +69,16 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Atribuir licença</h4>
+                    <span id="Title-Empresa-Produto"></span>
+                    <p>Chave - <span id="Title-Produto-Key"></span></p>
+
                 </div>
                 <div class="modal-body">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Associados</div>
+                        <div class="panel-body" id="LicencasAssociadas">
+                        </div>
+                    </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <form class="form-inline">
@@ -97,54 +105,31 @@
         <div id="idkey" style="display: none"></div>
     </div><!-- /.modal -->
     <script src="{{asset('js/jquery.js')}}"></script>
+    <script src="{{asset('js/licencas.js')}}"></script>
     <script>
-        function handleData(data, textStatus, jqXHR) {
-            $('#resultOfSearch').empty();
-            $.each(data, function (i, item) {
-                //console.log(item);
-                var row = "<div class=\"panel panel-default\">" +
-                        "<div class=\"panel-heading\"><b>" +
-                        item.CODBEM +
-                        "</b></div>" +
-                        "<div class=\"panel-body\">" +
-                        "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
-                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
-                        "<button class=\"btn btn-primary  btn-xs selecao\" type=\"button\" data-toggle=\"collapse\" " +
-                        "data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">" +
-                        "Marcar" +
-                        "</button>" +
-                        "</div>" +
-                        "<div style='display: none' class='codemp'>" + item.CODEMP + "</div>" +
-                        "</div>";
-                $('#resultOfSearch').append(row);
-
-            });
-
-            $("#buttonSearch").empty();
-            $("#buttonSearch").append("Pesquisar");
-
-        }
-        function trataRetorno(data) {
-            console.log(data);
-            if(data.erro==2){
-                if(confirm(data.msg)){
+        function trataRetorno(data,pat,emp,key) {
+            //var pat;
+            //var emp;
+            //var key;
+            if (data.erro == 2) {
+                if (confirm(data.msg)) {
                     $.ajax({
                         url: '{{url('/licencas/associar')}}',
                         type: 'post',
-                        data:{pat:pat,emp:emp,key:key,conf:1},
+                        data: {pat: pat, emp: emp, key: key, conf: 1},
                         dataType: 'json'
                     }).done(trataRetorno);
                 }
-            }else{
+            } else {
                 alert(data.msg);
+                location.reload();
             }
         }
+
         $(document).ready(function () {
 
             $.ajaxSetup({
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
             $('form').submit(function (e) {
                 if ($('#resultOfSearch').hasClass('col-md-4')) {
@@ -181,20 +166,20 @@
                         url: '{{url('/api/licencas/associadas')}}/' + pat + "/" + emp,
                         type: 'get',
                         dataType: 'json',
-                        success:function (data) {
+                        success: function (data) {
                             if (data.length > 0) {
                                 $.each(data, function (i, item) {
                                     //console.log(item);
                                     var rodape = "<div class='panel-footer'>" +
-                                            "<p>Empresa/Produto "+item.name+"/ "+item.model+" </p>"+
-                                            "<p style='line-height: 0.5;'><b>Chave:</b> "+item.key+" </p>"+
+                                            "<p>Empresa/Produto " + item.name + "/ " + item.model + " </p>" +
+                                            "<p style='line-height: 0.5;'><b>Chave:</b> " + item.key + " </p>" +
 
                                             "</div> "
                                     selecao.append(rodape);
                                 });
                                 selecao.append("<div class='panel-footer'><button class='btn btn-success btn-xs associarchave'>Associar chave</button></div>");
 
-                            }else{
+                            } else {
                                 var rodape = "<div class='panel-footer'>" +
                                         "<p>Nenhuma chave associada</p>" +
                                         "<button class='btn btn-success btn-xs associarchave'>Associar chave</button>" +
@@ -203,16 +188,16 @@
 
                             }
 
-                        },complete:function () {
+                        }, complete: function () {
                             botaoSelecao.text('Desmarcar')
                         }
                     });
-                }else{
+                } else {
                     botaoSelecao.text('Marcar')
                     selecao.find('.panel-footer').remove();
                 }
             });
-            $(document).on('click','.associarchave',function () {
+            $(document).on('click', '.associarchave', function () {
                 var selecao = $(this).parent().parent();
                 var pat = selecao.find('.panel-heading').text();
                 var emp = selecao.find('.codemp').text();
@@ -220,17 +205,55 @@
                 $.ajax({
                     url: '{{url('/licencas/associar')}}',
                     type: 'post',
-                    data:{pat:pat,emp:emp,key:key},
-                    dataType: 'json'
-                }).done(trataRetorno);
+                    data: {pat: pat, emp: emp, key: key},
+                    dataType: 'json',
+                    success:function (data) {
+                        trataRetorno(data,pat,emp,key);
+                    }
+                });
             });
-            $(document).on('click','.associarkeymodal',function () {
-                $('#associarkey #idkey').text($(this).parent().find('.licencakeyid').text());
+            $(document).on('click', '.associarkeymodal', function () {
+                $(".div-load").toggleClass('div-load-hidden');
+                var idkey = $(this).parent().find('.licencakeyid').text();
+                var table_keys = $(this).parent().parent();
+                var heading_modal_associarkey = $('#Title-Empresa-Produto');
+                var heading_modal_key = $('#Title-Produto-Key');
+                $('#associarkey #idkey').text(idkey);
                 $('#resultOfSearch').empty();
+                heading_modal_associarkey.empty();
+                heading_modal_key.empty();
+                empresa = table_keys.find('.Empresa-table').text();
+                produto = table_keys.find('.Model-table').text();
+                key = table_keys.find('.Key-table').text();
+                heading_modal_associarkey.text(empresa + ' - ' + produto);
+                heading_modal_key.text(key);
                 $('#patrimonio').val("");
-                $('#associarkey').modal('show');
+                $.ajax({
+                    url: '{{url('/api/licencas/associadas')}}/' + idkey,
+                    type: 'get',
+                    dataType: 'json',
+                }).done(function (data) {
+                    trataModalLicenca(data, function () {
+                        $(".div-load").toggleClass('div-load-hidden');
+                        $('#associarkey').modal('show');
+                    });
+
+                });
+
             });
 
+            $(document).on('click','.remover-associacao',function () {
+                key = $('#associarkey #idkey').text();
+                pat = $(this).parent().find('.patrimonio').text();
+                $.ajax({
+                  url:'{{url('/licencas/produto/delete')}}',
+                  data:{key:key,pat:pat},
+                  type:'delete',
+                  success:function (data) {
+                      console.log(data);
+                  }
+                });
+            });
         });
     </script>
 @endsection

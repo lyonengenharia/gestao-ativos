@@ -44,3 +44,18 @@ Route::get('/licencas/associadas/{patrimonio}/{empresa}', function (Request $req
     })->where('E670BEM_CODBEM', '=', $patrimonio)->where('E070EMP_CODEMP', '=', $empresa)->get();
     return response()->json($BensKeys);
 });
+/**
+ * Retonar todos os bens associados para id da licença
+ */
+Route::get('licencas/associadas/{key}',function (Request $request,$key){
+    $itens = DB::table('benskeys')
+             ->select(['keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','benskeys.E670BEM_CODBEM'])
+             ->join('keys',function ($inner){
+                 $inner->on('keys.ID','=','benskeys.key_id');
+             })->join('produtos',function ($inner){
+                 $inner->on('produtos.id','=','keys.produto_id');
+             })->join('empresas',function ($inner){
+                 $inner->on('empresas.id','=','produtos.empresa_id');
+             })->where('benskeys.key_id','=',$key)->get();
+    return $itens;
+});

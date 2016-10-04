@@ -21,7 +21,15 @@ elixir(function(mix){
      .copy(bootstrapPath + '/fonts', 'public/fonts')
      .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js');
     //mix.scripts([jqueryPath+"/"]);
+
+    //View - Template
+
     mix.scripts(jqueryPath,'public/js/all.js');
     mix.styles(['all.css'],'public/css/all.css');
+
+    //View - JavaScript
+    mix.scripts('licencas/licencas.js','public/js/licencas.js');
+
+    //View - Css
 });
 

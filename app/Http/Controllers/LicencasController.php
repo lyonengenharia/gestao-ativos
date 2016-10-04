@@ -236,13 +236,19 @@ class LicencasController extends Controller
             $BensKey->key_id = $request->get('key');
             $BensKey->E670BEM_CODBEM = $request->get('pat');
             $BensKey->E070EMP_CODEMP = $request->get('emp');
-
-
-            //return $request->all();
             $BensKey->save();
             return response()->json(['erro' => 1, 'msg' => 'Chave associada!']);
         }
 
+    }
+
+    public function produtodelete(Request $request)
+    {
+        $table = DB::table('benskeys')->where('key_id', '=', $request->get('key'))->where('E670BEM_CODBEM', '=', $request->get('pat'))->delete();
+        $key = \App\Key::find($request->get('key'));
+        $key->in_use =  $key->in_use - $table;
+        $key->save();
+        return $table;
     }
 
 }

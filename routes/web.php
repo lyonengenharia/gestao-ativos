@@ -44,6 +44,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 
     Route::get('/licencas/produto', ['uses' => 'LicencasController@produto'])->middleware('can:ativos');
     Route::post('/licencas/produto/insert', ['uses' => 'LicencasController@produtoinsert'])->middleware('can:ativos');
+    Route::delete('/licencas/produto/delete', ['uses' => 'LicencasController@produtodelete'])->middleware('can:ativos');
 
 });
 
