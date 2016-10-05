@@ -1,6 +1,10 @@
 .panel-body p {
     line-height:1.2;
 }
+
+.espaco-entrelinhas-xs{
+    line-height:0.7;
+}
 .div-load-hidden{
     display: none;
     -webkit-transition: opacity 3s ease-in-out;

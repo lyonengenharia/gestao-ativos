@@ -92,11 +92,11 @@
                 <li class="{{ Request::is('ativos') ? 'active' : '' }}">
                     <a href="{{url('/ativos')}}"><i class="fa fa-fw fa-bar-chart-o"></i> Ativos</a>
                 </li>
-                <li>
+                <li class="{{ Request::is('licencas') ? 'active' : '' }}">
                     <a href="{{url('licencas')}}"><i class="fa fa-fw fa-table"></i> Licenças</a>
                 </li>
-                <li>
-                    <a href="forms.html"><i class="fa fa-fw fa-edit"></i> Forms</a>
+                <li class="{{ Request::is('painel') ? 'active' : '' }}">
+                    <a href="{{url('painel')}}"><i class="fa fa-fw fa-gears"></i> Painel Controle</a>
                 </li>
                 <li>
                     <a href="bootstrap-elements.html"><i class="fa fa-fw fa-desktop"></i> Bootstrap Elements</a>

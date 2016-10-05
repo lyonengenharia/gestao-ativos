@@ -46,6 +46,15 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::post('/licencas/produto/insert', ['uses' => 'LicencasController@produtoinsert'])->middleware('can:ativos');
     Route::delete('/licencas/produto/delete', ['uses' => 'LicencasController@produtodelete'])->middleware('can:ativos');
 
+    //Painel Controle
+    Route::get('/painel','PainelController@index')->middleware('can:ativos');
+    Route::get('/painel/usuarios','UserController@index')->middleware('can:ativos');
+    Route::get('/painel/usuarios/grupos','RolesController@index')->middleware('can:ativos');
+
+    //Usuários
+    Route::get('/usuario/{id}','UserController@edit')->middleware('can:ativos');
+    Route::post('/usuario/edit','UserController@update')->middleware('can:ativos');
+
 });
 
 Route::get('/teste', function () {

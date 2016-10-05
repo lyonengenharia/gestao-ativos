@@ -31,10 +31,40 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        return $request->all();
-        //$users = Adldap::getDefaultProvider()->auth()->attempt('wfs', 'Html#2018');
-        //$users = $this->adldap->getDefaultProvider()->search()->users()->get();
-        //dd($users);
-        //return view('users.index', compact('users'));
+        $users = \App\User::paginate(15);
+        return view('painel.usuarios',[
+            "breadcrumbs" => array("Painel Controle" => "painel","Usuários"=>'painel/usuarios'),
+            "page" => "Gestão de usuários",
+            "explanation" => " Gestão de Usuários",
+            "users"=>$users
+        ]);
+    }
+
+    public function edit($id){
+        $user = \App\User::find($id);
+        $roles = \App\Role::all();
+        return view('users.edit',[
+            "breadcrumbs" => array("Painel Controle" => "painel","Usuários" => "painel/usuarios","Editar" => "#"),
+            "page" => "Gestão de usuários",
+            "explanation" => " edição de usuário",
+            "user"=>$user,
+            "roles"=>$roles
+        ]);
+    }
+    public function update(Request $request){
+        $user = \App\User::find($request->get('usuario'));
+        /*foreach ($request->get('permissoes') as $permission){
+            if($role->id)
+            }
+
+        foreach ($user->roles as $role){
+
+        }
+        /*if($request->has('permissoes')){
+
+
+        }*/
+
+       return $user;
     }
 }
