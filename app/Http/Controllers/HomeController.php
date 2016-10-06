@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Gate ;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -24,8 +23,45 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //if(Gate::denies('acesso'))
-         //   abort(403,'Acesso negado');
-        return view('dashboard.dashboard', ["breadcrumbs" => array("Home" => "home"), "page" => "Dashboard", "explanation" => " Estatística e visão geral"]);
+        $user = \App\User::count();
+        $equipamentos = DB::connection('sapiens')->table("E670BEM")
+            ->join('E670LOC', function ($join) {
+                $join->on('E670LOC.CODEMP', '=', 'E670BEM.CODEMP');
+
+            })
+            ->Join('E670DRA', function ($join) {
+                $join->on('E670DRA.CODEMP', '=', 'E670LOC.CODEMP');
+            })
+            ->join('E044CCU', function ($join) {
+                $join->on('E044CCU.CODEMP', '=', 'E670DRA.CODEMP');
+            })
+            ->join('E070EMP', function ($join) {
+                $join->on('E070EMP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            ->join('E674ESP', function ($join) {
+                $join->on('E674ESP.CODESP', '=', 'E670BEM.CODESP')
+                    ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            //->where('E670BEM.CODEMP', '=', 1)
+            ->whereColumn('E670LOC.CODEMP', '=', 'E670BEM.CODEMP')
+            ->whereColumn('E670LOC.CODBEM', '=', 'E670BEM.CODBEM')
+            ->whereColumn('E670DRA.CODEMP', '=', 'E670LOC.CODEMP')
+            ->whereColumn('E670DRA.CODBEM', '=', 'E670LOC.CODBEM')
+            ->whereColumn('E670DRA.DATLOC', '=', 'E670LOC.DATLOC')
+            ->whereColumn('E670DRA.SEQLOC', '=', 'E670LOC.SEQLOC')
+            ->whereColumn('E044CCU.CODEMP', '=', 'E670DRA.CODEMP')
+            ->whereColumn('E044CCU.CODCCU', '=', 'E670DRA.CODCCU')
+            ->where('E670LOC.ULTREG', '=', 'S')
+            ->where('E670LOC.SITLOC', '=', 'A')
+            ->whereIn('E674ESP.CODESP',[18,3])
+            ->count();
+        return view('dashboard.dashboard',
+            ["breadcrumbs" => array("Home" => "home"),
+                "page" => "Dashboard",
+                "explanation" => " Estatística e visão geral",
+                "user"=>$user,
+                "informatica"=>$equipamentos
+            ]
+        );
     }
 }

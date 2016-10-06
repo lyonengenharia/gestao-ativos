@@ -1,6 +1,13 @@
 @extends('layouts.painel')
 
 @section('content')
+    {{--<pre>--}}
+    {{--{{var_dump($user->roles->toArray())}}--}}
+    {{--{{var_dump($roles->toArray())}}--}}
+    {{--<hr>--}}
+    {{--{{var_dump(array_intersect_key($user->roles->toArray(),$roles->toArray()))}}--}}
+    {{--</pre>--}}
+
     <div class="container">
         <div class="row">
             <div class="col-md-12 col-lg-8">
@@ -20,22 +27,25 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Grupos</label>
+
                                     <select class="form-control" id="groups" multiple>
                                         @foreach($roles as $role)
-
-                                                @forelse($user->roles as $roleuser)
-                                                    @if($roleuser->id!=$role->id)
-                                                        <option value="{{$role->id}}">{{$role->name}}</option>
-                                                    @endif
-                                                @empty
+                                            @forelse($user->roles as $roleuser)
+                                                @if($roleuser->id==$role->id)
+                                                    @break
+                                                @endif
+                                                @if($roleuser->id!=$role->id && $loop->last)
                                                     <option value="{{$role->id}}">{{$role->name}}</option>
-                                                @endforelse
+                                                @endif
+                                            @empty
+                                                <option value="{{$role->id}}">{{$role->name}}</option>
+                                            @endforelse
                                         @endforeach
                                     </select>
-                                    <a  href="#" class="btn btn-default btn-xs" id="plus"><span class="glyphicon glyphicon-arrow-right"></span> </a>
+                                    <a href="#" class="btn btn-default btn-xs" id="plus"><span
+                                                class="glyphicon glyphicon-arrow-right"></span> </a>
                                 </div>
                             </div>
-
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Atual</label>
@@ -46,7 +56,8 @@
 
                                         @endforelse
                                     </select>
-                                    <a href="#" class="btn btn-default btn-xs" id="remove"><span class="glyphicon glyphicon-arrow-left"></span> </a>
+                                    <a href="#" class="btn btn-default btn-xs" id="remove"><span
+                                                class="glyphicon glyphicon-arrow-left"></span> </a>
                                 </div>
                             </div>
                         </div>
@@ -60,19 +71,23 @@
 
     <script src="{{asset('js/jquery.js')}}"></script>
     <script>
-        function salveForm(url,grupos,usuario) {
+        function salveForm(url, grupos, usuario) {
             var dados = [];
             console.log(usuario);
-            for(i=0;i<grupos.length;i++){
+            for (i = 0; i < grupos.length; i++) {
                 dados.push(grupos.options[i].value)
             }
             $.ajax({
-               url:url,
-               data:{permissoes:dados,usuario:usuario},
-               type:'post',
-               success:function (result) {
-                   console.log(result);
-               }
+                url: url,
+                data: {permissoes: dados, usuario: usuario},
+                type: 'post',
+                dataType:'json',
+                success: function (result) {
+                    if(result.erro===0){
+                        alert(result.msg);
+                        location.reload();
+                    }
+                }
             });
         }
         $(document).ready(function () {
@@ -80,7 +95,7 @@
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
             $('#plus').click(function () {
-                $('select[name=groups-update]').append( $('#groups :selected'));
+                $('select[name=groups-update]').append($('#groups :selected'));
             });
             $('#remove').click(function () {
                 $('#groups').append($('select[name=groups-update] :selected'));
@@ -89,7 +104,7 @@
                 e.preventDefault();
                 grupos = document.getElementById('groups-update');
                 usuario = $('#idUser').text();
-                salveForm('{{url('usuario/edit')}}',grupos,usuario);
+                salveForm('{{url('usuario/edit')}}', grupos, usuario);
             });
         });
     </script>

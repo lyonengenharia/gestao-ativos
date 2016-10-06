@@ -107,7 +107,7 @@
     <script src="{{asset('js/jquery.js')}}"></script>
     <script src="{{asset('js/licencas.js')}}"></script>
     <script>
-        function trataRetorno(data,pat,emp,key) {
+        function trataRetorno(data, pat, emp, key) {
             //var pat;
             //var emp;
             //var key;
@@ -207,8 +207,8 @@
                     type: 'post',
                     data: {pat: pat, emp: emp, key: key},
                     dataType: 'json',
-                    success:function (data) {
-                        trataRetorno(data,pat,emp,key);
+                    success: function (data) {
+                        trataRetorno(data, pat, emp, key);
                     }
                 });
             });
@@ -241,18 +241,19 @@
                 });
 
             });
-
-            $(document).on('click','.remover-associacao',function () {
-                key = $('#associarkey #idkey').text();
-                pat = $(this).parent().find('.patrimonio').text();
-                $.ajax({
-                  url:'{{url('/licencas/produto/delete')}}',
-                  data:{key:key,pat:pat},
-                  type:'delete',
-                  success:function (data) {
-                      console.log(data);
-                  }
-                });
+            $(document).on('click', '.remover-associacao', function () {
+                if (confirm("Deseja realmente remover a associação ?")) {
+                    key = $('#associarkey #idkey').text();
+                    pat = $(this).parent().find('.patrimonio').text();
+                    $.ajax({
+                        url: '{{url('/licencas/produto/delete')}}',
+                        data: {key: key, pat: pat},
+                        type: 'delete',
+                        success: function (data) {
+                            console.log(data);
+                        }
+                    });
+                }
             });
         });
     </script>

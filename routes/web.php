@@ -55,6 +55,9 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/usuario/{id}','UserController@edit')->middleware('can:ativos');
     Route::post('/usuario/edit','UserController@update')->middleware('can:ativos');
 
+    //Permissões de Segurança
+    Route::get('/permissoes','PermissionsController@index')->middleware('can:ativcos');
+
 });
 
 Route::get('/teste', function () {
