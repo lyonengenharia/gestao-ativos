@@ -14,9 +14,8 @@
 
     <script src="{{asset('js/jquery.js')}}"></script>
     <div class="row">
-        <div class="col-md-12">
-
-            <div class="panel panel-default">
+        <div class="col-md-12" >
+            <div class="panel panel-default" id="search">
                 <div class="panel-heading">Busca</div>
                 <div class="panel-body">
                     <form>
@@ -108,8 +107,16 @@
                         "<div class=\"panel-body\">" +
                         "<p><b>Data Movimentação:</b> " + item.DATMOV + " </p>" +
                         "<p><b>Descrição:</b> " + item.DESTNS + " </p>" +
+                        "<p><b>CODTNS:</b> " + item.CODTNS + " </p>" +
                         "</div>" +
                         "</div>";
+                if(item.CODTNS == 90804 ){
+                    var alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">"+
+                                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>"+
+                                    "<strong>Atenção!</strong> Esse item foi vendido!."+
+                                "</div>";
+                    $('#search').after(alert);
+                }
                 $('#historyFinancialList').append(row);
             });
 
@@ -120,6 +127,7 @@
         $(document).ready(function () {
 
             $('form').submit(function (e) {
+                $('.search').remove();
                 if ($('#resultOfSearch').hasClass('col-md-4')) {
                     $('#resultOfSearch').toggleClass('col-md-12');
                     $('#resultOfSearch').toggleClass('col-md-4');
@@ -142,8 +150,9 @@
                 }).done(handleData);
             });
             $(document).on('click', '.localizacoes', function () {
-
+                $(".div-load").toggleClass('div-load-hidden');
                 var item = $(this).parent().parent().find('.panel-heading').text();
+                var panel = $(this).parent().parent();
                 if ($('#resultOfSearch').hasClass('col-md-12')) {
                     $('#resultOfSearch').toggleClass('col-md-12');
                     $('#resultOfSearch').toggleClass('col-md-4');
@@ -162,7 +171,14 @@
                     data: {pat: item},
                     type: 'get',
                     dataType: 'json'
-                }).done(historyLocations);
+                }).done(function (data) {
+                    historyLocations(data);
+                    $('#resultOfSearch').empty();
+                    panel.removeClass('panel-default');
+                    panel.addClass('panel-warning');
+                    $('#resultOfSearch').append(panel);
+                    $(".div-load").toggleClass('div-load-hidden');
+                });
             });
         });
     </script>

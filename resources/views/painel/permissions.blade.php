@@ -16,10 +16,17 @@
                 </div>
             </div>
             <div class="col-lg-12 col-md-12" style="margin-bottom: 5px;">
-                <a href="{{url('/permissoes')}}" class="btn btn-default">Nova Permissão <span class="fa fa-lock"></span>
+                <a href="{{url('/permission')}}" class="btn btn-default">Nova Permissão <span class="fa fa-lock"></span>
                 </a>
             </div>
             <div class="col-lg-12 col-md-12">
+                @if (session('status'))
+
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ session('status') }}
+                    </div>
+                @endif
                 <table class="table table-bordered hover">
                     <thead>
                     <th>Nome</th>
@@ -42,10 +49,8 @@
                             </td>
                             <td>{{$permission->created_at}}</td>
                             <td>
-                                <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span>
-                                </button>
-                                <button class="btn btn-info btn-xs"><span class="glyphicon glyphicon-plus"></span>
-                                </button>
+                                <a href="{{url('permission')."/".$permission->id}}" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span>
+                                </a>
                                 <button class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-erase"></span>
                                 </button>
                             </td>
