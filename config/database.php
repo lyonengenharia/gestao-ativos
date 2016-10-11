@@ -73,10 +73,14 @@ return [
             'database' => getenv('DB_SS_DATABASE'),
             'username' => getenv('DB_SS_USERNAME'),
             'password' => getenv('DB_SS_PASSWORD'),
-            //'collation' => 'windows-1252',
-            'prefix' => '',
-            //'schema' => 'public',
-            //'sslmode' => 'prefer',
+        ],
+        'vetorh' => [
+            'driver' => 'sqlsrv',
+            'host' => getenv('DB_VT_HOST'),
+            //'port' => getenv('env'),
+            'database' => getenv('DB_VT_DATABASE'),
+            'username' => getenv('DB_VT_USERNAME'),
+            'password' => getenv('DB_VT_PASSWORD'),
         ],
 
     ],

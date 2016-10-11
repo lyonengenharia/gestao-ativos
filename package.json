@@ -5,6 +5,7 @@
     "dev": "gulp watch"
   },
   "devDependencies": {
+    "jquery-ui":"^3.1.0",
     "bootstrap-sass": "^3.3.7",
     "gulp": "^3.9.1",
     "html-webpack-plugin": "^2.22.0",

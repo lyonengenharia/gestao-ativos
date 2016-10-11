@@ -59,3 +59,18 @@ Route::get('licencas/associadas/{key}',function (Request $request,$key){
              })->where('benskeys.key_id','=',$key)->get();
     return $itens;
 });
+
+
+Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
+    $colaboradores = DB::connection('vetorh')->table('R034FUN')
+        ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','SITAFA'])
+        ->where('NUMEMP','=',$emp)
+        ->where('TIPCOL','=',$tipo)
+        ->where('NOMFUN','like',"$name%")
+        ->limit(10)->get();
+    foreach ($colaboradores as $key => $value){
+        $colaboradores[$key]->value = iconv('windows-1252','utf-8',$colaboradores[$key]->value);
+    }
+    return ($colaboradores);
+});
+

@@ -97,6 +97,6 @@ Route::get('/key/{id}', function ($id, \Illuminate\Http\Request $request) {
 
 
     }
-    //dd($checkKey->get());
-    //dd();
+
 });
+

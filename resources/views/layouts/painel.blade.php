@@ -159,6 +159,7 @@
 
 <!-- jQuery -->
 <script src="{{asset('js/app.js')}}"></script>
+<script src="{{asset('js/jquery-ui/jquery-ui.js ')}}"></script>
 
 <div class="div-load div-load-show div-load-hidden">
     <img src="{{asset("img/load/gears.gif")}}">

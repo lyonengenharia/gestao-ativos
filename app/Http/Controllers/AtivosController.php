@@ -23,10 +23,15 @@ class AtivosController extends Controller
 
     public function index()
     {
-        /*if(Gate::denies('ativos')){
-            abort(403);
-        }*/
-        return view("ativos.ativos", ["breadcrumbs" => array("Ativos" => "ativos"), "page" => "Ativos", "explanation" => " Busca de ativos"]);
+        $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp','nomemp','apeemp'])->get();
+        foreach ($Empresas as $key => $value){
+            $Empresas[$key]->nomemp = iconv('windows-1252','utf-8',$Empresas[$key]->nomemp);
+            $Empresas[$key]->apeemp = iconv('windows-1252','utf-8',$Empresas[$key]->apeemp);
+        }
+        return view("ativos.ativos", ["breadcrumbs" => array("Ativos" => "ativos"),
+            "page" => "Ativos",
+            "explanation" => " Busca de ativos",
+            "empresas"=>$Empresas]);
 
 
     }
