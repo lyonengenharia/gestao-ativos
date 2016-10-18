@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -55,12 +56,29 @@ class HomeController extends Controller
             ->where('E670LOC.SITLOC', '=', 'A')
             ->whereIn('E674ESP.CODESP',[18,3])
             ->count();
+        $emprestimo = \App\Emprestimo::where('data_entrada','=',null);
+        $devolvidos = \App\Emprestimo::where('data_entrada','!=',null)->orderBy('data_entrada','asc')->limit(15)->get();
+        $datamaior = Carbon::now()->addDays(45);
+        $data = Carbon::now();
+
+        $licencas = \App\Key::select(['keys.id','keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','keys.maturity_date'])
+            ->join('produtos',function ($inner){
+                $inner->on('produtos.id','=','keys.produto_id');
+            })->join('empresas',function ($inner) {
+                $inner->on('empresas.id', '=', 'produtos.empresa_id');
+            })->where('maturity_date','>',$data)
+            ->where('maturity_date','<',$datamaior)->get();
+        //dd($licencas);
         return view('dashboard.dashboard',
             ["breadcrumbs" => array("Home" => "home"),
                 "page" => "Dashboard",
                 "explanation" => " Estatística e visão geral",
                 "user"=>$user,
-                "informatica"=>$equipamentos
+                "informatica"=>$equipamentos,
+                "emprestimos"=>$emprestimo->count(),
+                "ultimosEmprestimos"=>$emprestimo->orderBy('data_saida', 'asc')->limit(10)->get(),
+                "devolvidos"=>$devolvidos,
+                "vencimentolicencas"=>$licencas
             ]
         );
     }

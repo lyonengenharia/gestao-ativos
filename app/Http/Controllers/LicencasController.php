@@ -132,11 +132,16 @@ class LicencasController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
+        $data = null;
+        if ($request->has('datavencimento')) {
+            $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('datavencimento'), "America/Sao_Paulo");
+        }
         $Key = new \App\Key();
         $Key->key = $request->get('key');
         $Key->description = $request->get('description');
         $Key->quantity = $request->get('quantity');
         $Key->produto_id = $request->get('produto_id');
+        $Key->maturity_date= $data->toDateTimeString();
         $Key->save();
         return redirect('licencas/licenca')->with('status', 'Licença incluida com sucesso!');
 

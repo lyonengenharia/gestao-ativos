@@ -73,4 +73,10 @@ Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
     }
     return ($colaboradores);
 });
+Route::get('devolucao/{codbem}/{codbememp}',function ($codbem,$codbememp){
+    $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$codbem)
+        ->where('E070EMP_CODEMP','=',$codbememp)
+        ->where('data_entrada','=',null)->get();
+    return $VerificaEmprestimo;
+});
 

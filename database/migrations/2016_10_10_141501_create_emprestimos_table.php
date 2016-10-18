@@ -25,8 +25,8 @@ class CreateEmprestimosTable extends Migration
                 $table->integer('R034FUN_NUMEMP')->unsigned();
                 $table->integer('R034FUN_TIPCOL')->unsigned();
                 $table->integer('R034FUN_NUMCAD')->unsigned();
-                $table->text('obs_saida');
-                $table->text('obs_entrada');
+                $table->text('obs_saida')->nullable();
+                $table->text('obs_entrada')->nullable();
                 $table->timestamps();
             });
         }

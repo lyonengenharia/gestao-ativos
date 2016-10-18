@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
+use Faker\Provider\cs_CZ\DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate ;
+use Illuminate\Support\Facades\Gate;
 
 
 class AtivosController extends Controller
@@ -23,15 +24,15 @@ class AtivosController extends Controller
 
     public function index()
     {
-        $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp','nomemp','apeemp'])->get();
-        foreach ($Empresas as $key => $value){
-            $Empresas[$key]->nomemp = iconv('windows-1252','utf-8',$Empresas[$key]->nomemp);
-            $Empresas[$key]->apeemp = iconv('windows-1252','utf-8',$Empresas[$key]->apeemp);
+        $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp', 'nomemp', 'apeemp'])->get();
+        foreach ($Empresas as $key => $value) {
+            $Empresas[$key]->nomemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->nomemp);
+            $Empresas[$key]->apeemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->apeemp);
         }
         return view("ativos.ativos", ["breadcrumbs" => array("Ativos" => "ativos"),
             "page" => "Ativos",
             "explanation" => " Busca de ativos",
-            "empresas"=>$Empresas]);
+            "empresas" => $Empresas]);
 
 
     }
@@ -75,7 +76,7 @@ class AtivosController extends Controller
             })
             ->join('E674ESP', function ($join) {
                 $join->on('E674ESP.CODESP', '=', 'E670BEM.CODESP')
-                ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
+                    ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
             })
             //->where('E670BEM.CODEMP', '=', 1)
             ->whereColumn('E670LOC.CODEMP', '=', 'E670BEM.CODEMP')
@@ -101,7 +102,7 @@ class AtivosController extends Controller
             $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
             $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
             $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
-
+            $row->EMPRST = \App\Emprestimo::where('E670BEM_CODBEM','=',$row->CODBEM)->where('data_entrada','=',null)->count();
             array_push($retorno, $row);
         }
         return response()->json($retorno);
@@ -114,7 +115,7 @@ class AtivosController extends Controller
     {
         $pat = $request->get('pat');
         $retorno = [];
-        $movimentation =[];
+        $movimentation = [];
         $locations = DB::connection('sapiens')->table("E670LOC")
             ->select(['CODBEM', 'DATLOC', 'E670LOC.CODLOC', 'E674LOR.NOMLOC', 'E674LOR.DESLOC'])
             ->join('E674LOR', function ($join) {
@@ -138,20 +139,59 @@ class AtivosController extends Controller
             ->select(['E670MOV.CODBEM', 'E670MOV.DATMOV', 'E670MOV.DATLOC'
                 , 'E670MOV.SEQMOV', 'E670MOV.SEQLOC', 'E670MOV.NUMMAN'
                 , 'E001TNS.DESTNS', 'E001TNS.CODTNS'])
-            ->join('E001TNS',function($join){
-                $join->on('E670MOV.CODTNS','=','E001TNS.CODTNS')
-                ->whereColumn('E670MOV.CODEMP','=','E001TNS.CODEMP');
+            ->join('E001TNS', function ($join) {
+                $join->on('E670MOV.CODTNS', '=', 'E001TNS.CODTNS')
+                    ->whereColumn('E670MOV.CODEMP', '=', 'E001TNS.CODEMP');
             })
-            ->where('E670MOV.CODEMP','=',1)
-            ->where('E670MOV.CODBEM','=',$pat)
-            ->whereIn('E670MOV.SEQLOC',[1,2])
-            ->whereNotIn('E670MOV.CODTNS',[90815])
+            ->where('E670MOV.CODEMP', '=', 1)
+            ->where('E670MOV.CODBEM', '=', $pat)
+            ->whereIn('E670MOV.SEQLOC', [1, 2])
+            ->whereNotIn('E670MOV.CODTNS', [90815])
             ->get();
-        foreach ($movimentationFinancial as $mov){
+        foreach ($movimentationFinancial as $mov) {
             $mov->DESTNS = iconv("ISO-8859-1", "UTF-8", $mov->DESTNS);
-            array_push($movimentation,$mov);
+            array_push($movimentation, $mov);
         }
-        return response()->json(["Locations" => $retorno,'MovFinancial'=>$movimentation]);
+        return response()->json(["Locations" => $retorno, 'MovFinancial' => $movimentation]);
+    }
+
+    public function Emprestimo(Request $request)
+    {
+        $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('dataempdev'), "America/Sao_Paulo");
+        if (!$request->has('dataempdev')) {
+            return response()->json(["erro" => 1, "msg" => "Favor preencher a data de empréstimo"]);
+        }
+        $VerificarEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
+            ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
+            ->where('data_entrada','=',null)->count();
+        if($VerificarEmprestimo){
+            return response()->json(["erro"=>1,"msg"=>"O item se encontra emprestado!"]);
+        }
+        $Emprestimo = new \App\Emprestimo();
+        $Emprestimo->E670BEM_CODBEM = $request->get("codbem");
+        $Emprestimo->E070EMP_CODEMP = $request->get("codbememp");
+        $Emprestimo->data_saida = $data->toDateTimeString();
+        $Emprestimo->R034FUN_NUMEMP = $request->get("numemp");
+        $Emprestimo->R034FUN_TIPCOL = $request->get("tipcol");
+        $Emprestimo->R034FUN_NUMCAD = $request->get("numcad");
+        $Emprestimo->obs_saida = $request->get("obsemp");
+        $Emprestimo->save();
+        return response()->json(["erro"=>0,"msg"=>"O item foi emprestado com sucesso!"]);
+    }
+    public function Devolucao(Request $request){
+        $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
+            ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
+            ->where('data_entrada','=',null)->count();
+        if($VerificaEmprestimo){
+            $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('data'), "America/Sao_Paulo");
+            $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
+                ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
+                ->where('data_entrada','=',null)
+                ->update(['data_entrada'=>$data->toDateTimeString(),'obs_entrada'=>$request->get("obs_entrada")]);
+        }else{
+            return response()->json(["error"=>1,"msg"=>"Esse item não pode ser devolvido! Ele não consta como emprestado."]);
+        }
+        return response()->json(["error"=>0,"msg"=>"O item foi devolvido com sucesso."]);
     }
 
 }

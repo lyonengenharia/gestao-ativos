@@ -26,9 +26,12 @@ Auth::routes();
 Route::group(['middleware' => ['auth', 'acess']], function () {
 
     Route::get('/home', ['uses' => 'HomeController@index']);
+    //Ativos
     Route::get('/ativos', ['uses' => 'AtivosController@index'])->middleware('can:ativos');
     Route::get('/ativos/search/', 'AtivosController@search');
     Route::get('/ativos/locations/', 'AtivosController@locations');
+    Route::post('/ativos/emprestimo/', 'AtivosController@Emprestimo');
+    Route::post('/ativos/devolucao/', 'AtivosController@Devolucao');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
@@ -75,6 +78,20 @@ Route::get('/teste', function () {
         echo "<hr>";
     }
 
+});
+
+Route::get('/data/', function () {
+    $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',"COMP-000794.00")->where('data_entrada','=',null)
+        ->update(['data_entrada'=>null,'obs_entrada'=>null]);
+//    $Emprestimo = new \App\Emprestimo();
+//    $Emprestimo->E670BEM_CODBEM = "COMP-000794.00";
+//    $Emprestimo->E070EMP_CODEMP = 1;
+    //$Emprestimo->data_entrada = "2016-10-14 10:13:08";
+//    $Emprestimo->R034FUN_NUMEMP = 1;
+//    $Emprestimo->R034FUN_TIPCOL = 1;
+//    $Emprestimo->R034FUN_NUMCAD = 837;
+//    $Emprestimo->obs_saida = "asdasdasd";
+    dd($Emprestimo);
 });
 
 Route::get('/key/{id}', function ($id, \Illuminate\Http\Request $request) {
