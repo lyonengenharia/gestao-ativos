@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class KeysDataVencimento extends Migration
+class ConnectsDataInOut extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class KeysDataVencimento extends Migration
      */
     public function up()
     {
-        /*Schema::table('keys', function (Blueprint $table) {
-            $table->dateTime('maturity_date')->nullable();
-        });*/
+        Schema::table('connects', function (Blueprint $table) {
+            $table->dateTime('data_in')->nullable();
+            $table->dateTime('data_out')->nullable();
+        });
     }
 
     /**

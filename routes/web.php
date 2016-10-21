@@ -32,6 +32,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/ativos/locations/', 'AtivosController@locations');
     Route::post('/ativos/emprestimo/', 'AtivosController@Emprestimo');
     Route::post('/ativos/devolucao/', 'AtivosController@Devolucao');
+    Route::post('/ativos/associar/', 'AtivosController@Connect');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
@@ -40,11 +41,8 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/licencas/licenca/{id}', ['uses' => 'LicencasController@licencaget'])->middleware('can:ativos');
     Route::post('/licencas/licenca/update/', ['uses' => 'LicencasController@licencaupdate'])->middleware('can:ativos');
     Route::post('/licencas/associar/', ['uses' => 'LicencasController@associar'])->middleware('can:ativos');
-
-
     Route::get('/licencas/empresa', ['uses' => 'LicencasController@empresa'])->middleware('can:ativos');
     Route::post('/licencas/empresa/insert', ['uses' => 'LicencasController@empresainsert'])->middleware('can:ativos');
-
     Route::get('/licencas/produto', ['uses' => 'LicencasController@produto'])->middleware('can:ativos');
     Route::post('/licencas/produto/insert', ['uses' => 'LicencasController@produtoinsert'])->middleware('can:ativos');
     Route::delete('/licencas/produto/delete', ['uses' => 'LicencasController@produtodelete'])->middleware('can:ativos');
@@ -81,17 +79,17 @@ Route::get('/teste', function () {
 });
 
 Route::get('/data/', function () {
-    $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',"COMP-000794.00")->where('data_entrada','=',null)
-        ->update(['data_entrada'=>null,'obs_entrada'=>null]);
-//    $Emprestimo = new \App\Emprestimo();
-//    $Emprestimo->E670BEM_CODBEM = "COMP-000794.00";
-//    $Emprestimo->E070EMP_CODEMP = 1;
-    //$Emprestimo->data_entrada = "2016-10-14 10:13:08";
-//    $Emprestimo->R034FUN_NUMEMP = 1;
-//    $Emprestimo->R034FUN_TIPCOL = 1;
-//    $Emprestimo->R034FUN_NUMCAD = 837;
-//    $Emprestimo->obs_saida = "asdasdasd";
-    dd($Emprestimo);
+    $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
+    $Connect = new \App\Connect();
+    $Connect->E670BEM_CODBEM = 'COMP-000778.00';
+    $Connect->E070EMP_CODEMP = 1;
+    $Connect->R034FUN_NUMEMP = 1;
+    $Connect->R034FUN_TIPCOL = 1;
+    $Connect->R034FUN_NUMCAD = '5799';
+    $Connect->obs_out = 'obsemp';
+    $Connect->data_in = $dataassoc->toDateTimeString();
+    $Connect->save();
+    dd($Connect);
 });
 
 Route::get('/key/{id}', function ($id, \Illuminate\Http\Request $request) {

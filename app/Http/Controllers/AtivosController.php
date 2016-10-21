@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
+use Carbon\Carbon;
 use Faker\Provider\cs_CZ\DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -102,13 +103,16 @@ class AtivosController extends Controller
             $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
             $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
             $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
+            $data =  new Carbon($row->DATAQI);
+            $row->DATAQI = $data->format('d/m/Y');
             $row->EMPRST = \App\Emprestimo::where('E670BEM_CODBEM','=',$row->CODBEM)->where('data_entrada','=',null)->count();
+            $row->ASSOC =  \App\Connect::where('data_out','=',null)
+                ->where('E670BEM_CODBEM','=',$row->CODBEM)
+                ->where('E070EMP_CODEMP','=',$row->CODEMP)
+                ->count();
             array_push($retorno, $row);
         }
         return response()->json($retorno);
-        //for ($i=0;$i<)
-        //response()->json($query);
-
     }
 
     public function locations(Request $request)
@@ -133,7 +137,6 @@ class AtivosController extends Controller
             array_push($retorno, $location);
 
         }
-        DB::connection('sapiens')->enableQueryLog();
         $movimentationFinancial = DB::connection('sapiens')
             ->table('E670MOV')
             ->select(['E670MOV.CODBEM', 'E670MOV.DATMOV', 'E670MOV.DATLOC'
@@ -192,6 +195,40 @@ class AtivosController extends Controller
             return response()->json(["error"=>1,"msg"=>"Esse item não pode ser devolvido! Ele não consta como emprestado."]);
         }
         return response()->json(["error"=>0,"msg"=>"O item foi devolvido com sucesso."]);
+    }
+
+    /**
+     * @return string
+     */
+    public function connect(Request $request)
+    {
+
+        $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('dataempdev'), "America/Sao_Paulo");
+        $CheckConect = \App\Connect::where('data_out','=',null)
+                                        ->where('E670BEM_CODBEM','=',$request->get('codbem'))
+                                        ->where('E070EMP_CODEMP','=',$request->get('codbememp'));
+        $Connect = new \App\Connect();
+        if($CheckConect->count()){
+            return response()->json(['error'=>1,'msg'=>'Esse item já está associado']);
+        }else{
+
+            $Connect->E670BEM_CODBEM = $request->get('codbem');
+            $Connect->E070EMP_CODEMP = $request->get('codbememp');
+            $Connect->R034FUN_NUMEMP = $request->get('numemp');
+            $Connect->R034FUN_TIPCOL = $request->get('tipcol');
+            $Connect->R034FUN_NUMCAD = $request->get('numcad');
+            $Connect->obs_out = $request->get('obsemp');
+            $Connect->data_in = $dataassoc->toDateTimeString();
+            $Connect->save();
+            if($request->get('gerarTermo')){
+                $Termo = new \App\Termo();
+                $Termo->tipotermo_id=1;
+                $Termo->maketermo = true;
+                $Termo->pathtermo = "teste";
+            }
+        }
+
+        return response()->json(['error'=>0,'msg'=>'Item Associado com sucesso']);
     }
 
 }

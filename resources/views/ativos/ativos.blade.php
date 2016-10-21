@@ -15,143 +15,215 @@
             display: none;
         }
     </style>
-
     <script src="{{asset('js/jquery.js')}}"></script>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default" id="search">
-                <div class="panel-heading">Busca</div>
-                <div class="panel-body">
-                    <form id="search-iten">
-                        <div class="form-group">
-                            <label>Patrimônio</label>
-                            <input type="text" id="patrimonio" class="form-control" required autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-info btn-lg" id="buttonSearch">Pesquisar</button>
-                        </div>
-                    </form>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default" id="search">
+                    <div class="panel-heading">Busca</div>
+                    <div class="panel-body">
+                        <form id="search-iten">
+                            <div class="form-group">
+                                <label>Patrimônio</label>
+                                <input type="text" id="patrimonio" class="form-control" required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-info" id="buttonSearch"><span
+                                            class="glyphicon glyphicon-search"></span> Pesquisar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="row">
+            <div id="historyItem" class="display-localizaoes">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <b>Localizações</b> <span id="item">Iten</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="panel-body" id="historicoLocalizacoes">
+
+                    </div>
+                </div>
+            </div>
+            <div id="historyFinancial" class="display-localizaoes">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <b>Movimentação Fiscal</b> <span id="item">Iten</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="panel-body" id="historyFinancialList">
+
+                    </div>
+                </div>
+            </div>
+            {{--Emprestimo--}}
+            <div class="emprestimo-option display-emprestismo col-md-8">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <b>Empréstimo</b>
+                    </div>
+                    <div class="panel-body" id="historyFinancialList">
+                        <form id="emprestimo">
+                            <div class="col-md-3">
+                                <label for="tipcol">Tipo:</label>
+                                <select class="form-control" id="tipcol">
+                                    <option value="1">Empregado</option>
+                                    <option value="2">Terceiro</option>
+                                    <option value="3">Parceiro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="numcad">Empresa:</label>
+                                <select class="form-control" id="emp">
+                                    @foreach($empresas as $empresa)
+                                        <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="numemp">Colaborador(a):</label>
+                                    <input name="nomemp" id="nomemp" class="form-control nomemp" autocomplete="off"
+                                           placeholder="Digite um nome para pesquisar"/>
+
+                                </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
+                                <div id="log">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Observação Emprestimo</label>
+                                    <textarea class="form-control" id="obsemp" cols="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dataempdev">Data empréstimo</label>
+                                    <input type="text" class="form-control" name="dataempdev" id="dataempdev"
+                                           autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-info">Emprestar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="devolucao-option display-emprestismo col-md-8">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <b>Devolução</b>
+                    </div>
+                    <div class="panel-body" id="historyFinancialList">
+                        <form id="devolucao-form">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Observação Devolução</label>
+                                    <textarea class="form-control" id="obsdev" cols="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dataempdev">Data Devolução</label>
+                                    <input type="text" class="form-control" name="datadev" id="datadev"
+                                           autocomplete="off" required>
+
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-info">Devolver</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {{--Associação--}}
+            <div class="associacao-option display-emprestismo col-md-8">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <b>Associação colaborador</b>
+                    </div>
+                    <div class="panel-body" id="historyFinancialList">
+                        <form id="associacao">
+                            <div class="col-md-3">
+                                <label for="tipcol">Tipo:</label>
+                                <select class="form-control" id="tipcolassoc">
+                                    <option value="1">Empregado</option>
+                                    <option value="2">Terceiro</option>
+                                    <option value="3">Parceiro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="numcad">Empresa:</label>
+                                <select class="form-control" id="empassoc">
+                                    @foreach($empresas as $empresa)
+                                        <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="numemp">Colaborador(a):</label>
+                                    <input name="nomeassoc" id="nomeassoc" class="form-control nomemp"
+                                           autocomplete="off"
+                                           placeholder="Digite um nome para pesquisar"/>
+
+                                </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
+                                <div id="logassoc">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Observação</label>
+                                    <textarea class="form-control" id="obs" cols="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="dataassoc">Data associação</label>
+                                    <input type="text" class="form-control" name="dataassoc" id="dataassoc"
+                                           autocomplete="off" value="{{\Carbon\Carbon::now()->format('d/m/Y')}}">
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Gerar Termo</label>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" id="gerarTermo"> Sim
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-info">Associar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12" id="resultOfSearch">
+            </div>
+
         </div>
     </div>
-    <div class="row">
-        <div id="historyItem" class="display-localizaoes">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <b>Localizações</b> <span id="item">Iten</span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="panel-body" id="historicoLocalizacoes">
-
-                </div>
-            </div>
-        </div>
-        <div id="historyFinancial" class="display-localizaoes">
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <b>Movimentação Fiscal</b> <span id="item">Iten</span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="panel-body" id="historyFinancialList">
-
-                </div>
-            </div>
-        </div>
-        <div class="emprestimo-option display-emprestismo col-md-8">
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <b>Empréstimo</b>
-                </div>
-                <div class="panel-body" id="historyFinancialList">
-                    <form id="emprestimo">
-                        <div class="col-md-3">
-                            <label for="tipcol">Tipo:</label>
-                            <select class="form-control" id="tipcol">
-                                <option value="1">Empregado</option>
-                                <option value="2">Terceiro</option>
-                                <option value="3">Parceiro</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="numcad">Empresa:</label>
-                            <select class="form-control" id="emp">
-                                @foreach($empresas as $empresa)
-                                    <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="numemp">Colaborador(a):</label>
-                                <input name="nomemp" id="nomemp" class="form-control" autocomplete="off"
-                                       placeholder="Digite um nome para pesquisar"/>
-
-                            </div>
-                        </div>
-                        <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
-                            <div id="log">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Observação Emprestimo</label>
-                                <textarea class="form-control" id="obsemp" cols="5"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dataempdev">Data empréstimo</label>
-                                <input type="text" class="form-control" name="dataempdev" id="dataempdev"
-                                       autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-info">Emprestar</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="devolucao-option display-emprestismo col-md-8">
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <b>Devolução</b>
-                </div>
-                <div class="panel-body" id="historyFinancialList">
-                    <form id="devolucao-form">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Observação Devolução</label>
-                                <textarea class="form-control" id="obsdev" cols="5"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="dataempdev">Data Devolução</label>
-                                <input type="text" class="form-control" name="datadev" id="datadev"
-                                       autocomplete="off" required>
-
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-info">Devolver</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12" id="resultOfSearch">
-        </div>
-
-    </div>
-
-
     <script>
         function handleData(data, textStatus, jqXHR) {
             $('#resultOfSearch').empty();
@@ -168,30 +240,45 @@
                         "<p><b>Item:</b> " + item.DESBEM + " </p>" +
                         "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                         "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+                        "<p><b>Associado:</b> " + item.ASSOC + " </p>" +
                         "</div>" +
                         "<div class='panel-footer'> " +
-                        "<button class=\"btn btn-primary localizacoes\" type=\"button\" data-toggle=\"collapse\" " +
-                        "data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">" +
-                        "Localizações" +
+                        "<div class=\"btn-group\">" +
+                        "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
+                        "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
                         "</button>";
+                if(item.ASSOC){
+                    row +="<button class=\"btn btn-danger associar-colaborador\" type=\"button\">" +
+                            "<span class='glyphicon glyphicon-user'></span> Desassociar" +
+                            "</button>";
+                }else{
+                    row +="<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
+                    "<span class='glyphicon glyphicon-user'></span> Associar" +
+                    "</button>";
+                }
+
+
                 if (item.EMPRST == 0) {
                     row += "<button class=\"btn btn-success emprestimo\" type=\"button\">" +
-                            "Emprestimo" +
+                            "<span class='glyphicon glyphicon-transfer'></span> Emprestimo" +
                             "</button>" +
+                            "</div>" +
                             "</div>" +
                             "</div>";
                 } else {
                     row += "<button class=\"btn btn-warning devolucao\" type=\"button\">" +
-                            "Devolução" +
+                            "<span class='glyphicon glyphicon-retweet'></span> Devolução" +
                             "</button>" +
+                            "</div>" +
                             "</div>" +
                             "</div>";
                 }
+
                 $('#resultOfSearch').append(row);
 
             });
             $("#buttonSearch").empty();
-            $("#buttonSearch").append("Pesquisar");
+            $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
         }
         function historyLocations(data, textStatus, jqXHR) {
             $('#historicoLocalizacoes').empty();
@@ -280,20 +367,30 @@
 
 
         }
-        function DevolucaoDados(url,data) {
+        function DevolucaoDados(url, data) {
             $.ajax({
-                url: url+"/"+data.codbem+"/"+data.codbememp,
+                url: url + "/" + data.codbem + "/" + data.codbememp,
                 type: 'get',
                 data: data,
                 dataType: 'json',
                 success: function (response) {
                     console.log(response);
                     var linha = "<div class='panel panel-default'><div class='panel-body'>" +
-                         "<p>Data empréstimo:"+response[0].data_saida+"</p>"+
-                    "</div></div>";
+                            "<p>Data empréstimo:" + response[0].data_saida + "</p>" +
+                            "</div></div>";
                     $('#devolucao-form').before(linha);
                 }
             });
+        }
+        function Associar(url,data) {
+            $.ajax({
+                url:url,
+                type:'post',
+                data:data,
+                success:function($request){
+                    console.log($request)
+                }
+            })
         }
         $(document).ready(function () {
             $.ajaxSetup({
@@ -338,6 +435,25 @@
                 showMonthAfterYear: false,
                 yearSuffix: ''
             });
+            $('#dataassoc').datepicker({
+                closeText: 'Fechar',
+                prevText: '&lt;Anterior',
+                nextText: 'Próximo&gt;',
+                currentText: 'Hoje',
+                monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado'],
+                dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                dayNamesMin: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                weekHeader: 'Sm',
+                dateFormat: 'dd/mm/yy',
+                firstDay: 0,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: ''
+            });
             $("#nomemp").autocomplete({
                 source: function (request, response) {
                     var nome = $("#nomemp").val();
@@ -358,6 +474,31 @@
                 },
                 select: function (event, ui) {
                     $('#log').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"
+                            + ui.item.id + "</span><span id='numemp' style='display: none'>" + ui.item.NUMEMP
+                            + "</span><span id='tipcolpesquisa' style='display: none'>"
+                            + ui.item.TIPCOL + "</span>");
+                }
+            });
+            $("#nomeassoc").autocomplete({
+                source: function (request, response) {
+                    var nome = $("#nomeassoc").val();
+                    var empresa = $('#empassoc :selected').val();
+                    var tipcol = $('#tipcolassoc :selected').val();
+                    $.ajax({
+                        url: '{{url('api/colaboradores/')}}' + '/' + nome + '/' + tipcol + '/' + empresa,
+                        dataType: "json",
+                        type: 'get',
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                focus: function (event, ui) {
+                    $("#nomeassoc").val(ui.item.NOMFUN);
+                    return false;
+                },
+                select: function (event, ui) {
+                    $('#logassoc').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"
                             + ui.item.id + "</span><span id='numemp' style='display: none'>" + ui.item.NUMEMP
                             + "</span><span id='tipcolpesquisa' style='display: none'>"
                             + ui.item.TIPCOL + "</span>");
@@ -394,8 +535,6 @@
                         obsemp: obsemp
                     });
                 }
-
-
             });
             $('#search-iten').submit(function (e) {
                 e.preventDefault();
@@ -405,6 +544,7 @@
                 $('#historyItem').addClass('display-localizaoes');
                 $(".devolucao-option").addClass('display-emprestismo');
                 $('#historyFinancial').addClass('display-localizaoes');
+                $('.associacao-option').addClass('display-emprestismo');
                 if ($('#resultOfSearch').hasClass('col-md-4')) {
                     $('#resultOfSearch').toggleClass('col-md-12');
                     $('#resultOfSearch').removeClass('col-md-4');
@@ -426,8 +566,8 @@
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
-                var item = $(this).parent().parent().find('.panel-heading').text();
-                var panel = $(this).parent().parent();
+                var item = $(this).parent().parent().parent().find('.panel-heading').text();
+                var panel = $(this).parent().parent().parent();
                 $(".devolucao-option").addClass('display-emprestismo');
                 if (!$('.emprestimo-option').hasClass('display-emprestismo')) {
                     $('.emprestimo-option').addClass('display-emprestismo')
@@ -465,19 +605,19 @@
                 });
             });
             $(document).on('click', '.emprestimo', function () {
-
                 $('#emprestimo')[0].reset();
                 $('#log').empty();
                 $('#historyFinancialList').empty();
                 $('#historicoLocalizacoes').empty();
                 $('#historyItem').addClass('display-localizaoes');
+                $('.associacao-option').addClass('display-emprestismo');
                 $('#historyFinancial').addClass('display-localizaoes');
                 if ($('#resultOfSearch').hasClass('col-md-12')) {
                     $('#resultOfSearch').removeClass('col-md-12');
                     $('#resultOfSearch').addClass('col-md-4');
                 }
                 $('.emprestimo-option').removeClass('display-emprestismo');
-                var panel = $(this).parent().parent();
+                var panel = $(this).parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
@@ -487,6 +627,7 @@
                 $('#devolucao-form')[0].reset();
                 $('#historyFinancialList').empty();
                 $('#historicoLocalizacoes').empty();
+                $('.associacao-option').addClass('display-emprestismo');
                 $('#historyItem').addClass('display-localizaoes');
                 $('#historyFinancial').addClass('display-localizaoes');
                 if ($('#resultOfSearch').hasClass('col-md-12')) {
@@ -494,14 +635,14 @@
                     $('#resultOfSearch').addClass('col-md-4');
                 }
                 $(".devolucao-option").removeClass('display-emprestismo');
-                var panel = $(this).parent().parent();
+                var panel = $(this).parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
                 codbem = $('#resultOfSearch .panel .panel-heading').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
-                DevolucaoDados('{{url('api/devolucao')}}',{codbem:codbem,codbememp:codbememp});
+                DevolucaoDados('{{url('api/devolucao')}}', {codbem: codbem, codbememp: codbememp});
             });
             $('#devolucao-form').submit(function (e) {
                 e.preventDefault();
@@ -515,6 +656,56 @@
                             codbememp: codbememp
                         }
                 );
+            });
+            $(document).on('click', '.associar-colaborador', function () {
+                $('.emprestimo-option').addClass('display-emprestismo');
+                $('#historyItem').addClass('display-localizaoes');
+                $(".devolucao-option").addClass('display-emprestismo');
+                $('#historyFinancial').addClass('display-localizaoes');
+                $('.associacao-option').removeClass('display-emprestismo');
+                var panel = $(this).parent().parent().parent();
+                $('#resultOfSearch').empty();
+                panel.removeClass('panel-default');
+                panel.addClass('panel-warning');
+                if ($('#resultOfSearch').hasClass('col-md-12')) {
+                    $('#resultOfSearch').removeClass('col-md-12');
+                    $('#resultOfSearch').addClass('col-md-4');
+                }
+                $('#resultOfSearch').append(panel);
+            });
+            $('#associacao').submit(function (e) {
+                e.preventDefault();
+                erro = 0;
+                numcad = $('#logassoc #numcad').text();
+                numemp = $('#logassoc #numemp').text();
+                tipcol = $('#logassoc #tipcolpesquisa').text();
+                obsemp = $('#obs').val();
+                dataempdev = $('#dataassoc').val();
+                gerarTermo = $('#gerarTermo').is(':checked');
+
+                if (numcad == '') {
+                    alert('Favor pesquisar um colaborador!');
+                    erro++;
+                }
+                if (dataempdev == '') {
+                    alert('Favor preencher o campo de data!');
+                    erro++;
+                }
+
+                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbememp = $('#resultOfSearch .panel .result-emp').text();
+                if (erro == 0) {
+                    Associar('{{url('/ativos/associar')}}', {
+                        numcad: numcad,
+                        numemp: numemp,
+                        tipcol: tipcol,
+                        dataempdev: dataempdev,
+                        codbem: codbem,
+                        codbememp: codbememp,
+                        obsemp: obsemp,
+                        gerarTermo:gerarTermo
+                    });
+                }
             });
         });
     </script>
