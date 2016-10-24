@@ -1,5 +1,4 @@
 @extends('layouts.painel')
-
 @section('content')
     <style>
         .load-button {
@@ -91,7 +90,6 @@
                                     <label for="numemp">Colaborador(a):</label>
                                     <input name="nomemp" id="nomemp" class="form-control nomemp" autocomplete="off"
                                            placeholder="Digite um nome para pesquisar"/>
-
                                 </div>
                             </div>
                             <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
@@ -107,7 +105,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="dataempdev">Data empréstimo</label>
-                                    <input type="text" class="form-control" name="dataempdev" id="dataempdev"
+                                    <input type="text" class="form-control campo-data" name="dataempdev" id="dataempdev"
                                            autocomplete="off">
                                 </div>
                                 <div class="form-group">
@@ -118,7 +116,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="devolucao-option display-emprestismo col-md-8">
                 <div class="panel panel-danger">
                     <div class="panel-heading">
@@ -135,7 +132,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="dataempdev">Data Devolução</label>
-                                    <input type="text" class="form-control" name="datadev" id="datadev"
+                                    <input type="text" class="form-control campo-data" name="datadev" id="datadev"
                                            autocomplete="off" required>
 
                                 </div>
@@ -195,7 +192,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="dataassoc">Data associação</label>
-                                    <input type="text" class="form-control" name="dataassoc" id="dataassoc"
+                                    <input type="text" class="form-control campo-data" name="dataassoc" id="dataassoc"
                                            autocomplete="off" value="{{\Carbon\Carbon::now()->format('d/m/Y')}}">
                                 </div>
 
@@ -221,221 +218,46 @@
             </div>
             <div class="col-md-12" id="resultOfSearch">
             </div>
-
         </div>
     </div>
+    {{--Modal desassociar--}}
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-desassociar">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Desassociar item</h4>
+                </div>
+                <form id="form-desassociar">
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Observação</label>
+                            <textarea class="form-control" cols="5"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Data desassociação</label>
+                            <input type="text" class="form-control campo-data"
+                                   value="{{\Carbon\Carbon::now()->format('d/m/Y')}}" required>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="form-desassociar-salvar">Salvar</button>
+                    </div>
+                </form>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script src="{{asset('js/ativos.js')}}"></script>
     <script>
-        function handleData(data, textStatus, jqXHR) {
-            $('#resultOfSearch').empty();
-            $.each(data, function (i, item) {
-                var row = "<div class=\"panel panel-default\">" +
-                        "<div class=\"panel-heading\">" +
-                        item.CODBEM +
-                        "</div>" +
-                        "<div class='result-emp' style='display: none'>" +
-                        item.CODEMP +
-                        "</div>" +
-                        "<div class=\"panel-body\">" +
-                        "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
-                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
-                        "<p><b>Associado:</b> " + item.ASSOC + " </p>" +
-                        "</div>" +
-                        "<div class='panel-footer'> " +
-                        "<div class=\"btn-group\">" +
-                        "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
-                        "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
-                        "</button>";
-                if(item.ASSOC){
-                    row +="<button class=\"btn btn-danger associar-colaborador\" type=\"button\">" +
-                            "<span class='glyphicon glyphicon-user'></span> Desassociar" +
-                            "</button>";
-                }else{
-                    row +="<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
-                    "<span class='glyphicon glyphicon-user'></span> Associar" +
-                    "</button>";
-                }
-
-
-                if (item.EMPRST == 0) {
-                    row += "<button class=\"btn btn-success emprestimo\" type=\"button\">" +
-                            "<span class='glyphicon glyphicon-transfer'></span> Emprestimo" +
-                            "</button>" +
-                            "</div>" +
-                            "</div>" +
-                            "</div>";
-                } else {
-                    row += "<button class=\"btn btn-warning devolucao\" type=\"button\">" +
-                            "<span class='glyphicon glyphicon-retweet'></span> Devolução" +
-                            "</button>" +
-                            "</div>" +
-                            "</div>" +
-                            "</div>";
-                }
-
-                $('#resultOfSearch').append(row);
-
-            });
-            $("#buttonSearch").empty();
-            $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
-        }
-        function historyLocations(data, textStatus, jqXHR) {
-            $('#historicoLocalizacoes').empty();
-            $.each(data.Locations, function (i, item) {
-                var row = "<div class=\"panel panel-default\">" +
-                        "<div class=\"panel-body\">" +
-                        "<p><b>Data Aquisição:</b> " + item.DATLOC + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESLOC + " </p>" +
-                        "</div>" +
-                        "</div>";
-                $('#historicoLocalizacoes').append(row);
-            });
-            $('#historyFinancialList').empty();
-            $.each(data.MovFinancial, function (i, item) {
-                var row = "<div class=\"panel panel-default\">" +
-                        "<div class=\"panel-body\">" +
-                        "<p><b>Data Movimentação:</b> " + item.DATMOV + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESTNS + " </p>" +
-                        "<p><b>CODTNS:</b> " + item.CODTNS + " </p>" +
-                        "</div>" +
-                        "</div>";
-                if (item.CODTNS == 90804) {
-                    var alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
-                            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
-                            "<strong>Atenção!</strong> Esse item foi vendido!." +
-                            "</div>";
-                    $('#search').after(alert);
-                }
-                $('#historyFinancialList').append(row);
-            });
-
-
-        }
-        function Emprestimo(url, data) {
-            $.ajax({
-                url: url,
-                data: data,
-                type: 'post',
-                success: function (response) {
-                    var alert = "";
-                    if (response.erro == 1) {
-                        alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
-                                "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
-                                "<strong>Atenção!</strong> " + response.msg
-                        "</div>";
-                    } else if (response.erro == 0) {
-                        $('.emprestimo-option').addClass('display-emprestismo');
-                        $('#resultOfSearch').removeClass('col-md-4');
-                        $('#resultOfSearch').addClass('col-md-12');
-                        alert = "<div class=\"alert alert-success alert-dismissible search\" role=\"alert\">" +
-                                "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
-                                "<strong>Atenção!</strong> " + response.msg
-                        "</div>";
-
-                    }
-                    $('#search').after(alert);
-                }
-            })
-        }
-        function Devolucao(url, data) {
-            $.ajax({
-                url: url,
-                type: 'post',
-                data: data,
-                dataType: 'json',
-                success: function (response) {
-                    var alert = "";
-                    if (response.error == 1) {
-                        alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
-                                "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
-                                "<strong>Atenção!</strong> " + response.msg +
-                                "</div>";
-                    } else if (response.error == 0) {
-                        $('.devolucao-option').addClass('display-emprestismo');
-                        $('#resultOfSearch').removeClass('col-md-4');
-                        $('#resultOfSearch').addClass('col-md-12');
-                        alert = "<div class=\"alert alert-success alert-dismissible search\" role=\"alert\">" +
-                                "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
-                                "<strong>Atenção!</strong> " + response.msg +
-                                "</div>";
-
-                    }
-                    $('#search').after(alert);
-                },
-            });
-
-
-        }
-        function DevolucaoDados(url, data) {
-            $.ajax({
-                url: url + "/" + data.codbem + "/" + data.codbememp,
-                type: 'get',
-                data: data,
-                dataType: 'json',
-                success: function (response) {
-                    console.log(response);
-                    var linha = "<div class='panel panel-default'><div class='panel-body'>" +
-                            "<p>Data empréstimo:" + response[0].data_saida + "</p>" +
-                            "</div></div>";
-                    $('#devolucao-form').before(linha);
-                }
-            });
-        }
-        function Associar(url,data) {
-            $.ajax({
-                url:url,
-                type:'post',
-                data:data,
-                success:function($request){
-                    console.log($request)
-                }
-            })
-        }
         $(document).ready(function () {
             $.ajaxSetup({
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
-            $('#dataempdev').datepicker({
-                closeText: 'Fechar',
-                prevText: '&lt;Anterior',
-                nextText: 'Próximo&gt;',
-                currentText: 'Hoje',
-                monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
-                monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado'],
-                dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
-                dayNamesMin: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
-                weekHeader: 'Sm',
-                dateFormat: 'dd/mm/yy',
-                firstDay: 0,
-                isRTL: false,
-                showMonthAfterYear: false,
-                yearSuffix: ''
-            });
-
-            $('#datadev').datepicker({
-                closeText: 'Fechar',
-                prevText: '&lt;Anterior',
-                nextText: 'Próximo&gt;',
-                currentText: 'Hoje',
-                monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
-                monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-                    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado'],
-                dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
-                dayNamesMin: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
-                weekHeader: 'Sm',
-                dateFormat: 'dd/mm/yy',
-                firstDay: 0,
-                isRTL: false,
-                showMonthAfterYear: false,
-                yearSuffix: ''
-            });
-            $('#dataassoc').datepicker({
+            $('.campo-data').datepicker({
                 closeText: 'Fechar',
                 prevText: '&lt;Anterior',
                 nextText: 'Próximo&gt;',
@@ -562,7 +384,8 @@
                     data: {pat: $('#patrimonio').val()},
                     type: 'get',
                     dataType: 'json'
-                }).done(handleData);
+                }).done(handleData).fail(ErroConnect);
+
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
@@ -602,7 +425,8 @@
                     panel.addClass('panel-warning');
                     $('#resultOfSearch').append(panel);
                     $(".div-load").toggleClass('div-load-hidden');
-                });
+                }).fail(ErroConnect);
+                ;
             });
             $(document).on('click', '.emprestimo', function () {
                 $('#emprestimo')[0].reset();
@@ -703,10 +527,35 @@
                         codbem: codbem,
                         codbememp: codbememp,
                         obsemp: obsemp,
-                        gerarTermo:gerarTermo
+                        gerarTermo: gerarTermo
                     });
                 }
             });
+            $(document).on('click', '.dissociar-colaborador', function () {
+                var panel = $(this).parent().parent().parent();
+                $('#resultOfSearch').empty();
+                panel.removeClass('panel-default');
+                panel.addClass('panel-warning');
+                $('#resultOfSearch').append(panel);
+                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                $('#modal-desassociar .modal-title').text('Desassociar ' + codbem);
+                $('#modal-desassociar textarea').val(" ");
+                $('#modal-desassociar').modal('show');
+            });
+            $('#form-desassociar').submit(function (e) {
+                e.preventDefault();
+                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbememp = $('#resultOfSearch .panel .result-emp').text();
+                data = $('#modal-desassociar .campo-data').val();
+                obs = $('#modal-desassociar textarea').val();
+                Dissociar('{{url('ativos/dissociar')}}',
+                        {
+                            codbem: codbem,
+                            codbememp: codbememp,
+                            data: data,
+                            obs: obs
+                        });
+            })
         });
     </script>
 @endsection

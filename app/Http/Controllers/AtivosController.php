@@ -103,12 +103,12 @@ class AtivosController extends Controller
             $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
             $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
             $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
-            $data =  new Carbon($row->DATAQI);
+            $data = new Carbon($row->DATAQI);
             $row->DATAQI = $data->format('d/m/Y');
-            $row->EMPRST = \App\Emprestimo::where('E670BEM_CODBEM','=',$row->CODBEM)->where('data_entrada','=',null)->count();
-            $row->ASSOC =  \App\Connect::where('data_out','=',null)
-                ->where('E670BEM_CODBEM','=',$row->CODBEM)
-                ->where('E070EMP_CODEMP','=',$row->CODEMP)
+            $row->EMPRST = \App\Emprestimo::where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
+            $row->ASSOC = \App\Connect::where('data_out', '=', null)
+                ->where('E670BEM_CODBEM', '=', $row->CODBEM)
+                ->where('E070EMP_CODEMP', '=', $row->CODEMP)
                 ->count();
             array_push($retorno, $row);
         }
@@ -134,6 +134,9 @@ class AtivosController extends Controller
         foreach ($locations as $location) {
             $location->DESLOC = iconv("ISO-8859-1", "UTF-8", $location->DESLOC);
             $location->NOMLOC = iconv("ISO-8859-1", "UTF-8", $location->NOMLOC);
+            $dataLoc = new Carbon($location->DATLOC);
+            $location->DATLOC = $dataLoc->format('d/m/Y');
+
             array_push($retorno, $location);
 
         }
@@ -141,7 +144,7 @@ class AtivosController extends Controller
             ->table('E670MOV')
             ->select(['E670MOV.CODBEM', 'E670MOV.DATMOV', 'E670MOV.DATLOC'
                 , 'E670MOV.SEQMOV', 'E670MOV.SEQLOC', 'E670MOV.NUMMAN'
-                , 'E001TNS.DESTNS', 'E001TNS.CODTNS'])
+                , 'E001TNS.DESTNS', 'E001TNS.CODTNS','E670MOV.CODCCU'])
             ->join('E001TNS', function ($join) {
                 $join->on('E670MOV.CODTNS', '=', 'E001TNS.CODTNS')
                     ->whereColumn('E670MOV.CODEMP', '=', 'E001TNS.CODEMP');
@@ -150,10 +153,14 @@ class AtivosController extends Controller
             ->where('E670MOV.CODBEM', '=', $pat)
             ->whereIn('E670MOV.SEQLOC', [1, 2])
             ->whereNotIn('E670MOV.CODTNS', [90815])
+            ->orderBy('E670MOV.DATMOV','DESC')
             ->get();
         foreach ($movimentationFinancial as $mov) {
             $mov->DESTNS = iconv("ISO-8859-1", "UTF-8", $mov->DESTNS);
+            $dataMov = new Carbon($mov->DATMOV);
+            $mov->DATMOV = $dataMov->format('d/m/Y');
             array_push($movimentation, $mov);
+
         }
         return response()->json(["Locations" => $retorno, 'MovFinancial' => $movimentation]);
     }
@@ -164,11 +171,18 @@ class AtivosController extends Controller
         if (!$request->has('dataempdev')) {
             return response()->json(["erro" => 1, "msg" => "Favor preencher a data de empréstimo"]);
         }
-        $VerificarEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
-            ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
-            ->where('data_entrada','=',null)->count();
-        if($VerificarEmprestimo){
-            return response()->json(["erro"=>1,"msg"=>"O item se encontra emprestado!"]);
+        $VerificarEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
+            ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
+            ->where('data_entrada', '=', null)->count();
+
+        $CheckConect = \App\Connect::where('data_out', '=', null)
+            ->where('E670BEM_CODBEM', '=', $request->get('codbem'))
+            ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))->count();
+        if ($VerificarEmprestimo) {
+            return response()->json(["erro" => 1, "msg" => "O item se encontra emprestado!"]);
+        }
+        if ($CheckConect) {
+            return response()->json(["erro" => 1, "msg" => "O item se encontra associado a um colaborador!"]);
         }
         $Emprestimo = new \App\Emprestimo();
         $Emprestimo->E670BEM_CODBEM = $request->get("codbem");
@@ -179,22 +193,24 @@ class AtivosController extends Controller
         $Emprestimo->R034FUN_NUMCAD = $request->get("numcad");
         $Emprestimo->obs_saida = $request->get("obsemp");
         $Emprestimo->save();
-        return response()->json(["erro"=>0,"msg"=>"O item foi emprestado com sucesso!"]);
+        return response()->json(["erro" => 0, "msg" => "O item foi emprestado com sucesso!"]);
     }
-    public function Devolucao(Request $request){
-        $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
-            ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
-            ->where('data_entrada','=',null)->count();
-        if($VerificaEmprestimo){
+
+    public function Devolucao(Request $request)
+    {
+        $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
+            ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
+            ->where('data_entrada', '=', null)->count();
+        if ($VerificaEmprestimo) {
             $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('data'), "America/Sao_Paulo");
-            $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$request->get("codbem"))
-                ->where('E070EMP_CODEMP','=',$request->get('codbememp'))
-                ->where('data_entrada','=',null)
-                ->update(['data_entrada'=>$data->toDateTimeString(),'obs_entrada'=>$request->get("obs_entrada")]);
-        }else{
-            return response()->json(["error"=>1,"msg"=>"Esse item não pode ser devolvido! Ele não consta como emprestado."]);
+            $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
+                ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
+                ->where('data_entrada', '=', null)
+                ->update(['data_entrada' => $data->toDateTimeString(), 'obs_entrada' => $request->get("obs_entrada")]);
+        } else {
+            return response()->json(["error" => 1, "msg" => "Esse item não pode ser devolvido! Ele não consta como emprestado."]);
         }
-        return response()->json(["error"=>0,"msg"=>"O item foi devolvido com sucesso."]);
+        return response()->json(["error" => 0, "msg" => "O item foi devolvido com sucesso."]);
     }
 
     /**
@@ -204,13 +220,13 @@ class AtivosController extends Controller
     {
 
         $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('dataempdev'), "America/Sao_Paulo");
-        $CheckConect = \App\Connect::where('data_out','=',null)
-                                        ->where('E670BEM_CODBEM','=',$request->get('codbem'))
-                                        ->where('E070EMP_CODEMP','=',$request->get('codbememp'));
+        $CheckConect = \App\Connect::where('data_out', '=', null)
+            ->where('E670BEM_CODBEM', '=', $request->get('codbem'))
+            ->where('E070EMP_CODEMP', '=', $request->get('codbememp'));
         $Connect = new \App\Connect();
-        if($CheckConect->count()){
-            return response()->json(['error'=>1,'msg'=>'Esse item já está associado']);
-        }else{
+        if ($CheckConect->count()) {
+            return response()->json(['error' => 1, 'msg' => 'Esse item já está associado']);
+        } else {
 
             $Connect->E670BEM_CODBEM = $request->get('codbem');
             $Connect->E070EMP_CODEMP = $request->get('codbememp');
@@ -220,15 +236,29 @@ class AtivosController extends Controller
             $Connect->obs_out = $request->get('obsemp');
             $Connect->data_in = $dataassoc->toDateTimeString();
             $Connect->save();
-            if($request->get('gerarTermo')){
+            if ($request->get('gerarTermo')) {
                 $Termo = new \App\Termo();
-                $Termo->tipotermo_id=1;
+                $Termo->tipotermo_id = 1;
                 $Termo->maketermo = true;
                 $Termo->pathtermo = "teste";
             }
         }
 
-        return response()->json(['error'=>0,'msg'=>'Item Associado com sucesso']);
+        return response()->json(['error' => 0, 'msg' => 'Item Associado com sucesso']);
+    }
+
+    public function Disconnect(Request $request)
+    {
+        $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('data'), "America/Sao_Paulo");
+        $CheckConect = \App\Connect::where('data_out', '=', null)
+            ->where('E670BEM_CODBEM', '=', $request->get('codbem'))
+            ->where('E070EMP_CODEMP', '=', $request->get('codbememp'));
+        if($CheckConect->count()){
+            $CheckConect->update(['data_out'=>$data->toDateTimeString(),'obs_out'=>$request->get('obs')]);
+            return response()->json(['error'=>0,'msg'=>'Item desassociado com sucesso!']);
+        }
+        return response()->json(['error'=>1,'msg'=>'O item não está associado']);
+
     }
 
 }
