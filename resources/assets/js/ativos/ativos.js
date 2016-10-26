@@ -85,7 +85,7 @@ function historyLocations(data, textStatus, jqXHR) {
             "<div class=\"panel-body\">" +
             "<p><b>Data Movimentação:</b> " + item.DATMOV + " </p>" +
             "<p><b>Descrição:</b> " + item.DESTNS + " </p>" +
-            "<p><b>CODTNS:</b> " + item.CODTNS + " </p>" +
+            "<p><b>Centro Custo:</b> " + item.CODCCU + " </p>" +
             "</div>" +
             "</div>";
         if (item.CODTNS == 90804) {
@@ -95,7 +95,9 @@ function historyLocations(data, textStatus, jqXHR) {
                 "</div>";
             $('#search').after(alert);
         }
-        $('#historyFinancialList').append(row);
+        if (item.CODTNS != 90815) {
+            $('#historyFinancialList').append(row);
+        }
     });
 }
 function Emprestimo(url, data) {
@@ -149,9 +151,6 @@ function Devolucao(url, data) {
             $('#search').after(alert);
         },
     }).fail(ErroConnect);
-    ;
-
-
 }
 function DevolucaoDados(url, data) {
     $.ajax({

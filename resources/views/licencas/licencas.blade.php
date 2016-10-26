@@ -11,54 +11,53 @@
             display: none;
         }
     </style>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <a href="{{url('licencas/empresa')}}" class="btn btn-default">Nova Empresa</a>
-                <a href="{{url('licencas/produto')}}" class="btn btn-default">Novo Produto</a>
-                <a href="{{url('licencas/licenca')}}" class="btn btn-default">Nova Licença</a>
-            </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{{url('licencas/empresa')}}" class="btn btn-default">Nova Empresa</a>
+            <a href="{{url('licencas/produto')}}" class="btn btn-default">Novo Produto</a>
+            <a href="{{url('licencas/licenca')}}" class="btn btn-default">Nova Licença</a>
         </div>
-        <div class="row">
-            <div class="col-md-12" style="margin-top: 15px">
-                @if (session('status'))
-                    <div class="alert alert-warning alert-dismissible" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                        {{ session('status') }}
-                    </div>
-                @endif
-                <table class="table table-bordered table-hover">
-                    <thead>
-                    <th>Empresa</th>
-                    <th>Produto</th>
-                    <th>Chave</th>
-                    <th>Quantidade</th>
-                    <th>Quant. Uso</th>
-                    <th>Ações</th>
-                    </thead>
-                    <tbody>
-                    @foreach($licencas as $licenca)
-                        <tr {{$licenca->in_use > $licenca->quantity ?"class=danger":""}}>
-                            <td class="Empresa-table">{{$licenca->name}}</td>
-                            <td class="Model-table">{{$licenca->model}}</td>
-                            <td class="Key-table">{{$licenca->key}}</td>
-                            <td class="Quantity-table">{{$licenca->quantity}}</td>
-                            <td class="InUse-table">{{$licenca->in_use}}</td>
-                            <td>
-                                <a href="{{url('/licencas/licenca/'.$licenca->keyid)}}"
-                                   class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span> </a>
-                                <button class="btn btn-default btn-xs associarkeymodal">
-                                    <span class="glyphicon glyphicon-resize-small"></span>
-                                </button>
-                                <span style="display: none" class="licencakeyid">{{$licenca->keyid}}</span>
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-                <p>Total de Registros {{$licencas->total()}}, exibindo {{$licencas->count()}}</p>{{$licencas->links()}}
-            </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top: 15px">
+            @if (session('status'))
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    {{ session('status') }}
+                </div>
+            @endif
+            <table class="table table-bordered table-hover">
+                <thead>
+                <th>Empresa</th>
+                <th>Produto</th>
+                <th>Chave</th>
+                <th>Quantidade</th>
+                <th>Quant. Uso</th>
+                <th>Ações</th>
+                </thead>
+                <tbody>
+                @foreach($licencas as $licenca)
+                    <tr {{$licenca->in_use > $licenca->quantity ?"class=danger":""}}>
+                        <td class="Empresa-table">{{$licenca->name}}</td>
+                        <td class="Model-table">{{$licenca->model}}</td>
+                        <td class="Key-table">{{$licenca->key}}</td>
+                        <td class="Quantity-table">{{$licenca->quantity}}</td>
+                        <td class="InUse-table">{{$licenca->in_use}}</td>
+                        <td>
+                            <a href="{{url('/licencas/licenca/'.$licenca->keyid)}}"
+                               class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span> </a>
+                            <button class="btn btn-default btn-xs associarkeymodal">
+                                <span class="glyphicon glyphicon-resize-small"></span>
+                            </button>
+                            <span style="display: none" class="licencakeyid">{{$licenca->keyid}}</span>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+            <p>Total de Registros {{$licencas->total()}}, exibindo {{$licencas->count()}}</p>{{$licencas->links()}}
         </div>
     </div>
     {{--Modal de associação de licença--}}

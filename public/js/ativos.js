@@ -1,6 +1,13 @@
 /**
  * Created by wfs on 24/10/2016.
  */
+
+/**
+ * MODIFICADO
+ * @param data
+ * @param textStatus
+ * @param jqXHR
+ */
 function handleData(data, textStatus, jqXHR) {
     $('#resultOfSearch').empty();
     $.each(data, function (i, item) {
@@ -16,6 +23,20 @@ function handleData(data, textStatus, jqXHR) {
             "<p><b>Item:</b> " + item.DESBEM + " </p>" +
             "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
             "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+            "<hr>";
+        if(item.state.length==0){
+            row +=
+            "<p><b>Estado:</b>Sem definição</p>" +
+            "<p><b>Descrição:</b>Sem definição</p>";
+        }else{
+            row +=
+                "<p><b>Estado:</b>"+item.state[0].state+"</p>" +
+                "<p><b>Descrição:</b>"+item.state[0].description+"</p>";
+        }
+        row +=
+            "<button class=\"btn btn-primary status-ben\" type=\"button\">"+
+            "<span class='glyphicon glyphicon-fire'></span> Estado" +
+            "</button>"+
             "</div>" +
             "<div class='panel-footer'> " +
             "<div class=\"btn-group\">" +
@@ -163,7 +184,7 @@ function DevolucaoDados(url, data) {
             $('#devolucao-form').before(linha);
         }
     }).fail(ErroConnect);
-    ;
+
 }
 function Associar(url, data) {
     $.ajax({
@@ -218,5 +239,23 @@ function ErroConnect(Error) {
     if (Error.status == 401) {
         location.reload();
     }
+}
+
+/**
+ * NOVO
+ * @param url
+ * @param data
+ * @constructor
+ */
+function InsertState(url,data) {
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: data,
+        //dataType: 'json',
+        success: function (response) {
+            console.log(response);
+        }
+    }).fail(ErroConnect);
 }
 //# sourceMappingURL=ativos.js.map

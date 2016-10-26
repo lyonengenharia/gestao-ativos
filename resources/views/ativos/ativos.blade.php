@@ -15,209 +15,207 @@
         }
     </style>
     <script src="{{asset('js/jquery.js')}}"></script>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="panel panel-default" id="search">
-                    <div class="panel-heading">Busca</div>
-                    <div class="panel-body">
-                        <form id="search-iten">
-                            <div class="form-group">
-                                <label>Patrimônio</label>
-                                <input type="text" id="patrimonio" class="form-control" required autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-info" id="buttonSearch"><span
-                                            class="glyphicon glyphicon-search"></span> Pesquisar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default" id="search">
+                <div class="panel-heading">Busca</div>
+                <div class="panel-body">
+                    <form id="search-iten">
+                        <div class="form-group">
+                            <label>Patrimônio</label>
+                            <input type="text" id="patrimonio" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-info" id="buttonSearch"><span
+                                        class="glyphicon glyphicon-search"></span> Pesquisar
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div id="historyItem" class="display-localizaoes">
-                <div class="panel panel-info">
-                    <div class="panel-heading">
-                        <b>Localizações</b> <span id="item">Iten</span>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="panel-body" id="historicoLocalizacoes">
+    </div>
+    <div class="row">
+        <div id="historyItem" class="display-localizaoes">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <b>Localizações</b> <span id="item">Iten</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="panel-body" id="historicoLocalizacoes">
 
-                    </div>
                 </div>
             </div>
-            <div id="historyFinancial" class="display-localizaoes">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <b>Movimentação Fiscal</b> <span id="item">Iten</span>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="panel-body" id="historyFinancialList">
+        </div>
+        <div id="historyFinancial" class="display-localizaoes">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <b>Movimentação Fiscal</b> <span id="item">Iten</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="panel-body" id="historyFinancialList">
 
-                    </div>
                 </div>
             </div>
-            {{--Emprestimo--}}
-            <div class="emprestimo-option display-emprestismo col-md-8">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <b>Empréstimo</b>
-                    </div>
-                    <div class="panel-body" id="historyFinancialList">
-                        <form id="emprestimo">
-                            <div class="col-md-3">
-                                <label for="tipcol">Tipo:</label>
-                                <select class="form-control" id="tipcol">
-                                    <option value="1">Empregado</option>
-                                    <option value="2">Terceiro</option>
-                                    <option value="3">Parceiro</option>
-                                </select>
+        </div>
+        {{--Emprestimo--}}
+        <div class="emprestimo-option display-emprestismo col-md-8">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <b>Empréstimo</b>
+                </div>
+                <div class="panel-body" id="historyFinancialList">
+                    <form id="emprestimo">
+                        <div class="col-md-3">
+                            <label for="tipcol">Tipo:</label>
+                            <select class="form-control" id="tipcol">
+                                <option value="1">Empregado</option>
+                                <option value="2">Terceiro</option>
+                                <option value="3">Parceiro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="numcad">Empresa:</label>
+                            <select class="form-control" id="emp">
+                                @foreach($empresas as $empresa)
+                                    <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="numemp">Colaborador(a):</label>
+                                <input name="nomemp" id="nomemp" class="form-control nomemp" autocomplete="off"
+                                       placeholder="Digite um nome para pesquisar"/>
                             </div>
-                            <div class="col-md-3">
-                                <label for="numcad">Empresa:</label>
-                                <select class="form-control" id="emp">
-                                    @foreach($empresas as $empresa)
-                                        <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
-                                    @endforeach
-                                </select>
+                        </div>
+                        <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
+                            <div id="log">
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="numemp">Colaborador(a):</label>
-                                    <input name="nomemp" id="nomemp" class="form-control nomemp" autocomplete="off"
-                                           placeholder="Digite um nome para pesquisar"/>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Observação Emprestimo</label>
+                                <textarea class="form-control" id="obsemp" cols="5"></textarea>
                             </div>
-                            <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
-                                <div id="log">
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dataempdev">Data empréstimo</label>
+                                <input type="text" class="form-control campo-data" name="dataempdev" id="dataempdev"
+                                       autocomplete="off">
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Observação Emprestimo</label>
-                                    <textarea class="form-control" id="obsemp" cols="5"></textarea>
-                                </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-info">Emprestar</button>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="dataempdev">Data empréstimo</label>
-                                    <input type="text" class="form-control campo-data" name="dataempdev" id="dataempdev"
-                                           autocomplete="off">
-                                </div>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-info">Emprestar</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="devolucao-option display-emprestismo col-md-8">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <b>Devolução</b>
-                    </div>
-                    <div class="panel-body" id="historyFinancialList">
-                        <form id="devolucao-form">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Observação Devolução</label>
-                                    <textarea class="form-control" id="obsdev" cols="5"></textarea>
-                                </div>
+        </div>
+        <div class="devolucao-option display-emprestismo col-md-8">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <b>Devolução</b>
+                </div>
+                <div class="panel-body" id="historyFinancialList">
+                    <form id="devolucao-form">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Observação Devolução</label>
+                                <textarea class="form-control" id="obsdev" cols="5"></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="dataempdev">Data Devolução</label>
-                                    <input type="text" class="form-control campo-data" name="datadev" id="datadev"
-                                           autocomplete="off" required>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dataempdev">Data Devolução</label>
+                                <input type="text" class="form-control campo-data" name="datadev" id="datadev"
+                                       autocomplete="off" required>
 
-                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-info">Devolver</button>
-                                </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-info">Devolver</button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-            {{--Associação--}}
-            <div class="associacao-option display-emprestismo col-md-8">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <b>Associação colaborador</b>
-                    </div>
-                    <div class="panel-body" id="historyFinancialList">
-                        <form id="associacao">
-                            <div class="col-md-3">
-                                <label for="tipcol">Tipo:</label>
-                                <select class="form-control" id="tipcolassoc">
-                                    <option value="1">Empregado</option>
-                                    <option value="2">Terceiro</option>
-                                    <option value="3">Parceiro</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="numcad">Empresa:</label>
-                                <select class="form-control" id="empassoc">
-                                    @foreach($empresas as $empresa)
-                                        <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="numemp">Colaborador(a):</label>
-                                    <input name="nomeassoc" id="nomeassoc" class="form-control nomemp"
-                                           autocomplete="off"
-                                           placeholder="Digite um nome para pesquisar"/>
-
-                                </div>
-                            </div>
-                            <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
-                                <div id="logassoc">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Observação</label>
-                                    <textarea class="form-control" id="obs" cols="5"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="dataassoc">Data associação</label>
-                                    <input type="text" class="form-control campo-data" name="dataassoc" id="dataassoc"
-                                           autocomplete="off" value="{{\Carbon\Carbon::now()->format('d/m/Y')}}">
-                                </div>
+        </div>
+        {{--Associação--}}
+        <div class="associacao-option display-emprestismo col-md-8">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <b>Associação colaborador</b>
+                </div>
+                <div class="panel-body" id="historyFinancialList">
+                    <form id="associacao">
+                        <div class="col-md-3">
+                            <label for="tipcol">Tipo:</label>
+                            <select class="form-control" id="tipcolassoc">
+                                <option value="1">Empregado</option>
+                                <option value="2">Terceiro</option>
+                                <option value="3">Parceiro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="numcad">Empresa:</label>
+                            <select class="form-control" id="empassoc">
+                                @foreach($empresas as $empresa)
+                                    <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="numemp">Colaborador(a):</label>
+                                <input name="nomeassoc" id="nomeassoc" class="form-control nomemp"
+                                       autocomplete="off"
+                                       placeholder="Digite um nome para pesquisar"/>
 
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Gerar Termo</label>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" id="gerarTermo"> Sim
-                                        </label>
-                                    </div>
+                        </div>
+                        <div class="col-md-12" style="margin-top: -10px;margin-bottom: 10px">
+                            <div id="logassoc">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Observação</label>
+                                <textarea class="form-control" id="obs" cols="5"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="dataassoc">Data associação</label>
+                                <input type="text" class="form-control campo-data" name="dataassoc" id="dataassoc"
+                                       autocomplete="off" value="{{\Carbon\Carbon::now()->format('d/m/Y')}}">
+                            </div>
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Gerar Termo</label>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="gerarTermo"> Sim
+                                    </label>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-info">Associar</button>
-                                </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-info">Associar</button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="col-md-12" id="resultOfSearch">
-            </div>
+        </div>
+        <div class="col-md-12" id="resultOfSearch">
         </div>
     </div>
     {{--Modal desassociar--}}
@@ -242,6 +240,39 @@
                                    value="{{\Carbon\Carbon::now()->format('d/m/Y')}}" required>
                         </div>
 
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="form-desassociar-salvar">Salvar</button>
+                    </div>
+                </form>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    {{--Modal Estado--}}
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-status">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Estado/h4>
+                </div>
+                <form id="form-state">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select class="form-control" name="status-select" id="status-select">
+                                @foreach($states as $state)
+                                    <option value="{{$state->id}}">{{$state->state}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Observação</label>
+                            <textarea class="form-control" cols="5"></textarea>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -555,7 +586,34 @@
                             data: data,
                             obs: obs
                         });
-            })
+            });
+            $(document).on('click', '.status-ben', function () {
+                $("#form-state")[0].reset();
+                var panel = $(this).parent().parent();
+                $('#resultOfSearch').empty();
+                panel.removeClass('panel-default');
+                panel.addClass('panel-warning');
+                $('#resultOfSearch').append(panel);
+                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                $('#modal-status .modal-title').text('Status ' + codbem);
+                $('#modal-status').modal('show');
+            });
+            $("#form-state").submit(function (e) {
+                e.preventDefault();
+                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbememp = $('#resultOfSearch .panel .result-emp').text();
+                status = $("#form-state select :selected").val();
+                obs = $("#form-state textarea").val();
+                data = {
+                    codbem:codbem,
+                    codbememp:codbememp,
+                    status:status,
+                    obs:obs
+                };
+
+                InsertState('{{url('ativos/state/')}}',data);
+
+            });
         });
     </script>
 @endsection

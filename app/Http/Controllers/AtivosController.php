@@ -26,6 +26,7 @@ class AtivosController extends Controller
     public function index()
     {
         $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp', 'nomemp', 'apeemp'])->get();
+        $States = \App\State::orderBy('state','ASC')->get();
         foreach ($Empresas as $key => $value) {
             $Empresas[$key]->nomemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->nomemp);
             $Empresas[$key]->apeemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->apeemp);
@@ -33,9 +34,10 @@ class AtivosController extends Controller
         return view("ativos.ativos", ["breadcrumbs" => array("Ativos" => "ativos"),
             "page" => "Ativos",
             "explanation" => " Busca de ativos",
-            "empresas" => $Empresas]);
+            "empresas" => $Empresas,
+            "states"=>$States
 
-
+        ]);
     }
 
     public function search(Request $request)
@@ -94,7 +96,7 @@ class AtivosController extends Controller
             ->orderBy('E670BEM.CODEMP')
             ->orderBy('E670DRA.CODCCU')
             ->orderBy('E670BEM.CODBEM')
-            ->limit(50)
+            ->limit(10)
             ->get();
         //dd(DB::connection('sapiens')->getQueryLog());
         foreach ($query as $row) {
@@ -110,6 +112,11 @@ class AtivosController extends Controller
                 ->where('E670BEM_CODBEM', '=', $row->CODBEM)
                 ->where('E070EMP_CODEMP', '=', $row->CODEMP)
                 ->count();
+            $row->state = \App\Complement::
+            join('states',function ($join){
+                $join->on('state_id','=','states.id');
+            })
+            ->where('E670BEM_CODBEM','=',$row->CODBEM)->where('E070EMP_CODEMP','=',$row->CODEMP)->get();
             array_push($retorno, $row);
         }
         return response()->json($retorno);
@@ -258,7 +265,20 @@ class AtivosController extends Controller
             return response()->json(['error'=>0,'msg'=>'Item desassociado com sucesso!']);
         }
         return response()->json(['error'=>1,'msg'=>'O item não está associado']);
+    }
 
+    /**
+     * @return string
+     */
+    public function State(Request $request)
+    {
+        $Complement = new \App\Complement();
+        $Complement->E670BEM_CODBEM = $request->get('codbem');
+        $Complement->E070EMP_CODEMP = $request->get('codbememp');
+        $Complement->state_id = $request->get('status');
+        $Complement->description = $request->get('obs');
+        $Complement->save();
+        return true;
     }
 
 }

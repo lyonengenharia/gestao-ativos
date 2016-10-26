@@ -34,6 +34,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::post('/ativos/devolucao/', 'AtivosController@Devolucao');
     Route::post('/ativos/associar/', 'AtivosController@Connect');
     Route::post('/ativos/dissociar/', 'AtivosController@Disconnect');
+    Route::post('/ativos/state/', 'AtivosController@State');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');

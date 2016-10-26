@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ConnectsDataInOut extends Migration
+class CreateStatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class ConnectsDataInOut extends Migration
      */
     public function up()
     {
-        /*Schema::table('connects', function (Blueprint $table) {
-            $table->dateTime('data_in')->nullable();
-            $table->dateTime('data_out')->nullable();
-        });*/
+        Schema::create('states', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            $table->increments('id');
+            $table->string('state',150);
+            $table->text('description');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -26,6 +29,6 @@ class ConnectsDataInOut extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('states');
     }
 }
