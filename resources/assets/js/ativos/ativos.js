@@ -1,6 +1,4 @@
-/**
- * Created by wfs on 24/10/2016.
- */
+
 function handleData(data, textStatus, jqXHR) {
     $('#resultOfSearch').empty();
     if (data.length > 0) {
@@ -17,6 +15,20 @@ function handleData(data, textStatus, jqXHR) {
                 "<p><b>Item:</b> " + item.DESBEM + " </p>" +
                 "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                 "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+                "<hr>";
+            if (item.state.length == 0) {
+                row +=
+                    "<p><b>Estado:</b>Sem definição</p>" +
+                    "<p><b>Descrição:</b>Sem definição</p>";
+            } else {
+                row +=
+                    "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
+                    "<p><b>Descrição:</b>" + item.state[0].description + "</p>";
+            }
+            row +=
+                "<button class=\"btn btn-primary status-ben\" type=\"button\">" +
+                "<span class='glyphicon glyphicon-fire'></span> Estado" +
+                "</button>" +
                 "</div>" +
                 "<div class='panel-footer'> " +
                 "<div class=\"btn-group\">" +
@@ -54,17 +66,17 @@ function handleData(data, textStatus, jqXHR) {
                     "</div>" +
                     "</div>";
             }
+
             $('#resultOfSearch').append(row);
 
         });
-    }else{
+    }else {
         var alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
             "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
             "<strong>Atenção!</strong> Nenhum item encontrado!" +
             "</div>";
         $('#resultOfSearch').append(alert);
     }
-
     $("#buttonSearch").empty();
     $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
 }
@@ -81,6 +93,7 @@ function historyLocations(data, textStatus, jqXHR) {
     });
     $('#historyFinancialList').empty();
     $.each(data.MovFinancial, function (i, item) {
+        console.log(item);
         var row = "<div class=\"panel panel-default\">" +
             "<div class=\"panel-body\">" +
             "<p><b>Data Movimentação:</b> " + item.DATMOV + " </p>" +
@@ -99,6 +112,8 @@ function historyLocations(data, textStatus, jqXHR) {
             $('#historyFinancialList').append(row);
         }
     });
+
+
 }
 function Emprestimo(url, data) {
     $.ajax({
@@ -122,6 +137,8 @@ function Emprestimo(url, data) {
                 "</div>";
 
             }
+            url = url.replace('emprestimo', 'search');
+            updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
         }
     }).fail(ErroConnect);
@@ -148,9 +165,12 @@ function Devolucao(url, data) {
                     "<strong>Atenção!</strong> " + response.msg +
                     "</div>";
             }
+            url = url.replace('devolucao', 'search');
+            updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
         },
     }).fail(ErroConnect);
+
 }
 function DevolucaoDados(url, data) {
     $.ajax({
@@ -159,13 +179,16 @@ function DevolucaoDados(url, data) {
         data: data,
         dataType: 'json',
         success: function (response) {
-            var linha = "<div class='panel panel-default'><div class='panel-body'>" +
-                "<p>Data empréstimo:" + response[0].data_saida + "</p>" +
+            $('.info-devolucao').remove();
+            var linha = "<div class='panel panel-default info-devolucao'><div class='panel-body'>" +
+                "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
+                "<p><b>Colaborador: </b>" + response[0].colaborador.value + "</p>" +
+                "<p><b>Situação do colaborador: </b>" + response[0].colaborador.DESSIT + "</p>" +
                 "</div></div>";
             $('#devolucao-form').before(linha);
         }
     }).fail(ErroConnect);
-    ;
+
 }
 function Associar(url, data) {
     $.ajax({
@@ -188,10 +211,13 @@ function Associar(url, data) {
                     "<strong>Atenção!</strong> " + response.msg +
                     "</div>";
             }
+            url = url.replace('associar', 'search');
+            updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
         }
     }).fail(ErroConnect);
 }
+
 function Dissociar(url, data) {
     $.ajax({
         url: url,
@@ -211,13 +237,72 @@ function Dissociar(url, data) {
                     "<strong>Atenção!</strong> " + response.msg +
                     "</div>";
             }
+            url = url.replace('dissociar', 'search');
+            updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
             $('#modal-desassociar').modal('hide');
         }
     }).fail(ErroConnect);
 }
+
+
 function ErroConnect(Error) {
     if (Error.status == 401) {
         location.reload();
     }
 }
+
+function InsertState(url, data, callback) {
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: data,
+        dataType: 'json',
+        success: function (response) {
+            if (response.error == 1) {
+                alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg +
+                    "</div>";
+            } else if (response.error == 0) {
+                alert = "<div class=\"alert alert-success alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg +
+                    "</div>";
+            }
+            url = url.replace('state', 'search');
+            updatesearch(url, {pat: data.codbem, emp: data.codbememp});
+            $('#search').after(alert);
+        }
+    }).fail(ErroConnect).always(callback);
+}
+function GetState(url, data) {
+    $.ajax({
+        url: url,
+        type: 'get',
+        data: data,
+        dataType: 'json',
+        success: function (response) {
+            console.log(response);
+            if (response.length > 0) {
+                $("#form-state select").val(response[0].state_id);
+                $("#form-state textarea").val(response[0].description);
+                $('#upddated_at').text(response[0].updated);
+            } else {
+                $("#form-state")[0].reset();
+                $('#upddated_at').text("Não existe atualizações");
+            }
+
+        }
+    }).fail(ErroConnect);
+}
+function updatesearch(url, data) {
+    $.ajax({
+        url: url,
+        data: data,
+        type: 'get',
+        dataType: 'json'
+    }).done(handleData)
+        .fail(ErroConnect);
+}
+//# sourceMappingURL=ativos.js.map

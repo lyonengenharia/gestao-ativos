@@ -30,17 +30,17 @@ Route::get('/licencas/associadas/{patrimonio}/{empresa}', function (Request $req
         ->where('E670BEM.CODEMP', '=', $empresa)->get();
     if (!$bem->count())
         return [];
-    $BensKeys = \App\BensKeys::select(["BensKeys.id",
-        "BensKeys.key_id", "BensKeys.E670BEM_CODBEM",
-        "E070EMP_CODEMP","Keys.id as keyid" ,"Keys.key",
-        "Produtos.id as Proid","Produtos.model",
-        "Empresas.id as Empid","Empresas.name"
-    ])->join('Keys', function ($inner) {
-        $inner->on('Keys.id', '=', 'key_id');
-    })->join('Produtos', function ($inner) {
-        $inner->on('Produtos.id', '=', 'Keys.produto_id');
-    })->join('Empresas', function ($inner) {
-        $inner->on('Empresas.id', '=', 'Produtos.empresa_id');
+    $BensKeys = \App\BensKeys::select(["benskeys.id",
+        "key_id", "benskeys.E670BEM_CODBEM",
+        "E070EMP_CODEMP","keys.id as keyid" ,"keys.key",
+        "produtos.id as Proid","produtos.model",
+        "empresas.id as Empid","empresas.name"
+    ])->join('keys', function ($inner) {
+        $inner->on('keys.id', '=', 'benskeys.key_id');
+    })->join('produtos', function ($inner) {
+        $inner->on('produtos.id', '=', 'keys.produto_id');
+    })->join('empresas', function ($inner) {
+        $inner->on('empresas.id', '=', 'produtos.empresa_id');
     })->where('E670BEM_CODBEM', '=', $patrimonio)->where('E070EMP_CODEMP', '=', $empresa)->get();
     return response()->json($BensKeys);
 });
@@ -63,7 +63,10 @@ Route::get('licencas/associadas/{key}',function (Request $request,$key){
 
 Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
     $colaboradores = DB::connection('vetorh')->table('R034FUN')
-        ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','SITAFA'])
+        ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
+        ->join('R010SIT',function ($inner){
+            $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+        })
         ->where('NUMEMP','=',$emp)
         ->where('TIPCOL','=',$tipo)
         ->where('NOMFUN','like',"$name%")
@@ -76,7 +79,28 @@ Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
 Route::get('devolucao/{codbem}/{codbememp}',function ($codbem,$codbememp){
     $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$codbem)
         ->where('E070EMP_CODEMP','=',$codbememp)
-        ->where('data_entrada','=',null)->get();
+        ->where('data_entrada','=',null);
+    if($VerificaEmprestimo->count()){
+        $VerificaEmprestimo = $VerificaEmprestimo->get();
+        $VerificaEmprestimo[0]->data_out= $VerificaEmprestimo[0]->data_saida->format('d/m/Y H:i');
+        $Colaborador = DB::connection('vetorh')->table('R034FUN')
+            ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
+            ->join('R010SIT',function ($inner){
+                $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+            })
+            ->where('NUMEMP','=',$VerificaEmprestimo[0]->R034FUN_NUMEMP)
+            ->where('TIPCOL','=',$VerificaEmprestimo[0]->R034FUN_TIPCOL)
+            ->where('NUMCAD','=',$VerificaEmprestimo[0]->R034FUN_NUMCAD);
+        if($Colaborador->count()){
+            $Colaborador = $Colaborador->get();
+            $Colaborador[0]->value = iconv('windows-1252','utf-8',$Colaborador[0]->value);
+            $Colaborador[0]->DESSIT = iconv('windows-1252','utf-8',$Colaborador[0]->DESSIT);
+            $VerificaEmprestimo[0]->colaborador = $Colaborador[0];
+            return $VerificaEmprestimo;
+
+        }
+
+    }
     return $VerificaEmprestimo;
 });
 

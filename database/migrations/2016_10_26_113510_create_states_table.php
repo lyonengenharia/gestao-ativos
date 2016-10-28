@@ -13,13 +13,15 @@ class CreateStatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('states', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
-            $table->string('state',150);
-            $table->text('description');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('states')) {
+            Schema::create('states', function (Blueprint $table) {
+                $table->engine = 'InnoDB';
+                $table->increments('id');
+                $table->string('state', 150);
+                $table->text('description');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

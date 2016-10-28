@@ -25,6 +25,7 @@ class CreateComplementsTable extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
             $table->timestamps();
+            $table->primary(['E670BEM_CODBEM', 'E070EMP_CODEMP']);
         });
     }
 

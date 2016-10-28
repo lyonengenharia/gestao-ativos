@@ -96,8 +96,11 @@ class AtivosController extends Controller
             ->orderBy('E670BEM.CODEMP')
             ->orderBy('E670DRA.CODCCU')
             ->orderBy('E670BEM.CODBEM')
-            ->limit(10)
-            ->get();
+            ->limit(10);
+            if($request->has('emp')){
+                $query->where('E670LOC.CODEMP','=',$request->get('emp'));
+            }
+        $query = $query->get();
         //dd(DB::connection('sapiens')->getQueryLog());
         foreach ($query as $row) {
             $row->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
@@ -107,7 +110,7 @@ class AtivosController extends Controller
             $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
             $data = new Carbon($row->DATAQI);
             $row->DATAQI = $data->format('d/m/Y');
-            $row->EMPRST = \App\Emprestimo::where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
+            $row->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
             $row->ASSOC = \App\Connect::where('data_out', '=', null)
                 ->where('E670BEM_CODBEM', '=', $row->CODBEM)
                 ->where('E070EMP_CODEMP', '=', $row->CODEMP)
@@ -117,6 +120,19 @@ class AtivosController extends Controller
                 $join->on('state_id','=','states.id');
             })
             ->where('E670BEM_CODBEM','=',$row->CODBEM)->where('E070EMP_CODEMP','=',$row->CODEMP)->get();
+            $row->keys = \App\BensKeys::select(["benskeys.id",
+                "key_id", "benskeys.E670BEM_CODBEM",
+                "E070EMP_CODEMP","keys.id as keyid" ,"keys.key",
+                "produtos.id as Proid","produtos.model",
+                "empresas.id as Empid","empresas.name"
+            ])->join('keys', function ($inner) {
+                $inner->on('keys.id', '=', 'benskeys.key_id');
+            })->join('produtos', function ($inner) {
+                $inner->on('produtos.id', '=', 'keys.produto_id');
+            })->join('empresas', function ($inner) {
+                $inner->on('empresas.id', '=', 'produtos.empresa_id');
+            })->where('E670BEM_CODBEM', '=', $row->CODBEM)
+              ->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
             array_push($retorno, $row);
         }
         return response()->json($retorno);
@@ -272,13 +288,29 @@ class AtivosController extends Controller
      */
     public function State(Request $request)
     {
-        $Complement = new \App\Complement();
-        $Complement->E670BEM_CODBEM = $request->get('codbem');
-        $Complement->E070EMP_CODEMP = $request->get('codbememp');
-        $Complement->state_id = $request->get('status');
-        $Complement->description = $request->get('obs');
-        $Complement->save();
-        return true;
+        $Complement = \App\Complement::where('E670BEM_CODBEM','=',$request->get('codbem'))->where('E070EMP_CODEMP','=',$request->get('codbememp'));
+        if($Complement->count()){
+            $Complement->update(['state_id'=>$request->get('status'),'description'=>$request->get('obs')]);
+            return response()->json(['error'=>0,'msg'=>'Estado do item foi atualizado!']);
+        }else{
+            $Complement = new \App\Complement();
+            $Complement->E670BEM_CODBEM = $request->get('codbem');
+            $Complement->E070EMP_CODEMP = $request->get('codbememp');
+            $Complement->state_id = $request->get('status');
+            $Complement->description = $request->get('obs');
+            $Complement->save();
+            return response()->json(['error'=>0,'msg'=>'Estado do item foi inserido!']);
+        }
+    }
+    public function GetState(Request $request){
+
+        $Complement = \App\Complement::where('E670BEM_CODBEM','=',$request->get('codbem'))->where('E070EMP_CODEMP','=',$request->get('codbememp'));
+        if($Complement->count()){
+            $Complement = $Complement->get();
+            $Complement[0]->updated = $Complement[0]->updated_at->format('d/m/Y H:i');
+            $Complement[0]->create = $Complement[0]->created_at->format('d/m/Y');
+        }
+       return $Complement;
     }
 
 }

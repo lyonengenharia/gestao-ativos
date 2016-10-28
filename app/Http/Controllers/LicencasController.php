@@ -212,7 +212,7 @@ class LicencasController extends Controller
             //Verificar se existe um chave identica associada.
 
             if (!$request->has('conf')) {
-                $checkKey = DB::table('Keys')->where('id', '=', $request->get('key'))->get();
+                $checkKey = DB::table('keys')->where('id', '=', $request->get('key'))->get();
                 $existekey = DB::table('benskeys')
                     ->select(
                         [

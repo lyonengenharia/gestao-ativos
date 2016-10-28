@@ -273,6 +273,7 @@
                             <label>Observação</label>
                             <textarea class="form-control" cols="5"></textarea>
                         </div>
+                        <p>Ultima atualização:</p><span id="upddated_at"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -282,9 +283,9 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <script src="{{asset('js/ativos.js')}}"></script>
     <script>
         $(document).ready(function () {
+            var URLUPDATE = '{{url('ativos/search')}}';
             $.ajaxSetup({
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
@@ -326,10 +327,11 @@
                     return false;
                 },
                 select: function (event, ui) {
-                    $('#log').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"
-                            + ui.item.id + "</span><span id='numemp' style='display: none'>" + ui.item.NUMEMP
-                            + "</span><span id='tipcolpesquisa' style='display: none'>"
-                            + ui.item.TIPCOL + "</span>");
+                    $('#log').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"+ ui.item.id +"</span>"+
+                            " - <b>Situação:</b>"+ui.item.DESSIT+
+                            "<span id='numemp' style='display: none'>" + ui.item.NUMEMP + "</span>" +
+                            "<span id='tipcolpesquisa' style='display: none'>"+ ui.item.TIPCOL + "</span>" +
+                            "<span id='SITAFA' style='display: none'>"+ ui.item.SITAFA + "</span>");
                 }
             });
             $("#nomeassoc").autocomplete({
@@ -351,10 +353,11 @@
                     return false;
                 },
                 select: function (event, ui) {
-                    $('#logassoc').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"
-                            + ui.item.id + "</span><span id='numemp' style='display: none'>" + ui.item.NUMEMP
-                            + "</span><span id='tipcolpesquisa' style='display: none'>"
-                            + ui.item.TIPCOL + "</span>");
+                    $('#logassoc').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"+ ui.item.id +"</span>"+
+                            " - <b>Situação:</b>"+ui.item.DESSIT+
+                            "<span id='numemp' style='display: none'>" + ui.item.NUMEMP + "</span>" +
+                            "<span id='tipcolpesquisa' style='display: none'>"+ ui.item.TIPCOL + "</span>" +
+                            "<span id='SITAFA' style='display: none'>"+ ui.item.SITAFA + "</span>");
                 }
             });
             $('#emprestimo').submit(function (e) {
@@ -365,7 +368,10 @@
                 tipcol = $('#tipcolpesquisa').text();
                 obsemp = $('#obsemp').val();
                 dataempdev = $('#dataempdev').val();
-
+                if($('#SITAFA').text()=="7"){
+                    alert('Favor verificar a situação do colaborador!');
+                    erro++;
+                }
                 if (numcad == '') {
                     alert('Favor pesquisar um colaborador!');
                     erro++;
@@ -513,6 +519,7 @@
                 );
             });
             $(document).on('click', '.associar-colaborador', function () {
+                $('#associacao')[0].reset();
                 $('.emprestimo-option').addClass('display-emprestismo');
                 $('#historyItem').addClass('display-localizaoes');
                 $(".devolucao-option").addClass('display-emprestismo');
@@ -537,7 +544,10 @@
                 obsemp = $('#obs').val();
                 dataempdev = $('#dataassoc').val();
                 gerarTermo = $('#gerarTermo').is(':checked');
-
+                if($('#SITAFA').text()=="7"){
+                    alert('Favor verificar a situação do colaborador!');
+                    erro++;
+                }
                 if (numcad == '') {
                     alert('Favor pesquisar um colaborador!');
                     erro++;
@@ -595,8 +605,12 @@
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
                 codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbememp = $('#resultOfSearch .panel .result-emp').text();
                 $('#modal-status .modal-title').text('Status ' + codbem);
+                GetState('{{url('ativos/state/')}}',{codbem:codbem,codbememp:codbememp});
                 $('#modal-status').modal('show');
+
+
             });
             $("#form-state").submit(function (e) {
                 e.preventDefault();
@@ -610,10 +624,10 @@
                     status:status,
                     obs:obs
                 };
-
-                InsertState('{{url('ativos/state/')}}',data);
+                InsertState('{{url('ativos/state/')}}',data,$('#modal-status').modal('hide'));
 
             });
         });
     </script>
+    <script src="{{asset('js/ativos.js')}}"></script>
 @endsection
