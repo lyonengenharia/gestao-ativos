@@ -254,6 +254,7 @@
                     });
                 }
             });
+
         });
     </script>
 @endsection

@@ -246,14 +246,17 @@ class LicencasController extends Controller
         }
 
     }
-
     public function produtodelete(Request $request)
     {
-        $table = DB::table('benskeys')->where('key_id', '=', $request->get('key'))->where('E670BEM_CODBEM', '=', $request->get('pat'))->delete();
+        $table = DB::table('benskeys')->where('key_id', '=', $request->get('key'))
+            ->where('E670BEM_CODBEM', '=', $request->get('pat'))
+            ->where('E070EMP_CODEMP','=',$request->get('emp'))
+            ->delete();
+
         $key = \App\Key::find($request->get('key'));
         $key->in_use =  $key->in_use - $table;
         $key->save();
-        return $table;
+        return response()->json(["error"=>0,"msg"=>"Chave dissociada com sucesso!."]);
     }
 
 }

@@ -124,7 +124,8 @@ class AtivosController extends Controller
                 "key_id", "benskeys.E670BEM_CODBEM",
                 "E070EMP_CODEMP","keys.id as keyid" ,"keys.key",
                 "produtos.id as Proid","produtos.model",
-                "empresas.id as Empid","empresas.name"
+                "empresas.id as Empid","empresas.name",
+                "keys.quantity","keys.in_use","maturity_date"
             ])->join('keys', function ($inner) {
                 $inner->on('keys.id', '=', 'benskeys.key_id');
             })->join('produtos', function ($inner) {

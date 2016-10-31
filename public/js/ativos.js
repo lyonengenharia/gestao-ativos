@@ -5,7 +5,7 @@ function handleData(data, textStatus, jqXHR) {
     if (data.length > 0) {
         $.each(data, function (i, item) {
             var row = "<div class=\"panel panel-default\">" +
-                "<div class=\"panel-heading\">" +
+                "<div class=\"panel-heading cod-bem\">" +
                 item.CODBEM +
                 "</div>" +
                 "<div class='result-emp' style='display: none'>" +
@@ -23,6 +23,7 @@ function handleData(data, textStatus, jqXHR) {
                     "<p><b>Descrição:</b>Sem definição</p>";
             } else {
                 row +=
+                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
                     "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
                     "<p><b>Descrição:</b>" + item.state[0].description + "</p>";
             }
@@ -31,17 +32,36 @@ function handleData(data, textStatus, jqXHR) {
                 row +=
                     "<p>Nenhuma licença associada</p>";
             } else {
+                row += "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
                 $.each(item.keys,function (l,key) {
+                    vencimento = "Vitalício";
+                    if(key.maturity_date!=null){
+                        vencimento = DateUsTODateBr(key.maturity_date);
+                    }
                     row +=
-                        "<p><b>"+key.name+"/"+key.model+"</b>" + item.keys.length + "</p>";
+                        "<div class='panel panel-default'>"+
+                            "<div class='panel-heading' role='tab' id='headin"+key.id+"'>"+
+                                "<h4 class=\"panel-title\">"+
+                                    "<a role='button' data-toggle='collapse'  href='#"+key.id+"' aria-expanded='true' aria-controls='"+key.id+"'>"
+                                        +key.name+"/"+key.model+
+                                    "</a>"+
+                                "</h4>"+
+                            "</div>"+
+                            "<div id='"+key.id+"' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin"+key.id+"'>"+
+                                "<div class=\"panel-body\">"
+                                    +"<span class='idkey' style='display: none' >"+key.keyid+"</span>"+
+                                    "<b>Chave:</b>"+key.key + "  - <b>QTD</b> :"+key.quantity+"/<b>Em uso: </b>"+key.in_use+"<b> - Vencimento: </b>"+ vencimento
+                                    +" <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>"+
+                                "</div>" +
+                            "</div>" +
+                        "</div>" ;
                 });
+                row +=
+                    "</div>"+
+                    "</div>";
 
             }
             row +=
-                "<button class=\"btn btn-primary status-ben\" type=\"button\">" +
-                "<span class='glyphicon glyphicon-fire'></span> Estado" +
-                "</button>" +
-                "</div>" +
                 "<div class='panel-footer'> " +
                 "<div class=\"btn-group\">" +
                 "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
@@ -288,7 +308,7 @@ function InsertState(url, data, callback) {
         }
     }).fail(ErroConnect).always(callback);
 }
-function GetState(url, data) {
+function GetState(url, data,callback) {
     $.ajax({
         url: url,
         type: 'get',
@@ -306,7 +326,38 @@ function GetState(url, data) {
             }
 
         }
-    }).fail(ErroConnect);
+    }).fail(ErroConnect).always(callback);
+}
+function RemoveKey(url,data,callback) {
+    $.ajax({
+        url: url,
+        type: 'delete',
+        data: data,
+        dataType: 'json',
+        success: function (response) {
+            var alert = "";
+            if (response.error == 1) {
+                alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg
+                "</div>";
+            } else if (response.error == 0) {
+                $('.emprestimo-option').addClass('display-emprestismo');
+                $('#resultOfSearch').removeClass('col-md-4');
+                $('#resultOfSearch').addClass('col-md-12');
+                alert = "<div class=\"alert alert-success alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg
+                "</div>";
+            }
+            url = url.replace('licencas', 'ativos');
+            url = url.replace('produto', 'search');
+            url = url.replace('delete', '');
+            updatesearch(url, {pat: data.pat, emp: data.emp});
+            $('#search').after(alert);
+
+        }
+    }).fail(ErroConnect).always(callback);;
 }
 function updatesearch(url, data) {
     $.ajax({
@@ -316,5 +367,10 @@ function updatesearch(url, data) {
         dataType: 'json'
     }).done(handleData)
       .fail(ErroConnect);
+}
+function DateUsTODateBr(date) {
+    var d = new Date(date);
+    return d.toLocaleDateString();
+
 }
 //# sourceMappingURL=ativos.js.map

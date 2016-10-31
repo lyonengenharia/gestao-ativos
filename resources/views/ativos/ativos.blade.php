@@ -283,6 +283,23 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    <div class="modal fade" role="dialog" id="dissoc-key">
+        <div class="modal-dialog" role="document">
+            <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">×</span></button>
+                <h4>Atenção</h4>
+                <p>Deseja realmente dissociar o item da licença ?</p>
+                <p>
+                    <button type="button" class="btn btn-danger" id="btn-dissoc-key">Sim</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Não agora</button>
+                </p>
+                <span id="bem-dissoc-key" style="display: none"></span>
+                <span id="emp-dissoc-key" style="display: none"></span>
+                <span id="key-dissoc-key" style="display: none"></span>
+            </div>
+        </div>
+    </div>
     <script>
         $(document).ready(function () {
             var URLUPDATE = '{{url('ativos/search')}}';
@@ -327,11 +344,11 @@
                     return false;
                 },
                 select: function (event, ui) {
-                    $('#log').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"+ ui.item.id +"</span>"+
-                            " - <b>Situação:</b>"+ui.item.DESSIT+
+                    $('#log').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>" + ui.item.id + "</span>" +
+                            " - <b>Situação:</b>" + ui.item.DESSIT +
                             "<span id='numemp' style='display: none'>" + ui.item.NUMEMP + "</span>" +
-                            "<span id='tipcolpesquisa' style='display: none'>"+ ui.item.TIPCOL + "</span>" +
-                            "<span id='SITAFA' style='display: none'>"+ ui.item.SITAFA + "</span>");
+                            "<span id='tipcolpesquisa' style='display: none'>" + ui.item.TIPCOL + "</span>" +
+                            "<span id='SITAFA' style='display: none'>" + ui.item.SITAFA + "</span>");
                 }
             });
             $("#nomeassoc").autocomplete({
@@ -353,11 +370,11 @@
                     return false;
                 },
                 select: function (event, ui) {
-                    $('#logassoc').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>"+ ui.item.id +"</span>"+
-                            " - <b>Situação:</b>"+ui.item.DESSIT+
+                    $('#logassoc').html("<b><span style='color: #761c19;'>Selecionado:</span></b> " + ui.item.value + " - <b>Matrícula:</b> <span id='numcad'>" + ui.item.id + "</span>" +
+                            " - <b>Situação:</b>" + ui.item.DESSIT +
                             "<span id='numemp' style='display: none'>" + ui.item.NUMEMP + "</span>" +
-                            "<span id='tipcolpesquisa' style='display: none'>"+ ui.item.TIPCOL + "</span>" +
-                            "<span id='SITAFA' style='display: none'>"+ ui.item.SITAFA + "</span>");
+                            "<span id='tipcolpesquisa' style='display: none'>" + ui.item.TIPCOL + "</span>" +
+                            "<span id='SITAFA' style='display: none'>" + ui.item.SITAFA + "</span>");
                 }
             });
             $('#emprestimo').submit(function (e) {
@@ -368,7 +385,7 @@
                 tipcol = $('#tipcolpesquisa').text();
                 obsemp = $('#obsemp').val();
                 dataempdev = $('#dataempdev').val();
-                if($('#SITAFA').text()=="7"){
+                if ($('#SITAFA').text() == "7") {
                     alert('Favor verificar a situação do colaborador!');
                     erro++;
                 }
@@ -381,7 +398,7 @@
                     erro++;
                 }
 
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .panel-heading .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 if (erro == 0) {
                     Emprestimo('{{url('ativos/emprestimo/')}}', {
@@ -426,7 +443,7 @@
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
-                var item = $(this).parent().parent().parent().find('.panel-heading').text();
+                var item = $(this).parent().parent().parent().find('.cod-bem').text();
                 var panel = $(this).parent().parent().parent();
                 $(".devolucao-option").addClass('display-emprestismo');
                 if (!$('.emprestimo-option').hasClass('display-emprestismo')) {
@@ -501,13 +518,13 @@
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 DevolucaoDados('{{url('api/devolucao')}}', {codbem: codbem, codbememp: codbememp});
             });
             $('#devolucao-form').submit(function (e) {
                 e.preventDefault();
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 Devolucao('{{url('/ativos/devolucao')}}',
                         {
@@ -525,7 +542,7 @@
                 $(".devolucao-option").addClass('display-emprestismo');
                 $('#historyFinancial').addClass('display-localizaoes');
                 $('.associacao-option').removeClass('display-emprestismo');
-                var panel = $(this).parent().parent().parent();
+                var panel = $(this).parent().parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
@@ -544,7 +561,7 @@
                 obsemp = $('#obs').val();
                 dataempdev = $('#dataassoc').val();
                 gerarTermo = $('#gerarTermo').is(':checked');
-                if($('#SITAFA').text()=="7"){
+                if ($('#SITAFA').text() == "7") {
                     alert('Favor verificar a situação do colaborador!');
                     erro++;
                 }
@@ -557,7 +574,7 @@
                     erro++;
                 }
 
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 if (erro == 0) {
                     Associar('{{url('/ativos/associar')}}', {
@@ -578,14 +595,14 @@
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 $('#modal-desassociar .modal-title').text('Desassociar ' + codbem);
                 $('#modal-desassociar textarea').val(" ");
                 $('#modal-desassociar').modal('show');
             });
             $('#form-desassociar').submit(function (e) {
                 e.preventDefault();
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 data = $('#modal-desassociar .campo-data').val();
                 obs = $('#modal-desassociar textarea').val();
@@ -604,28 +621,46 @@
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 $('#modal-status .modal-title').text('Status ' + codbem);
-                GetState('{{url('ativos/state/')}}',{codbem:codbem,codbememp:codbememp});
+                GetState('{{url('ativos/state/')}}', {codbem: codbem, codbememp: codbememp});
                 $('#modal-status').modal('show');
 
 
             });
             $("#form-state").submit(function (e) {
                 e.preventDefault();
-                codbem = $('#resultOfSearch .panel .panel-heading').text();
+                codbem = $('#resultOfSearch .panel .cod-bem').text();
                 codbememp = $('#resultOfSearch .panel .result-emp').text();
                 status = $("#form-state select :selected").val();
                 obs = $("#form-state textarea").val();
                 data = {
-                    codbem:codbem,
-                    codbememp:codbememp,
-                    status:status,
-                    obs:obs
+                    codbem: codbem,
+                    codbememp: codbememp,
+                    status: status,
+                    obs: obs
                 };
-                InsertState('{{url('ativos/state/')}}',data,$('#modal-status').modal('hide'));
+                InsertState('{{url('ativos/state/')}}', data, $('#modal-status').modal('hide'));
 
+            });
+            $(document).on('click', '.remove-key', function () {
+                var panel = $(this).parent().parent().parent().parent().parent().parent();
+                var key = $(this).parent().find('.idkey').text();
+                $('#resultOfSearch').empty();
+                panel.removeClass('panel-default');
+                panel.addClass('panel-warning');
+                $('#resultOfSearch').append(panel);
+                $("#bem-dissoc-key").text($('#resultOfSearch .panel .cod-bem').text());
+                $("#emp-dissoc-key").text($('#resultOfSearch .panel .result-emp').text());
+                $("#key-dissoc-key").text(key);
+                $('#dissoc-key').modal('show');
+            });
+            $('#btn-dissoc-key').click(function () {
+                pat = $("#bem-dissoc-key").text();
+                emp= $("#emp-dissoc-key").text();
+                key = $("#key-dissoc-key").text();
+                RemoveKey('{{url('licencas/produto/delete')}}',{pat:pat,emp:emp,key:key},$('#dissoc-key').modal('hide'));
             });
         });
     </script>
