@@ -103,6 +103,9 @@ class AtivosController extends Controller
         $query = $query->get();
         //dd(DB::connection('sapiens')->getQueryLog());
         foreach ($query as $row) {
+            $assoc = \App\Connect::where('data_out', '=', null)
+                ->where('E670BEM_CODBEM', '=', $row->CODBEM)
+                ->where('E070EMP_CODEMP', '=', $row->CODEMP);
             $row->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
             $row->DESBEM = iconv("ISO-8859-1", "UTF-8", $row->DESBEM);
             $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
@@ -111,12 +114,24 @@ class AtivosController extends Controller
             $data = new Carbon($row->DATAQI);
             $row->DATAQI = $data->format('d/m/Y');
             $row->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
-            $row->ASSOC = \App\Connect::where('data_out', '=', null)
-                ->where('E670BEM_CODBEM', '=', $row->CODBEM)
-                ->where('E070EMP_CODEMP', '=', $row->CODEMP)
-                ->count();
+            $row->ASSOC = $assoc->count();
+            if($row->ASSOC){
+                $assoc = $assoc->get();
+                $row->connect = DB::connection('vetorh')->table('R034FUN')
+                    ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
+                    ->join('R010SIT',function ($inner){
+                        $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+                    })
+                    ->where('NUMEMP','=',$assoc[0]->R034FUN_NUMEMP)
+                    ->where('TIPCOL','=',$assoc[0]->R034FUN_TIPCOL)
+                    ->where('NUMCAD','=',$assoc[0]->R034FUN_NUMCAD)
+                    ->get();
+            }else{
+                $row->connect = null;
+            }
             $row->state = \App\Complement::
-            join('states',function ($join){
+            select(['states.id','states.description','E070EMP_CODEMP','E670BEM_CODBEM','complements.created_at','complements.description as desc','states.state'])
+            ->join('states',function ($join){
                 $join->on('state_id','=','states.id');
             })
             ->where('E670BEM_CODBEM','=',$row->CODBEM)->where('E070EMP_CODEMP','=',$row->CODEMP)->get();
@@ -198,7 +213,6 @@ class AtivosController extends Controller
         $VerificarEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
             ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
             ->where('data_entrada', '=', null)->count();
-
         $CheckConect = \App\Connect::where('data_out', '=', null)
             ->where('E670BEM_CODBEM', '=', $request->get('codbem'))
             ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))->count();

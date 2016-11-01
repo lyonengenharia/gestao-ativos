@@ -1,10 +1,12 @@
 
 function handleData(data, textStatus, jqXHR) {
+    console.log(data);
     $('#resultOfSearch').empty();
     if (data.length > 0) {
         $.each(data, function (i, item) {
+            var connection = '';
             var row = "<div class=\"panel panel-default\">" +
-                "<div class=\"panel-heading\">" +
+                "<div class=\"panel-heading cod-bem\">" +
                 item.CODBEM +
                 "</div>" +
                 "<div class='result-emp' style='display: none'>" +
@@ -16,20 +18,58 @@ function handleData(data, textStatus, jqXHR) {
                 "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                 "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
                 "<hr>";
+            //console.debug(item.connection.length);
+            if(item.connect != null){
+                connection = "<hr>"+
+                    "<p><b>Colaborador associado</b></p>"+
+                    "<p><b>Colaborador:</b>"+item.connect[0].value+" <b>Matrícula:</b>  "+item.connect[0].id+"  <b>Situação:</b> "+item.connect[0].DESSIT+"</p>";
+            }
             if (item.state.length == 0) {
                 row +=
                     "<p><b>Estado:</b>Sem definição</p>" +
                     "<p><b>Descrição:</b>Sem definição</p>";
             } else {
                 row +=
+                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
                     "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
                     "<p><b>Descrição:</b>" + item.state[0].description + "</p>";
             }
+            row += connection;
+            row +="<hr>";
+            if (item.keys.length == 0) {
+                row +=
+                    "<p>Nenhuma licença associada</p>";
+            } else {
+                row += "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
+                $.each(item.keys,function (l,key) {
+                    vencimento = "Vitalício";
+                    if(key.maturity_date!=null){
+                        vencimento = DateUsTODateBr(key.maturity_date);
+                    }
+                    row +=
+                        "<div class='panel panel-default'>"+
+                        "<div class='panel-heading' role='tab' id='headin"+key.id+"'>"+
+                        "<h4 class=\"panel-title\">"+
+                        "<a role='button' data-toggle='collapse'  href='#"+key.id+"' aria-expanded='true' aria-controls='"+key.id+"'>"
+                        +key.name+"/"+key.model+
+                        "</a>"+
+                        "</h4>"+
+                        "</div>"+
+                        "<div id='"+key.id+"' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin"+key.id+"'>"+
+                        "<div class=\"panel-body\">"
+                        +"<span class='idkey' style='display: none' >"+key.keyid+"</span>"+
+                        "<b>Chave:</b>"+key.key + "  - <b>QTD</b> :"+key.quantity+"/<b>Em uso: </b>"+key.in_use+"<b> - Vencimento: </b>"+ vencimento
+                        +" <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>"+
+                        "</div>" +
+                        "</div>" +
+                        "</div>" ;
+                });
+                row +=
+                    "</div>"+
+                    "</div>";
+
+            }
             row +=
-                "<button class=\"btn btn-primary status-ben\" type=\"button\">" +
-                "<span class='glyphicon glyphicon-fire'></span> Estado" +
-                "</button>" +
-                "</div>" +
                 "<div class='panel-footer'> " +
                 "<div class=\"btn-group\">" +
                 "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
@@ -116,6 +156,7 @@ function historyLocations(data, textStatus, jqXHR) {
 
 }
 function Emprestimo(url, data) {
+    console.log(data);
     $.ajax({
         url: url,
         data: data,
@@ -179,11 +220,13 @@ function DevolucaoDados(url, data) {
         data: data,
         dataType: 'json',
         success: function (response) {
+            console.log(response);
             $('.info-devolucao').remove();
             var linha = "<div class='panel panel-default info-devolucao'><div class='panel-body'>" +
                 "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
                 "<p><b>Colaborador: </b>" + response[0].colaborador.value + "</p>" +
                 "<p><b>Situação do colaborador: </b>" + response[0].colaborador.DESSIT + "</p>" +
+                "<p><b>Obs saída: </b>" + (response[0].obs_saida == ""?"Sem observação":response[0].obs_saida) + "</p>" +
                 "</div></div>";
             $('#devolucao-form').before(linha);
         }
@@ -276,7 +319,7 @@ function InsertState(url, data, callback) {
         }
     }).fail(ErroConnect).always(callback);
 }
-function GetState(url, data) {
+function GetState(url, data,callback) {
     $.ajax({
         url: url,
         type: 'get',
@@ -294,7 +337,38 @@ function GetState(url, data) {
             }
 
         }
-    }).fail(ErroConnect);
+    }).fail(ErroConnect).always(callback);
+}
+function RemoveKey(url,data,callback) {
+    $.ajax({
+        url: url,
+        type: 'delete',
+        data: data,
+        dataType: 'json',
+        success: function (response) {
+            var alert = "";
+            if (response.error == 1) {
+                alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg
+                "</div>";
+            } else if (response.error == 0) {
+                $('.emprestimo-option').addClass('display-emprestismo');
+                $('#resultOfSearch').removeClass('col-md-4');
+                $('#resultOfSearch').addClass('col-md-12');
+                alert = "<div class=\"alert alert-success alert-dismissible search\" role=\"alert\">" +
+                    "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
+                    "<strong>Atenção!</strong> " + response.msg
+                "</div>";
+            }
+            url = url.replace('licencas', 'ativos');
+            url = url.replace('produto', 'search');
+            url = url.replace('delete', '');
+            updatesearch(url, {pat: data.pat, emp: data.emp});
+            $('#search').after(alert);
+
+        }
+    }).fail(ErroConnect).always(callback);;
 }
 function updatesearch(url, data) {
     $.ajax({
@@ -304,5 +378,10 @@ function updatesearch(url, data) {
         dataType: 'json'
     }).done(handleData)
         .fail(ErroConnect);
+}
+function DateUsTODateBr(date) {
+    var d = new Date(date);
+    return d.toLocaleDateString();
+
 }
 //# sourceMappingURL=ativos.js.map

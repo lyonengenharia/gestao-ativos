@@ -4,6 +4,7 @@ function handleData(data, textStatus, jqXHR) {
     $('#resultOfSearch').empty();
     if (data.length > 0) {
         $.each(data, function (i, item) {
+            var connection = '';
             var row = "<div class=\"panel panel-default\">" +
                 "<div class=\"panel-heading cod-bem\">" +
                 item.CODBEM +
@@ -17,6 +18,12 @@ function handleData(data, textStatus, jqXHR) {
                 "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                 "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
                 "<hr>";
+            //console.debug(item.connection.length);
+            if(item.connect != null){
+                connection = "<hr>"+
+                        "<p><b>Colaborador associado</b></p>"+
+                        "<p><b>Colaborador:</b>"+item.connect[0].value+" <b>Matrícula:</b>  "+item.connect[0].id+"  <b>Situação:</b> "+item.connect[0].DESSIT+"</p>";
+            }
             if (item.state.length == 0) {
                 row +=
                     "<p><b>Estado:</b>Sem definição</p>" +
@@ -25,8 +32,10 @@ function handleData(data, textStatus, jqXHR) {
                 row +=
                     "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
                     "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
-                    "<p><b>Descrição:</b>" + item.state[0].description + "</p>";
+                    "<p><b>Descrição:</b>" + item.state[0].description + "</p>"+
+                    "<p><b>Observação:</b>" + item.state[0].desc + "</p>";
             }
+            row += connection;
             row +="<hr>";
             if (item.keys.length == 0) {
                 row +=
@@ -148,6 +157,7 @@ function historyLocations(data, textStatus, jqXHR) {
 
 }
 function Emprestimo(url, data) {
+    console.log(data);
     $.ajax({
         url: url,
         data: data,
@@ -211,11 +221,13 @@ function DevolucaoDados(url, data) {
         data: data,
         dataType: 'json',
         success: function (response) {
+            console.log(response);
             $('.info-devolucao').remove();
             var linha = "<div class='panel panel-default info-devolucao'><div class='panel-body'>" +
                 "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
                 "<p><b>Colaborador: </b>" + response[0].colaborador.value + "</p>" +
                 "<p><b>Situação do colaborador: </b>" + response[0].colaborador.DESSIT + "</p>" +
+                "<p><b>Obs saída: </b>" + (response[0].obs_saida == ""?"Sem observação":response[0].obs_saida) + "</p>" +
                 "</div></div>";
             $('#devolucao-form').before(linha);
         }

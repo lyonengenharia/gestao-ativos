@@ -57,7 +57,7 @@ class HomeController extends Controller
             ->whereIn('E674ESP.CODESP',[18,3])
             ->count();
         $emprestimo = \App\Emprestimo::where('data_entrada','=',null);
-        $devolvidos = \App\Emprestimo::where('data_entrada','!=',null)->orderBy('data_entrada','asc')->limit(15)->get();
+        $devolvidos = \App\Emprestimo::where('data_entrada','!=',null)->orderBy('data_entrada','DESC')->limit(15)->get();
         $datamaior = Carbon::now()->addDays(45);
         $data = Carbon::now();
 
@@ -68,7 +68,13 @@ class HomeController extends Controller
                 $inner->on('empresas.id', '=', 'produtos.empresa_id');
             })->where('maturity_date','>',$data)
             ->where('maturity_date','<',$datamaior)->get();
-        //dd($licencas);
+
+        $vencidas = \App\Key::select(['keys.id','keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','keys.maturity_date'])
+            ->join('produtos',function ($inner){
+                $inner->on('produtos.id','=','keys.produto_id');
+            })->join('empresas',function ($inner) {
+                $inner->on('empresas.id', '=', 'produtos.empresa_id');
+            })->where('maturity_date','<',$data)->get();
         return view('dashboard.dashboard',
             ["breadcrumbs" => array("Home" => "home"),
                 "page" => "Dashboard",
@@ -76,9 +82,10 @@ class HomeController extends Controller
                 "user"=>$user,
                 "informatica"=>$equipamentos,
                 "emprestimos"=>$emprestimo->count(),
-                "ultimosEmprestimos"=>$emprestimo->orderBy('data_saida', 'asc')->limit(10)->get(),
+                "ultimosEmprestimos"=>$emprestimo->orderBy('data_saida', 'desc')->limit(10)->get(),
                 "devolvidos"=>$devolvidos,
-                "vencimentolicencas"=>$licencas
+                "vencimentolicencas"=>$licencas,
+                "vencidaslicencas"=>$vencidas
             ]
         );
     }

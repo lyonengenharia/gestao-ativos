@@ -126,11 +126,35 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Licenças com vencimento próximo</h3>
-
                 </div>
                 <div class="panel-body">
                     <div class="list-group">
                         @forelse($vencimentolicencas as $vencimentolicenca )
+                            <a href="{{url('/licencas/licenca/')."/".$vencimentolicenca->id}}" class="list-group-item">
+                                <span class="badge">{{$vencimentolicenca->maturity_date->format('d/m/Y')}}</span>
+                                <i class="fa fa-fw fa-bookmark"></i> {{$vencimentolicenca->name}}
+                                / {{$vencimentolicenca->model}}
+                            </a>
+                        @empty
+                            <a href="#" class="list-group-item">
+                                <i class="fa fa-fw fa-calendar"></i> Não exite licenças com vencimentos próximos
+                            </a>
+                        @endforelse
+
+                    </div>
+                    <div class="text-right">
+                        <a href="{{url('licencas')}}">Verificar licenças <i
+                                    class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Licenças vencidas</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="list-group">
+                        @forelse($vencidaslicencas as $vencimentolicenca )
                             <a href="{{url('/licencas/licenca/')."/".$vencimentolicenca->id}}" class="list-group-item">
                                 <span class="badge">{{$vencimentolicenca->maturity_date->format('d/m/Y')}}</span>
                                 <i class="fa fa-fw fa-bookmark"></i> {{$vencimentolicenca->name}}
