@@ -49,7 +49,7 @@ Route::get('/licencas/associadas/{patrimonio}/{empresa}', function (Request $req
  */
 Route::get('licencas/associadas/{key}',function (Request $request,$key){
     $itens = DB::table('benskeys')
-             ->select(['keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','benskeys.E670BEM_CODBEM'])
+             ->select(['keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','benskeys.E670BEM_CODBEM','benskeys.E070EMP_CODEMP'])
              ->join('keys',function ($inner){
                  $inner->on('keys.ID','=','benskeys.key_id');
              })->join('produtos',function ($inner){
@@ -57,6 +57,70 @@ Route::get('licencas/associadas/{key}',function (Request $request,$key){
              })->join('empresas',function ($inner){
                  $inner->on('empresas.id','=','produtos.empresa_id');
              })->where('benskeys.key_id','=',$key)->get();
+
+    foreach ($itens as $key => $iten){
+
+        $comp = DB::connection('sapiens')->table("E670BEM")
+            ->select([
+                'E670BEM.CODBEM',
+                'E670LOC.CODEMP',
+                'E670LOC.CODBEM',
+                'E670LOC.DATLOC',
+                'E670LOC.SEQLOC',
+                'E670LOC.CTARED',
+                'E670BEM.DATAQI',
+                'E044CCU.CODEMP',
+                'E044CCU.CODCCU',
+                'E044CCU.DESCCU',
+                'E670BEM.DESBEM',
+                'E670LOC.CODCCU',
+                'E670BEM.SITPAT',
+                'E670BEM.CODEMP',
+                'E070EMP.NOMEMP',
+                'E674ESP.DESESP',
+                'E674ESP.ABRESP'
+            ])
+            ->join('E670LOC', function ($join) {
+                $join->on('E670LOC.CODEMP', '=', 'E670BEM.CODEMP');
+
+            })
+            ->Join('E670DRA', function ($join) {
+                $join->on('E670DRA.CODEMP', '=', 'E670LOC.CODEMP');
+            })
+            ->join('E044CCU', function ($join) {
+                $join->on('E044CCU.CODEMP', '=', 'E670DRA.CODEMP');
+            })
+            ->join('E070EMP', function ($join) {
+                $join->on('E070EMP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            ->join('E674ESP', function ($join) {
+                $join->on('E674ESP.CODESP', '=', 'E670BEM.CODESP')
+                    ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            //->where('E670BEM.CODEMP', '=', 1)
+            ->whereColumn('E670LOC.CODEMP', '=', 'E670BEM.CODEMP')
+            ->whereColumn('E670LOC.CODBEM', '=', 'E670BEM.CODBEM')
+            ->whereColumn('E670DRA.CODEMP', '=', 'E670LOC.CODEMP')
+            ->whereColumn('E670DRA.CODBEM', '=', 'E670LOC.CODBEM')
+            ->whereColumn('E670DRA.DATLOC', '=', 'E670LOC.DATLOC')
+            ->whereColumn('E670DRA.SEQLOC', '=', 'E670LOC.SEQLOC')
+            ->whereColumn('E044CCU.CODEMP', '=', 'E670DRA.CODEMP')
+            ->whereColumn('E044CCU.CODCCU', '=', 'E670DRA.CODCCU')
+            ->where('E670LOC.ULTREG', '=', 'S')
+            ->where('E670LOC.SITLOC', '=', 'A')
+            ->where('E670BEM.CODBEM', '=', $iten->E670BEM_CODBEM)
+            ->where('E670BEM.CODEMP', '=', $iten->E070EMP_CODEMP)
+            ->get();
+
+        $comp[0]->DESCCU = iconv('windows-1252','utf-8', $comp[0]->DESCCU);
+        $comp[0]->DESBEM = iconv('windows-1252','utf-8', $comp[0]->DESBEM);
+        $comp[0]->DESESP = iconv('windows-1252','utf-8', $comp[0]->DESESP);
+        $comp[0]->NOMEMP = iconv('windows-1252','utf-8', $comp[0]->NOMEMP);
+        $comp[0]->ABRESP = iconv('windows-1252','utf-8', $comp[0]->ABRESP);
+        $itens[$key]->iten = $comp;
+
+
+    }
     return $itens;
 });
 

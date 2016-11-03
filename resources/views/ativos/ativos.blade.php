@@ -443,8 +443,7 @@
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
-                var item = $(this).parent().parent().parent().find('.cod-bem').text();
-                var panel = $(this).parent().parent().parent();
+
                 $(".devolucao-option").addClass('display-emprestismo');
                 if (!$('.emprestimo-option').hasClass('display-emprestismo')) {
                     $('.emprestimo-option').addClass('display-emprestismo')
@@ -590,7 +589,7 @@
                 }
             });
             $(document).on('click', '.dissociar-colaborador', function () {
-                var panel = $(this).parent().parent().parent();
+                var panel = $(this).parent().parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');

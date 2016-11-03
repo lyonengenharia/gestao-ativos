@@ -32,28 +32,50 @@
                 <thead>
                 <th>Empresa</th>
                 <th>Produto</th>
-                <th>Chave</th>
-                <th>Quantidade</th>
-                <th>Quant. Uso</th>
+                <th>Vencimento</th>
+                <th>Uso x Qtd</th>
                 <th>Ações</th>
                 </thead>
                 <tbody>
                 @foreach($licencas as $licenca)
+                    <?php
+                    $data = null;
+                    if (empty($licenca->maturity_date)) {
+                        $data = "Vitalício";
+                    } else {
+                        $data = new \Carbon\Carbon($licenca->maturity_date);
+                        $data = $data->format('d/m/Y');
+                    }
+                    ?>
                     <tr {{$licenca->in_use > $licenca->quantity ?"class=danger":""}}>
                         <td class="Empresa-table">{{$licenca->name}}</td>
                         <td class="Model-table">{{$licenca->model}}</td>
-                        <td class="Key-table">{{$licenca->key}}</td>
-                        <td class="Quantity-table">{{$licenca->quantity}}</td>
-                        <td class="InUse-table">{{$licenca->in_use}}</td>
+                        <td>{{$data}}</td>
+                        <td>{{$licenca->in_use}} de {{$licenca->quantity}}</td>
                         <td>
                             <a href="{{url('/licencas/licenca/'.$licenca->keyid)}}"
                                class="btn btn-default btn-xs"><span class="glyphicon glyphicon-pencil"></span> </a>
                             <button class="btn btn-default btn-xs associarkeymodal">
                                 <span class="glyphicon glyphicon-resize-small"></span>
                             </button>
+                            <button class="btn btn-primary btn-xs" type="button" data-toggle="collapse"
+                                    data-target="#{{$licenca->keyid}}"
+                                    aria-expanded="false" aria-controls="collapseExample">
+                                <span class="glyphicon glyphicon-list"></span>
+                            </button>
                             <span style="display: none" class="licencakeyid">{{$licenca->keyid}}</span>
                         </td>
+                    <tr class="collapse" id="{{$licenca->keyid}}">
+                        <td colspan="5">
+                            <p class="espaco-entrelinhas-xs">Chave: {{$licenca->key}}</p>
+                            <p class="espaco-entrelinhas-xs">Data Criação registro: {{$licenca->created_at}}</p>
+                            <p class="espaco-entrelinhas-xs">Última Atualização Criação registro: {{$licenca->updated_at}}</p>
+                            <p class="espaco-entrelinhas-xs">Descrição:{{$licenca->description}}</p>
+                        </td>
                     </tr>
+                    </tr>
+
+
                 @endforeach
                 </tbody>
             </table>
@@ -172,7 +194,6 @@
                                     var rodape = "<div class='panel-footer'>" +
                                             "<p>Empresa/Produto " + item.name + "/ " + item.model + " </p>" +
                                             "<p style='line-height: 0.5;'><b>Chave:</b> " + item.key + " </p>" +
-
                                             "</div> "
                                     selecao.append(rodape);
                                 });
@@ -184,7 +205,6 @@
                                         "<button class='btn btn-success btn-xs associarchave'>Associar chave</button>" +
                                         "</div> "
                                 selecao.append(rodape);
-
                             }
 
                         }, complete: function () {
@@ -197,6 +217,8 @@
                 }
             });
             $(document).on('click', '.associarchave', function () {
+                var botao = $(this);
+                botao.text("Carregando...");
                 var selecao = $(this).parent().parent();
                 var pat = selecao.find('.panel-heading').text();
                 var emp = selecao.find('.codemp').text();
@@ -208,6 +230,8 @@
                     dataType: 'json',
                     success: function (data) {
                         trataRetorno(data, pat, emp, key);
+                    }, complete: function () {
+                        botao.text('Desmarcar')
                     }
                 });
             });
@@ -244,14 +268,21 @@
                 if (confirm("Deseja realmente remover a associação ?")) {
                     key = $('#associarkey #idkey').text();
                     pat = $(this).parent().find('.patrimonio').text();
+                    emp = $(this).parent().find('.emppatmodal').text();
                     $.ajax({
                         url: '{{url('/licencas/produto/delete')}}',
-                        data: {key: key, pat: pat},
+                        data: {key: key, pat: pat,emp:emp},
                         type: 'delete',
+                        dataType:'json',
                         success: function (data) {
-                            console.log(data);
+                            if(data.error){
+                                alert(data.msg);
+                            }else{
+                                alert(data.msg);
+                                location.reload();
+                            }
                         }
-                    });
+                    }).fail(ErroConnect);
                 }
             });
 

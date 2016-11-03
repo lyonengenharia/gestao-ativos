@@ -14,7 +14,9 @@ class LicencasController extends Controller
     public function index()
     {
         $licencas = DB::table('keys')
-            ->select(['keys.id as keyid', 'key', 'quantity', 'in_use', 'keys.description', 'produtos.id', 'produtos.model', 'empresas.name'])
+            ->select(['keys.id as keyid', 'key', 'quantity', 'in_use', 'keys.description',
+                      'produtos.id', 'produtos.model', 'empresas.name','maturity_date'
+                      ,'keys.created_at','keys.updated_at'])
             ->join('produtos', function ($inner) {
                 $inner->on('produtos.id', '=', 'keys.produto_id');
             })
@@ -134,14 +136,14 @@ class LicencasController extends Controller
         }
         $data = null;
         if ($request->has('datavencimento')) {
-            $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('datavencimento'), "America/Sao_Paulo");
+            $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('datavencimento'), "America/Sao_Paulo")->toDateTimeString();
         }
         $Key = new \App\Key();
         $Key->key = $request->get('key');
         $Key->description = $request->get('description');
         $Key->quantity = $request->get('quantity');
         $Key->produto_id = $request->get('produto_id');
-        $Key->maturity_date= $data->toDateTimeString();
+        $Key->maturity_date= $data;
         $Key->save();
         return redirect('licencas/licenca')->with('status', 'Licença incluida com sucesso!');
 
@@ -177,6 +179,10 @@ class LicencasController extends Controller
             'quantity.min' => "O valor mínimo é 1.",
         ];
         $validator = \Validator::make($request->all(), $rules, $messages);
+        $data = null;
+        if ($request->has('datavencimento')) {
+            $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('datavencimento'), "America/Sao_Paulo")->toDateTimeString();
+        }
         if ($validator->fails()) {
             return redirect('licencas/licenca/update')
                 ->withErrors($validator)
@@ -187,6 +193,7 @@ class LicencasController extends Controller
         $key->description = $request->get('description');
         $key->quantity = $request->get('quantity');
         $key->produto_id = $request->get('produto_id');
+        $key->maturity_date = $data;
         $key->save();
         return redirect('licencas')->with('status', 'Chave atualizada');
 

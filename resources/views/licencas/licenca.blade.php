@@ -40,6 +40,7 @@
                         <input type="text" name="key" required class="form-control" value="{{old('key') }}"
                                style="text-transform: uppercase">
                     </div>
+
                     <div class="col-md-12">
                         <div class="col-md-6">
                             <div class="form-group">
