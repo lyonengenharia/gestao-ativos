@@ -318,14 +318,13 @@ class AtivosController extends Controller
         }
     }
     public function GetState(Request $request){
-
         $Complement = \App\Complement::where('E670BEM_CODBEM','=',$request->get('codbem'))->where('E070EMP_CODEMP','=',$request->get('codbememp'));
         if($Complement->count()){
             $Complement = $Complement->get();
             $Complement[0]->updated = $Complement[0]->updated_at->format('d/m/Y H:i');
             $Complement[0]->create = $Complement[0]->created_at->format('d/m/Y');
+            return $Complement;
         }
-       return $Complement;
+        return null;
     }
-
 }

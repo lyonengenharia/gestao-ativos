@@ -30,7 +30,6 @@
             @endif
             <table class="table table-bordered table-hover">
                 <thead>
-                <th>Empresa</th>
                 <th>Produto</th>
                 <th>Vencimento</th>
                 <th>Uso x Qtd</th>
@@ -48,8 +47,7 @@
                     }
                     ?>
                     <tr {{$licenca->in_use > $licenca->quantity ?"class=danger":""}}>
-                        <td class="Empresa-table">{{$licenca->name}}</td>
-                        <td class="Model-table">{{$licenca->model}}</td>
+                        <td class="Model-table">{{$licenca->name}} - {{$licenca->model}}</td>
                         <td>{{$data}}</td>
                         <td>{{$licenca->in_use}} de {{$licenca->quantity}}</td>
                         <td>

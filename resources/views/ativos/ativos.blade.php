@@ -300,6 +300,7 @@
             </div>
         </div>
     </div>
+
     <script>
         $(document).ready(function () {
             var URLUPDATE = '{{url('ativos/search')}}';
@@ -443,7 +444,8 @@
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
-
+                var item = $(this).parent().parent().parent().find('.cod-bem').text();
+                var panel = $(this).parent().parent().parent();
                 $(".devolucao-option").addClass('display-emprestismo');
                 if (!$('.emprestimo-option').hasClass('display-emprestismo')) {
                     $('.emprestimo-option').addClass('display-emprestismo')
@@ -479,7 +481,6 @@
                     $('#resultOfSearch').append(panel);
                     $(".div-load").toggleClass('div-load-hidden');
                 }).fail(ErroConnect);
-                ;
             });
             $(document).on('click', '.emprestimo', function () {
                 $('#emprestimo')[0].reset();
@@ -657,9 +658,13 @@
             });
             $('#btn-dissoc-key').click(function () {
                 pat = $("#bem-dissoc-key").text();
-                emp= $("#emp-dissoc-key").text();
+                emp = $("#emp-dissoc-key").text();
                 key = $("#key-dissoc-key").text();
-                RemoveKey('{{url('licencas/produto/delete')}}',{pat:pat,emp:emp,key:key},$('#dissoc-key').modal('hide'));
+                RemoveKey('{{url('licencas/produto/delete')}}', {
+                    pat: pat,
+                    emp: emp,
+                    key: key
+                }, $('#dissoc-key').modal('hide'));
             });
         });
     </script>

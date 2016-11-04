@@ -37,6 +37,6 @@ elixir(function(mix){
     mix.scripts('licencas/licencas.js','public/js/licencas.js');
     mix.scripts('ativos/ativos.js','public/js/ativos.js');
 
-    //View - Css
 });
+
 

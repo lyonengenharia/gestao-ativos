@@ -1,7 +1,6 @@
 function handleData(data, textStatus, jqXHR) {
     $('#resultOfSearch').empty();
     $.each(data, function (i, item) {
-        //console.log(item);
         var row = "<div class=\"panel panel-default\">" +
             "<div class=\"panel-heading\"><b>" +
             item.CODBEM +
@@ -19,12 +18,9 @@ function handleData(data, textStatus, jqXHR) {
             "<div style='display: none' class='codemp'>" + item.CODEMP + "</div>" +
             "</div>";
         $('#resultOfSearch').append(row);
-
     });
-
     $("#buttonSearch").empty();
     $("#buttonSearch").append("Pesquisar");
-
 }
 function trataModalLicenca(data, callback) {
     var LicencasAssociadas = $('#LicencasAssociadas');
@@ -33,7 +29,6 @@ function trataModalLicenca(data, callback) {
     Empresa_Produto.empty();
     if (data.length > 0) {
         $.each(data, function (i, item) {
-            console.log(item);
             linha = "<div class=\"alert alert-warning\" role=\"alert\">" +
                 "<p><b>Patrimônio: </b> <span class=\"patrimonio\">" + item.E670BEM_CODBEM + "</span> </p>" +
                 "<p><b>Empresa: </b> " + item.iten[0].NOMEMP + "</span> </p>" +
@@ -56,4 +51,6 @@ function ErroConnect(Error) {
         location.reload();
     }
 }
+//# sourceMappingURL=licencas.js.map
+
 //# sourceMappingURL=licencas.js.map

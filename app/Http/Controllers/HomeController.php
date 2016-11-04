@@ -54,6 +54,7 @@ class HomeController extends Controller
             ->whereColumn('E044CCU.CODCCU', '=', 'E670DRA.CODCCU')
             ->where('E670LOC.ULTREG', '=', 'S')
             ->where('E670LOC.SITLOC', '=', 'A')
+            ->where('E044CCU.CODCCU','=','6652')
             ->whereIn('E674ESP.CODESP',[18,3])
             ->count();
         $emprestimo = \App\Emprestimo::where('data_entrada','=',null);

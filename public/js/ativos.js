@@ -1,113 +1,117 @@
 
 function handleData(data, textStatus, jqXHR) {
-    console.log(data);
     $('#resultOfSearch').empty();
     if (data.length > 0) {
         $.each(data, function (i, item) {
             var connection = '';
-            var row = "<div class=\"panel panel-default\">" +
-                "<div class=\"panel-heading cod-bem\">" +
-                item.CODBEM +
-                "</div>" +
-                "<div class='result-emp' style='display: none'>" +
-                item.CODEMP +
-                "</div>" +
-                "<div class=\"panel-body\">" +
-                "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                "<p><b>Item:</b> " + item.DESBEM + " </p>" +
-                "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
-                "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
-                "<hr>";
-            //console.debug(item.connection.length);
+            var state = '';
+            var keys = '';
+            var Assoc = '';
+            var Empres = '';
             if(item.connect != null){
                 connection = "<hr>"+
-                        "<p><b>Colaborador associado</b></p>"+
-                        "<p><b>Colaborador:</b>"+item.connect[0].value+" <b>Matrícula:</b>  "+item.connect[0].id+"  <b>Situação:</b> "+item.connect[0].DESSIT+"</p>";
+                    "<p><b>Colaborador associado</b></p>"+
+                    "<p><b>Colaborador:</b>"+item.connect[0].value+" <b>Matrícula:</b>  "+item.connect[0].id+"  <b>Situação:</b> "+item.connect[0].DESSIT+"</p>";
             }
+
             if (item.state.length == 0) {
-                row +=
+                state =
+                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
                     "<p><b>Estado:</b>Sem definição</p>" +
                     "<p><b>Descrição:</b>Sem definição</p>";
             } else {
-                row +=
+                state  =
                     "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
                     "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
                     "<p><b>Descrição:</b>" + item.state[0].description + "</p>"+
                     "<p><b>Observação:</b>" + item.state[0].desc + "</p>";
             }
-            row += connection;
-            row +="<hr>";
+
             if (item.keys.length == 0) {
-                row +=
+                keys =
                     "<p>Nenhuma licença associada</p>";
             } else {
-                row += "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
-                $.each(item.keys,function (l,key) {
+                keys = "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
+                $.each(item.keys, function (l, key) {
                     vencimento = "Vitalício";
-                    if(key.maturity_date!=null){
+                    if (key.maturity_date != null) {
                         vencimento = DateUsTODateBr(key.maturity_date);
                     }
-                    row +=
-                        "<div class='panel panel-default'>"+
-                            "<div class='panel-heading' role='tab' id='headin"+key.id+"'>"+
-                                "<h4 class=\"panel-title\">"+
-                                    "<a role='button' data-toggle='collapse'  href='#"+key.id+"' aria-expanded='true' aria-controls='"+key.id+"'>"
-                                        +key.name+"/"+key.model+
-                                    "</a>"+
-                                "</h4>"+
-                            "</div>"+
-                            "<div id='"+key.id+"' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin"+key.id+"'>"+
+                    keys +=
+                        "<div class='panel panel-default'>" +
+                            "<div class='panel-heading' role='tab' id='headin" + key.id + "'>" +
+                                "<h4 class=\"panel-title\">" +
+                                    "<a role='button' data-toggle='collapse'  href='#" + key.id + "' aria-expanded='true' aria-controls='" + key.id + "'>"
+                                        + key.name + "/" + key.model +
+                                    "</a>" +
+                                "</h4>" +
+                            "</div>" +
+                            "<div id='" + key.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + key.id + "'>" +
                                 "<div class=\"panel-body\">"
-                                    +"<span class='idkey' style='display: none' >"+key.keyid+"</span>"+
-                                    "<b>Chave:</b>"+key.key + "  - <b>QTD</b> :"+key.quantity+"/<b>Em uso: </b>"+key.in_use+"<b> - Vencimento: </b>"+ vencimento
-                                    +" <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>"+
+                                    +"<span class='idkey' style='display: none' >" + key.keyid + "</span>" +
+                                    "<b>Chave:</b>" + key.key + "  - <b>QTD</b> :" + key.quantity + "/<b>Em uso: </b>" + key.in_use + "<b> - Vencimento: </b>" + vencimento
+                                    + " <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>" +
                                 "</div>" +
                             "</div>" +
-                        "</div>" ;
+                        "</div>";
                 });
-                row +=
-                    "</div>"+
-                    "</div>";
-
+                keys +="</div>";
             }
-            row +=
-                "<div class='panel-footer'> " +
-                "<div class=\"btn-group\">" +
-                "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
-                "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
-                "</button>";
+
             if (item.ASSOC) {
-                row += "<button class=\"btn btn-danger dissociar-colaborador\" type=\"button\">" +
+                Assoc += "<button class=\"btn btn-danger dissociar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Desassociar" +
                     "</button>";
             } else {
-                row += "<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
+                Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
             }
+
             if (item.EMPRST == 0 && item.ASSOC == 0) {
-                row += "<button class=\"btn btn-success emprestimo\" type=\"button\">" +
+                Empres = "<button class=\"btn btn-success emprestimo\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-transfer'></span> Emprestimo" +
-                    "</button>" +
-                    "</div>" +
-                    "</div>" +
-                    "</div>";
+                    "</button>";
             } else if (item.ASSOC == 1) {
-                row += "<button class=\"btn btn-success emprestimo\" type=\"button\" disabled>" +
+                Empres = "<button class=\"btn btn-success emprestimo\" type=\"button\" disabled>" +
                     "<span class='glyphicon glyphicon-transfer'></span> Emprestimo" +
-                    "</button>" +
-                    "</div>" +
-                    "</div>" +
-                    "</div>";
+                    "</button>";
             } else {
-                row += "<button class=\"btn btn-warning devolucao\" type=\"button\">" +
+                Empres = "<button class=\"btn btn-warning devolucao\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-retweet'></span> Devolução" +
-                    "</button>" +
-                    "</div>" +
-                    "</div>" +
-                    "</div>";
+                    "</button>";
+
             }
 
+            var row =
+                "<div class=\"panel panel-default\">" +
+                    "<div class=\"panel-heading cod-bem\">" +
+                        item.CODBEM +
+                    "</div>" +
+                    "<div class='result-emp' style='display: none'>" +
+                        item.CODEMP +
+                    "</div>" +
+                    "<div class=\"panel-body\">" +
+                        "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
+                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
+                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
+                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+                        "<hr>"
+                        +state
+                        +connection
+                        +"<hr>"
+                        +keys+
+                    "</div>"+
+                    "<div class='panel-footer'> " +
+                        "<div class=\"btn-group\">" +
+                            "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
+                                "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
+                            "</button>"+
+                            Assoc+
+                            Empres+
+                        "</div>"+
+                    "</div>"+
+                "</div>";
             $('#resultOfSearch').append(row);
 
         });
@@ -134,7 +138,6 @@ function historyLocations(data, textStatus, jqXHR) {
     });
     $('#historyFinancialList').empty();
     $.each(data.MovFinancial, function (i, item) {
-        console.log(item);
         var row = "<div class=\"panel panel-default\">" +
             "<div class=\"panel-body\">" +
             "<p><b>Data Movimentação:</b> " + item.DATMOV + " </p>" +
@@ -367,7 +370,6 @@ function RemoveKey(url,data,callback) {
             url = url.replace('delete', '');
             updatesearch(url, {pat: data.pat, emp: data.emp});
             $('#search').after(alert);
-
         }
     }).fail(ErroConnect).always(callback);;
 }
@@ -385,4 +387,6 @@ function DateUsTODateBr(date) {
     return d.toLocaleDateString();
 
 }
+//# sourceMappingURL=ativos.js.map
+
 //# sourceMappingURL=ativos.js.map
