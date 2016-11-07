@@ -51,4 +51,24 @@ function ErroConnect(Error) {
         location.reload();
     }
 }
+function trataRetorno(data, pat, emp, key,url) {
+    if (data.erro == 2) {
+        if (confirm(data.msg)) {
+            $.ajax({
+                url: url,
+                type: 'post',
+                data: {pat: pat, emp: emp, key: key, conf: 1},
+                dataType: 'json'
+            }).done(trataRetorno);
+        }
+    } else {
+        alert(data.msg);
+        location.reload();
+    }
+}
+function Products(data) {
+    $.each(data, function (i, item) {
+        $('#produto').append(new Option(item.model, item.id));
+    });
+}
 //# sourceMappingURL=licencas.js.map

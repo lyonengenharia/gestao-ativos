@@ -215,7 +215,6 @@ function Devolucao(url, data) {
             $('#search').after(alert);
         },
     }).fail(ErroConnect);
-
 }
 function DevolucaoDados(url, data) {
     $.ajax({
@@ -235,7 +234,6 @@ function DevolucaoDados(url, data) {
             $('#devolucao-form').before(linha);
         }
     }).fail(ErroConnect);
-
 }
 function Associar(url, data) {
     $.ajax({
@@ -264,7 +262,6 @@ function Associar(url, data) {
         }
     }).fail(ErroConnect);
 }
-
 function Dissociar(url, data) {
     $.ajax({
         url: url,
@@ -291,8 +288,6 @@ function Dissociar(url, data) {
         }
     }).fail(ErroConnect);
 }
-
-
 function ErroConnect(Error) {
     if (Error.status == 401) {
         location.reload();

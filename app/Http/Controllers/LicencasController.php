@@ -11,8 +11,12 @@ use App\Http\Requests;
 
 class LicencasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $empresa = $request->get('empresa');
+        $produto = $request->get('produto');
+        $chave = $request->get('chave');
+        $vencimento= $request->get('datavencimento');
         $licencas = DB::table('keys')
             ->select(['keys.id as keyid', 'key', 'quantity', 'in_use', 'keys.description',
                       'produtos.id', 'produtos.model', 'empresas.name','maturity_date'
@@ -22,12 +26,21 @@ class LicencasController extends Controller
             })
             ->join('empresas', function ($inner) {
                 $inner->on('empresas.id', '=', 'produtos.empresa_id');
-            })
-            ->paginate(15);
+            });
+        if(!empty($empresa)){
+            $licencas = $licencas->where('empresas.id','=',$empresa);
+        }
+        if(!empty($produto)){
+            $licencas = $licencas->where('produtos.id','=',$produto);
+        }
+        if(!empty($chave)){
+            $licencas = $licencas->where('key','like',"$chave%");
+        }
         return view("licencas.licencas", ["breadcrumbs" => array("Licenças" => "licencas"),
             "page" => "Licenças",
             "explanation" => " Listagem de todas as licenças de software",
-            "licencas" => $licencas]);
+            "licencas" => $licencas->paginate(15),
+            "empresas"=>\App\Empresa::get()]);
     }
 
     public function empresa()
