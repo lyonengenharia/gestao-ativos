@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/painel','PainelController@index')->middleware('can:ativos');
     Route::get('/painel/usuarios','UserController@index')->middleware('can:ativos');
     Route::get('/painel/usuarios/grupos','RolesController@index')->middleware('can:ativos');
+    Route::get('/painel/importacao/','Import@index')->middleware('can:ativos');
 
     //Usuários
     Route::get('/usuario/{id}','UserController@edit')->middleware('can:ativos');
@@ -64,6 +65,13 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/permission/{id?}','PermissionsController@permission')->middleware('can:ativos');
     Route::post('/permission/insert','PermissionsController@permissionInsert')->middleware('can:ativos');
     Route::post('/permission/update','PermissionsController@permissionUpdate')->middleware('can:ativos');
+
+
+    //Importação
+    Route::get('painel/importacao/dados','Import@Dados')->middleware('can:ativos');
+    Route::post('painel/importacao/import','Import@Import')->middleware('can:ativos');
+    Route::get('importacao/process','Import@Process')->middleware('can:ativos');
+    Route::delete('importacao/delete','Import@Delete')->middleware('can:ativos');
 
 });
 

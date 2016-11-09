@@ -29,13 +29,20 @@ elixir(function(mix){
 
     //Jquery-ui
     mix.scripts('jquery-ui/jquery-ui.js','public/js/jquery-ui');
-    //mix.styles(,'public/css/jquery-ui.css');
+
 
     mix.styles(['all.css','jquery-ui/jquery-ui.theme.css','jquery-ui/jquery-ui.css'],'public/css/all.css');
+    //View - Css
+
+    mix.styles('fileupload/fileinput.min.css','public/css/fileupload/fileinput.min.css');
+
 
     //View - JavaScript
     mix.scripts('licencas/licencas.js','public/js/licencas.js');
     mix.scripts('ativos/ativos.js','public/js/ativos.js');
+    mix.scripts('fileupload/fileinput.js','public/js/fileinput/fileinput.js');
+    mix.scripts('fileupload/locales/pt-BR.js','public/js/fileinput/locales/pt-BR.js');
+
 
 });
 
