@@ -542,7 +542,7 @@
                 $(".devolucao-option").addClass('display-emprestismo');
                 $('#historyFinancial').addClass('display-localizaoes');
                 $('.associacao-option').removeClass('display-emprestismo');
-                var panel = $(this).parent().parent().parent().parent();
+                var panel = $(this).parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');

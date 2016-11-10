@@ -17,7 +17,6 @@ require("jquery");
 elixir(function(mix){
     var bootstrapPath = 'node_modules/bootstrap-sass/assets';
     var jqueryPath = './node_modules/jquery/dist/jquery.js';
-    var jqueryui = './node_modules/jquery-ui/';
     mix.sass('app.scss')
      .copy(bootstrapPath + '/fonts', 'public/fonts')
      .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js');
@@ -25,11 +24,10 @@ elixir(function(mix){
 
     //View - Template
 
-    mix.scripts(jqueryPath,'public/js/all.js');
+    mix.scripts([jqueryPath,'jquery-ui/jquery-ui.js'],'public/js/all.js');
 
     //Jquery-ui
-    mix.scripts('jquery-ui/jquery-ui.js','public/js/jquery-ui');
-
+    //mix.scripts(','public/js/jquery-ui');
 
     mix.styles(['all.css','jquery-ui/jquery-ui.theme.css','jquery-ui/jquery-ui.css'],'public/css/all.css');
     //View - Css
