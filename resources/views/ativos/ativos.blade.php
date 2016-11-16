@@ -14,7 +14,6 @@
             display: none;
         }
     </style>
-    <script src="{{asset('js/jquery.js')}}"></script>
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default" id="search">
@@ -642,10 +641,9 @@
                     obs: obs
                 };
                 InsertState('{{url('ativos/state/')}}', data, $('#modal-status').modal('hide'));
-
             });
             $(document).on('click', '.remove-key', function () {
-                var panel = $(this).parent().parent().parent().parent();
+                var panel = $(this).parent().parent().parent().parent().parent().parent();
                 var key = $(this).parent().find('.idkey').text();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
@@ -668,5 +666,5 @@
             });
         });
     </script>
-    <script src="{{asset('js/ativos.js')}}"></script>
+    <script src="{{asset('assets/js/ativos.js')}}"></script>
 @endsection

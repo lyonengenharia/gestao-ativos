@@ -18,9 +18,9 @@
                             <option value="0"></option>
                             @foreach($empresas as $empresa)
                                 @if($empresa->id == $produtos->myCompany->id)
-                                    <option value="{{$empresa->id}}}" selected>{{$empresa->name}}</option>
+                                    <option value="{{$empresa->id}}" selected>{{$empresa->name}}</option>
                                 @else
-                                    <option value="{{$empresa->id}}}">{{$empresa->name}}</option>
+                                    <option value="{{$empresa->id}}">{{$empresa->name}}</option>
                                 @endif
                             @endforeach
                         </select>
@@ -32,7 +32,7 @@
                             </span>
                         @endif
                         <label>Produto</label>
-                        <select name="produto_id" id="produto_id" class="form-control" value="{{old('produto_id') }}">
+                        <select name="produto_id" id="produto_id" class="form-control" value="{{old('produto_id')}}">
                             <option value="{{$produtos->id}}" selected>{{$produtos->model}}</option>
                         </select>
                     </div>

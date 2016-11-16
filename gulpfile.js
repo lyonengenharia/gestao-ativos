@@ -15,32 +15,22 @@ require("jquery");
  |
  */
 elixir(function(mix){
-    var bootstrapPath = 'node_modules/bootstrap-sass/assets';
+    var bootstrapPath = './node_modules/bootstrap-sass/assets';
     var jqueryPath = './node_modules/jquery/dist/jquery.js';
-    mix.sass('app.scss')
-     .copy(bootstrapPath + '/fonts', 'public/fonts')
-     .copy(bootstrapPath + '/javascripts/bootstrap.min.js', 'public/js');
-    //mix.scripts([jqueryPath+"/"]);
-
+    mix.sass('app.scss','public/assets/css');
+    mix.copy(bootstrapPath + '/fonts', 'public/assets/fonts');
     //View - Template
-
-    mix.scripts([jqueryPath,'jquery-ui/jquery-ui.js'],'public/js/all.js');
-
-    //Jquery-ui
-    //mix.scripts(','public/js/jquery-ui');
-
-    mix.styles(['all.css','jquery-ui/jquery-ui.theme.css','jquery-ui/jquery-ui.css'],'public/css/all.css');
+    mix.scripts([jqueryPath,'jquery-ui/jquery-ui.js',bootstrapPath +'/javascripts/bootstrap.min.js'],'public/assets/js/all.js');
+    mix.styles(['all.css','jquery-ui/jquery-ui.theme.css','jquery-ui/jquery-ui.css','sbadmin/sb-admin.css','sbadmin/css/font-awesome.css'],'public/assets/css/all.css');
+    mix.styles(['404.css'],'public/assets/css/404.css');
+    mix.copy('./resources/assets/css/sbadmin/fonts','public/assets/fonts');
     //View - Css
-
-    mix.styles('fileupload/fileinput.min.css','public/css/fileupload/fileinput.min.css');
-
-
+    mix.styles('fileupload/fileinput.min.css','public/assets/css/fileupload/fileinput.min.css');
     //View - JavaScript
-    mix.scripts('licencas/licencas.js','public/js/licencas.js');
-    mix.scripts('ativos/ativos.js','public/js/ativos.js');
-    mix.scripts('fileupload/fileinput.js','public/js/fileinput/fileinput.js');
-    mix.scripts('fileupload/locales/pt-BR.js','public/js/fileinput/locales/pt-BR.js');
-
+    mix.scripts('licencas/licencas.js','public/assets/js/licencas.js');
+    mix.scripts('ativos/ativos.js','public/assets/js/ativos.js');
+    mix.scripts('fileupload/fileinput.js','public/assets/js/fileinput/fileinput.js');
+    mix.scripts('fileupload/locales/pt-BR.js','public/assets/js/fileinput/locales/pt-BR.js');
 
 });
 

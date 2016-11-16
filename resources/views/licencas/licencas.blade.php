@@ -13,7 +13,6 @@
     </style>
     <div class="row">
         <div class="col-md-12">
-
         </div>
     </div>
     <div class="row">
@@ -24,10 +23,14 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Empresa</label>
-                                <select type="text" name="empresa" id="empresa" class="form-control">
+                                <select type="text" name="empresa" id="empresa" class="form-control" value="3">
                                     <option value="0"></option>
                                     @foreach($empresas as $empresa)
-                                        <option value="{{$empresa->id}}">{{$empresa->name}}</option>
+                                        @if($empresa->id== request('empresa'))
+                                            <option value="{{$empresa->id}}" selected>{{$empresa->name}}</option>
+                                            @else
+                                            <option value="{{$empresa->id}}">{{$empresa->name}}</option>
+                                         @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -35,20 +38,28 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Produto</label>
-                                <select type="text" name="produto" id="produto" class="form-control">
+                                <select type="text" name="produto" id="produto" class="form-control" value="{{request('produto')}}">
+                                    <option value="0"></option>
+                                    @forelse($produtos as $produto)
+                                        @if($produto->id==request('produto'))
+                                            <option value="{{$produto->id}}" selected>{{$produto->model}}</option>
+                                        @else
+                                            <option value="{{$produto->id}}">{{$produto->model}}</option>
+                                        @endif
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Chave</label>
-                                <input type="text" name="chave" class="form-control">
+                                <input type="text" name="chave" class="form-control" value="{{request('chave')}}">
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Data vencimento</label>
-                                <input type="text" name="datavencimento" class="form-control data-picker">
+                                <input type="text" name="datavencimento" class="form-control data-picker" value="{{request('datavencimento')}}">
                             </div>
                         </div>
 
@@ -193,11 +204,8 @@
         </div><!-- /.modal-dialog -->
         <div id="idkey" style="display: none"></div>
     </div><!-- /.modal -->
-    <script src="{{asset('js/jquery.js')}}"></script>
-    <script src="{{asset('js/licencas.js')}}"></script>
+    <script src="{{asset('assets/js/licencas.js')}}"></script>
     <script>
-
-
         $(document).ready(function () {
             $.ajaxSetup({
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}

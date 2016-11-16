@@ -12,8 +12,8 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
-    <link href="{{asset('css/app.css')}}" rel="stylesheet">
-    <link href="{{asset('css/all.css')}}" rel="stylesheet">
+    <link href="{{asset('assets/css/app.css')}}" rel="stylesheet">
+    <link href="{{asset('assets/css/all.css')}}" rel="stylesheet">
 
     <!-- Scripts -->
     <script>
@@ -21,18 +21,15 @@
                 'csrfToken' => csrf_token(),
         ]); ?>
     </script>
-
-    <!-- Bootstrap Core CSS -->
-    {{--<link href="/css/bootstrap.min.css" rel="stylesheet">--}}
-
     <!-- Custom CSS -->
-    <link href="/css/sb-admin.css" rel="stylesheet">
+    {{--<link href="/css/sb-admin.css" rel="stylesheet">--}}
 
-    <!-- Morris Charts CSS -->
-    {{--<link href="/css/plugins/morris.css" rel="stylesheet">--}}
+    <!-- Library -->
+    {{--<script src="{{asset('assets/js/app.js')}}"></script>--}}
+    <script src="{{asset('assets/js/all.js ')}}"></script>
 
     <!-- Custom Fonts -->
-    <link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    {{--<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">--}}
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -157,12 +154,9 @@
 </div>
 <!-- /#wrapper -->
 
-<!-- jQuery -->
-<script src="{{asset('js/app.js')}}"></script>
-<script src="{{asset('js/all.js ')}}"></script>
 
 <div class="div-load div-load-show div-load-hidden">
-    <img src="{{asset("img/load/gears.gif")}}">
+    <img src="{{asset("assets/img/load/gears.gif")}}">
     <h1>Carregando</h1>
 </div>
 

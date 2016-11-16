@@ -293,7 +293,6 @@ function ErroConnect(Error) {
         location.reload();
     }
 }
-
 function InsertState(url, data, callback) {
     $.ajax({
         url: url,

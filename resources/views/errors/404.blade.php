@@ -3,8 +3,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>{{ config('app.name', 'Laravel') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/app.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{asset('css/404.css')}}"/>
+    <link href="{{asset('assets/css/app.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{asset('assets/css/404.css')}}"/>
 
 </head>
 <body>

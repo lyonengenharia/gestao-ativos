@@ -1,11 +1,9 @@
 @extends('layouts.painel')
 
 @section('content')
-
-    <link href="{{asset('css/fileupload/fileinput.min.css')}}" rel="stylesheet">
-    <script src="{{asset('js/jquery.js')}}"></script>
-    <script src="{{asset('js/fileinput/fileinput.js')}}"></script>
-    <script src="{{asset('js/fileinput/locales/pt-BR.js')}}"></script>
+    <link href="{{asset('assets/css/fileupload/fileinput.min.css')}}" rel="stylesheet">
+    <script src="{{asset('assets/js/fileinput/fileinput.js')}}"></script>
+    <script src="{{asset('assets/js/fileinput/locales/pt-BR.js')}}"></script>
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <table class="table table-responsive">

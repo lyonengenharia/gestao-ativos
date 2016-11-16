@@ -15,6 +15,7 @@ class LicencasController extends Controller
     {
         $empresa = $request->get('empresa');
         $produto = $request->get('produto');
+        $produtos = \App\Produto::where('empresa_id','=',$empresa)->get();
         $chave = $request->get('chave');
         $vencimento= $request->get('datavencimento');
         $licencas = DB::table('keys')
@@ -40,7 +41,8 @@ class LicencasController extends Controller
             "page" => "Licenças",
             "explanation" => " Listagem de todas as licenças de software",
             "licencas" => $licencas->paginate(15),
-            "empresas"=>\App\Empresa::get()]);
+            "empresas"=>\App\Empresa::get(),
+            "produtos"=>$produtos]);
     }
 
     public function empresa()

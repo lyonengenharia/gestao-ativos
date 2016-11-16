@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 
+use Carbon\Carbon;
 use App\Http\Requests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use phpDocumentor\Reflection\Types\Null_;
 
 
 class Import extends Controller
@@ -34,7 +37,6 @@ class Import extends Controller
             ]
         );
     }
-
     public function Import(Request $request)
     {
         $files = $request->file('file');
@@ -54,7 +56,6 @@ class Import extends Controller
             return json_encode('Upload realizado com sucesso');
         }
     }
-
     /**
      * @param Request $request
      * @return string3
@@ -64,29 +65,46 @@ class Import extends Controller
         if (Storage::exists('import/data/' . $request->get('data'))) {
             $lines = file(storage_path('app/import/data/') . $request->get('data'));
             $PositionsFile = $this->LoadHeadCVS($this->SliptLine($lines[0]));
-            $PatrimonyPosition = null;
-            //dd($PositionsFile);
+            $PatrimonyPosition = $this->FindCellPosition($PositionsFile, 'pat');
+            $UserPosition = $this->FindCellPosition($PositionsFile, 'usu');
             foreach ($lines as $Keys => $line):
                 if ($Keys == 0) {
                     continue;
                 }
                 $row = $this->SliptLine($line);
-                //Verify where is location at cell patrimony
-                $PatrimonyPosition = $this->FindCellPosition($PositionsFile,'pat');
-                $PatrimonyInformation = $this->CkeckPatrimony($row[$PatrimonyPosition->pos]);
-                //echo $this->getLCS("NÃO TEM PATRIMÔNIO","GT");
-
-
-                if(preg_match('/^([a-zA-Z]+)?.([a-zA-Z]+.)?([0-9]+.?[0-9]+)/',$row[$PatrimonyPosition->pos],$match)){
-                    echo $row[$PatrimonyPosition->pos] . " - " .$match[1]."--" . $match[2]."---" . $match[3]."<br>";
-                }else{
-                    echo $row[$PatrimonyPosition->pos] . " -  Não localizado<br>";
+                $PatrimonyInformation = null;
+                $UserInformation = $this->CheckUser($row[$UserPosition->pos]);
+                /***
+                 * Match 1 Company
+                 * Match 2 Item
+                 * Match 3 Patrimony
+                 *
+                 */
+                if (preg_match('/^([a-zA-Z]+)?.([a-zA-Z]+.)?([0-9]+.?[0-9]+)/', $row[$PatrimonyPosition->pos], $match)) {
+                    $PatrimonyInformation = $this->CkeckPatrimony($match[1], $match[2], $match[3]);
                 }
+                $this->Connectkeys($row, $PositionsFile,$PatrimonyInformation);
+                $this->ConnectUsers($UserInformation,$PatrimonyInformation);
             endforeach;
         }
-        return 'não existe';
+        return 'Arquivo carregado';
     }
-
+    private function ConnectUsers($user,$PatrimonyInformation){
+        if(!empty($user) &&!empty($PatrimonyInformation)){
+            //print_r($user);
+            $Connect = new \App\Connect();
+            $Connect->E670BEM_CODBEM = $PatrimonyInformation[0]->CODBEM;
+            $Connect->E070EMP_CODEMP = $PatrimonyInformation[0]->CODEMP;
+            $Connect->R034FUN_NUMEMP = $user->NUMEMP;
+            $Connect->R034FUN_TIPCOL = $user->TIPCOL;
+            $Connect->R034FUN_NUMCAD = $user->id;
+            $Connect->obs_out = 'Inserido automaticamente';
+            $Connect->data_in = Carbon::now();
+            $Connect->save();
+            return $Connect;
+        }
+        return null;
+    }
     public function Delete(Request $request)
     {
         if (Storage::exists('import/data/' . $request->get('data'))) {
@@ -106,7 +124,7 @@ class Import extends Controller
     }
 
     /**
-     * Load the positions of cvs
+     * Load the positions of cvs,check if exist company and product
      * @param $FirstLine
      * @return array
      */
@@ -147,6 +165,7 @@ class Import extends Controller
         }
         return $list;
     }
+
     /**
      * This method uses the algorithm Longest common substring
      * font:https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring#PHP
@@ -229,19 +248,219 @@ class Import extends Controller
             return $Produto;
         }
     }
-    private function CkeckPatrimony($Patrimony){
-        $company = "";
-        if($this->getLCS($Patrimony,"LYON")>=51 || $this->getLCS($Patrimony,"Lyon")>=51){
-            $company = 1;
-        }elseif ($this->getLCS($Patrimony,"GT")>=51){
-            $company = 2;
+
+    private function CkeckPatrimony($Company, $Item = null, $Patrimony)
+    {
+        $company = null;
+        $patrimony = null;
+        if (strlen($Patrimony) < 6) {
+            $Patrimony = str_pad($Patrimony, 6, "0", STR_PAD_LEFT);
         }
-        return $company;
+        if ($this->getLCS($Company, "LYON") >= 51 || $this->getLCS($Company, "Lyon") >= 51) {
+            $company = 1;
+        } elseif ($this->getLCS($Company, "GT") >= 51) {
+            $company = 3;
+        }
+        if (empty($Item)) {
+
+            $patrimony = "COMP-" . $Patrimony;
+
+        } else {
+            $patrimony = $Item . "" . $Patrimony;
+        }
+        $retorno = [];
+        $query = DB::connection('sapiens')->table("E670BEM")
+            ->select([
+                'E670BEM.CODBEM',
+                'E670LOC.CODEMP',
+                'E670LOC.CODBEM',
+                'E670LOC.DATLOC',
+                'E670LOC.SEQLOC',
+                'E670LOC.CTARED',
+                'E670BEM.DATAQI',
+                'E044CCU.CODEMP',
+                'E044CCU.CODCCU',
+                'E044CCU.DESCCU',
+                'E670BEM.DESBEM',
+                'E670LOC.CODCCU',
+                'E670BEM.SITPAT',
+                'E670BEM.CODEMP',
+                'E070EMP.NOMEMP',
+                'E674ESP.DESESP',
+                'E674ESP.ABRESP'
+            ])
+            ->join('E670LOC', function ($join) {
+                $join->on('E670LOC.CODEMP', '=', 'E670BEM.CODEMP');
+
+            })
+            ->Join('E670DRA', function ($join) {
+                $join->on('E670DRA.CODEMP', '=', 'E670LOC.CODEMP');
+            })
+            ->join('E044CCU', function ($join) {
+                $join->on('E044CCU.CODEMP', '=', 'E670DRA.CODEMP');
+            })
+            ->join('E070EMP', function ($join) {
+                $join->on('E070EMP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            ->join('E674ESP', function ($join) {
+                $join->on('E674ESP.CODESP', '=', 'E670BEM.CODESP')
+                    ->whereColumn('E674ESP.CODEMP', '=', 'E670BEM.CODEMP');
+            })
+            ->whereColumn('E670LOC.CODEMP', '=', 'E670BEM.CODEMP')
+            ->whereColumn('E670LOC.CODBEM', '=', 'E670BEM.CODBEM')
+            ->whereColumn('E670DRA.CODEMP', '=', 'E670LOC.CODEMP')
+            ->whereColumn('E670DRA.CODBEM', '=', 'E670LOC.CODBEM')
+            ->whereColumn('E670DRA.DATLOC', '=', 'E670LOC.DATLOC')
+            ->whereColumn('E670DRA.SEQLOC', '=', 'E670LOC.SEQLOC')
+            ->whereColumn('E044CCU.CODEMP', '=', 'E670DRA.CODEMP')
+            ->whereColumn('E044CCU.CODCCU', '=', 'E670DRA.CODCCU')
+            ->where('E670LOC.ULTREG', '=', 'S')
+            ->where('E670LOC.SITLOC', '=', 'A')
+            ->where('E670BEM.CODBEM', 'like', "$patrimony%")
+            ->where('E670LOC.CODEMP', '=', $company)
+            ->orderBy('E670BEM.CODEMP')
+            ->orderBy('E670DRA.CODCCU')
+            ->orderBy('E670BEM.CODBEM')
+            ->limit(10)
+            ->get();
+        foreach ($query as $row) {
+            $assoc = \App\Connect::where('data_out', '=', null)
+                ->where('E670BEM_CODBEM', '=', $row->CODBEM)
+                ->where('E070EMP_CODEMP', '=', $row->CODEMP);
+            $row->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
+            $row->DESBEM = iconv("ISO-8859-1", "UTF-8", $row->DESBEM);
+            $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
+            $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
+            $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
+            $data = new Carbon($row->DATAQI);
+            $row->DATAQI = $data->format('d/m/Y');
+            $row->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
+            $row->ASSOC = $assoc->count();
+            if ($row->ASSOC) {
+                $assoc = $assoc->get();
+                $row->connect = DB::connection('vetorh')->table('R034FUN')
+                    ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+                    ->join('R010SIT', function ($inner) {
+                        $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
+                    })
+                    ->where('NUMEMP', '=', $assoc[0]->R034FUN_NUMEMP)
+                    ->where('TIPCOL', '=', $assoc[0]->R034FUN_TIPCOL)
+                    ->where('NUMCAD', '=', $assoc[0]->R034FUN_NUMCAD)
+                    ->get();
+            } else {
+                $row->connect = null;
+            }
+            $row->state = \App\Complement::
+            select(['states.id', 'states.description', 'E070EMP_CODEMP', 'E670BEM_CODBEM', 'complements.created_at', 'complements.description as desc', 'states.state'])
+                ->join('states', function ($join) {
+                    $join->on('state_id', '=', 'states.id');
+                })
+                ->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
+            $row->keys = \App\BensKeys::select(["benskeys.id",
+                "key_id", "benskeys.E670BEM_CODBEM",
+                "E070EMP_CODEMP", "keys.id as keyid", "keys.key",
+                "produtos.id as Proid", "produtos.model",
+                "empresas.id as Empid", "empresas.name",
+                "keys.quantity", "keys.in_use", "maturity_date"
+            ])->join('keys', function ($inner) {
+                $inner->on('keys.id', '=', 'benskeys.key_id');
+            })->join('produtos', function ($inner) {
+                $inner->on('produtos.id', '=', 'keys.produto_id');
+            })->join('empresas', function ($inner) {
+                $inner->on('empresas.id', '=', 'produtos.empresa_id');
+            })->where('E670BEM_CODBEM', '=', $row->CODBEM)
+                ->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
+            array_push($retorno, $row);
+        }
+        return $retorno;
+    }
+
+    private function CheckUser($User)
+    {
+        $User = preg_replace(array("/(á|à|ã|â|ä)/", "/(Á|À|Ã|Â|Ä)/", "/(é|è|ê|ë)/", "/(É|È|Ê|Ë)/",
+                "/(í|ì|î|ï)/", "/(Í|Ì|Î|Ï)/", "/(ó|ò|õ|ô|ö)/", "/(Ó|Ò|Õ|Ô|Ö)/",
+                "/(ú|ù|û|ü)/", "/(Ú|Ù|Û|Ü)/", "/(ñ)/", "/(Ñ)/")
+            , explode(" ", "a A e E i I o O u U n N"), $User);
+        $Result = DB::connection('vetorh')->table('R034FUN')
+            ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+            ->join('R010SIT', function ($inner) {
+                $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
+            })
+            ->where('NOMFUN', 'like', "$User%")
+            ->limit(1);
+        if($Result->count()){
+            return $Result->get()[0];
+        }
+        return null;
+    }
+
+    private function Connectkeys($Row, $PositionsFile,$PatrimonyInformation)
+    {
+        foreach ($Row as $key => $row) {
+            if ($this->FindCellPositionForPosition($PositionsFile, $key)->whats == 'pat' || $this->FindCellPositionForPosition($PositionsFile, $key)->whats == 'usu' || $this->FindCellPositionForPosition($PositionsFile, $key)->whats == 'cdc') {
+                continue;
+            }
+            $chave = $this->CheckKey($row, $this->FindCellPositionForPosition($PositionsFile, $key)->value[1], $this->FindCellPositionForPosition($PositionsFile, $key)->value[0]);
+            if(!empty($chave) && !empty($PatrimonyInformation)){
+                $BensKey = new \App\BensKeys();
+                $BensKey->key_id = $chave->id;
+                $BensKey->E670BEM_CODBEM = $PatrimonyInformation[0]->CODBEM;
+                $BensKey->E070EMP_CODEMP = $PatrimonyInformation[0]->CODEMP;
+                $chave->in_use +=1;
+                $chave->save();
+                $BensKey->save();
+            }
+
+        }
 
     }
-    private function FindCellPosition($Positions,$Key){
-        foreach ($Positions as $position){
-            return $position->whats = $Key?$position:null;
+
+    private function CheckKey($key,$Product,$Company)
+    {
+        $key = trim($key);
+        if (empty($key)){
+            return null;
         }
+        $result = \App\Key::select(['keys.key'])->where('keys.key', '=', $key)
+            ->join('Produtos', function ($inner) use ($Product) {
+                $inner->where('Produtos.id', '=', $Product->id);
+            })
+            ->join('Empresas', function ($inner) {
+                $inner->whereColumn('Empresas.id', '=', 'Produtos.empresa_id');
+            })
+            ->where('Empresas.id', '=', $Company->id);
+        $VerifiyKey =  \App\Key::where('keys.key', '=',$key);
+        if($result->count() && $VerifiyKey->count()){
+            $result = $result->get();
+            $Newkey = \App\Key::find($result[0]->id);
+            return $Newkey;
+        }else{
+            $Newkey = new \App\Key();
+            $Newkey->key = $key;
+            $Newkey->description = $key;
+            $Newkey->produto_id = $Product->id;
+            $Newkey->save();
+            return $Newkey;
+        }
+    }
+
+    private function FindCellPosition($Positions, $Key)
+    {
+        foreach ($Positions as $position) {
+            if ($position->whats == $Key) {
+                return $position;
+            }
+        }
+        return null;
+    }
+
+    private function FindCellPositionForPosition($Positions, $Position)
+    {
+        foreach ($Positions as $position) {
+            if ($position->pos == $Position) {
+                return $position;
+            }
+        }
+        return null;
     }
 }
