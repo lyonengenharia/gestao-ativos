@@ -27,8 +27,8 @@
                                 </button>
                                 <button class="btn btn-warning btn-xs process-file"><span
                                             class="glyphicon glyphicon-refresh"></span></button>
-                                <button class="btn btn-info btn-xs"><span class="glyphicon glyphicon-list-alt"></span>
-                                </button>
+                                <a href="{{Storage::url(str_replace('import/data/','',$file).'.log')}}" class="btn btn-info btn-xs"><span class="glyphicon glyphicon-list-alt"></span>
+                                </a>
                             </td>
                         </tr>
                     @endif

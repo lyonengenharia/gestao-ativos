@@ -77,18 +77,8 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 
 Route::get('/teste', function () {
 
-    echo "<p>" . auth()->user()->name . "</p>";
-    echo "<h1>Permissões</h1>";
-    foreach (auth()->user()->roles as $role) {
-        echo $role->name . " -> ";
-        foreach ($role->permissions as $permission) {
-            echo $permission->name . ",";
-        }
-        echo "<hr>";
-    }
-
+    dispatch(new \App\Jobs\ImportData('Posso Mudar'));
 });
-
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
     $Connect = new \App\Connect();
