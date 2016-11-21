@@ -9,9 +9,12 @@
 namespace App\Common;
 
 
+use App\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use \App\Facades\Logging;
 
@@ -19,8 +22,16 @@ use \App\Facades\Logging;
 
 class ProcessFile
 {
-    public function Process($File)
+    public function Process($File,User $user)
     {
+        $Data = new \App\Pojo\Message();
+        $Data->setTitle("Processamento de Dados");
+        $Data->setSubTitle("Status de processamento de arquivos");
+        $Data->setBody("Prezado(a) ".$user->name." <p>Informamos que a sua pedido para processar o arquivo ".$File. " já foi iniciado.</p>");
+        $message = new \App\Mail\Information($Data);
+        $message->to($user->email);
+        $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
+        Mail::send($message);
         Logging::CreateFile($File);
         Logging::PreEnd($File, "Processando o arquivo" . $File);
         Logging::AppEnd($File, "Iniciando:" . Carbon::now());
@@ -56,7 +67,15 @@ class ProcessFile
             endforeach;
         }
         Logging::AppEnd($File, "Finalizando:" . Carbon::now());
-        return 'Arquivo carregado';
+        Log::info($user->email);
+        $Data = new \App\Pojo\Message();
+        $Data->setTitle("Processamento de Dados");
+        $Data->setSubTitle("Status de processamento de arquivos");
+        $Data->setBody("Prezado(a) ".$user->name." <p>Informamos que a sua pedido para processar o arquivo ".$File. " já foi concluído, verificar por favor os logs.</p>");
+        $message = new \App\Mail\Information($Data);
+        $message->to($user->email);
+        $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
+        Mail::send($message);
     }
 
 
@@ -441,13 +460,13 @@ class ProcessFile
         }
 
         $result = \App\Key::select(['keys.key','keys.id'])->where('keys.key', '=', $key)
-            ->join('Produtos', function ($inner) use ($Product) {
-                $inner->where('Produtos.id', '=', $Product->id);
+            ->join('produtos', function ($inner) use ($Product) {
+                $inner->where('produtos.id', '=', $Product->id);
             })
-            ->join('Empresas', function ($inner) {
-                $inner->whereColumn('Empresas.id', '=', 'Produtos.empresa_id');
+            ->join('empresas', function ($inner) {
+                $inner->whereColumn('empresas.id', '=', 'produtos.empresa_id');
             })
-            ->where('Empresas.id', '=', $Company->id);
+            ->where('empresas.id', '=', $Company->id);
         $VerifiyKey = \App\Key::where('keys.key', '=', $key);
 
 

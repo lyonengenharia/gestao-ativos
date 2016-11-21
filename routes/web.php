@@ -10,6 +10,7 @@
 | to using a Closure or controller method. Build something great!
 |
 */
+use \Illuminate\Support\Facades\Mail;
 
 
 Route::get('/', function () {
@@ -51,33 +52,40 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::delete('/licencas/produto/delete', ['uses' => 'LicencasController@produtodelete'])->middleware('can:ativos');
 
     //Painel Controle
-    Route::get('/painel','PainelController@index')->middleware('can:ativos');
-    Route::get('/painel/usuarios','UserController@index')->middleware('can:ativos');
-    Route::get('/painel/usuarios/grupos','RolesController@index')->middleware('can:ativos');
-    Route::get('/painel/importacao/','Import@index')->middleware('can:ativos');
+    Route::get('/painel', 'PainelController@index')->middleware('can:ativos');
+    Route::get('/painel/usuarios', 'UserController@index')->middleware('can:ativos');
+    Route::get('/painel/usuarios/grupos', 'RolesController@index')->middleware('can:ativos');
+    Route::get('/painel/importacao/', 'Import@index')->middleware('can:ativos');
 
     //Usuários
-    Route::get('/usuario/{id}','UserController@edit')->middleware('can:ativos');
-    Route::post('/usuario/edit','UserController@update')->middleware('can:ativos');
+    Route::get('/usuario/{id}', 'UserController@edit')->middleware('can:ativos');
+    Route::post('/usuario/edit', 'UserController@update')->middleware('can:ativos');
 
     //Permissões de Segurança
-    Route::get('/permissoes','PermissionsController@index')->middleware('can:ativos');
-    Route::get('/permission/{id?}','PermissionsController@permission')->middleware('can:ativos');
-    Route::post('/permission/insert','PermissionsController@permissionInsert')->middleware('can:ativos');
-    Route::post('/permission/update','PermissionsController@permissionUpdate')->middleware('can:ativos');
+    Route::get('/permissoes', 'PermissionsController@index')->middleware('can:ativos');
+    Route::get('/permission/{id?}', 'PermissionsController@permission')->middleware('can:ativos');
+    Route::post('/permission/insert', 'PermissionsController@permissionInsert')->middleware('can:ativos');
+    Route::post('/permission/update', 'PermissionsController@permissionUpdate')->middleware('can:ativos');
 
 
     //Importação
-    Route::get('painel/importacao/dados','Import@Dados')->middleware('can:ativos');
-    Route::post('painel/importacao/import','Import@Import')->middleware('can:ativos');
-    Route::get('importacao/process','Import@Process')->middleware('can:ativos');
-    Route::delete('importacao/delete','Import@Delete')->middleware('can:ativos');
+    Route::get('painel/importacao/dados', 'Import@Dados')->middleware('can:ativos');
+    Route::post('painel/importacao/import', 'Import@Import')->middleware('can:ativos');
+    Route::get('importacao/process', 'Import@Process')->middleware('can:ativos');
+    Route::delete('importacao/delete', 'Import@Delete')->middleware('can:ativos');
 
 });
 
 Route::get('/teste', function () {
-
-    dispatch(new \App\Jobs\ImportData('Posso Mudar'));
+    $message = new \App\Mail\Information('Teste');
+    $message->to('wellington.fernandes@lyonengenharia.com.br');
+    $message->from('informatica@lyonegenharia.com.br');
+    Mail::send($message);
+    dd(Auth::user);
+    $Data = new \App\Pojo\Message();
+    $Data->setTitle("Teste Classe");
+    $Data->setSubTitle("Informação de sub titulo");
+    return View('mail.layout',['Data'=>$Data]);
 });
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
@@ -95,7 +103,7 @@ Route::get('/data/', function () {
 
 Route::get('/key/{id}', function ($id, \Illuminate\Http\Request $request) {
 
-    $checkKey = DB::table('Keys')->where('id','=',$id)->get();
+    $checkKey = DB::table('Keys')->where('id', '=', $id)->get();
     $existekey = DB::table('benskeys')
         ->select(
             [
@@ -109,7 +117,7 @@ Route::get('/key/{id}', function ($id, \Illuminate\Http\Request $request) {
         })->where('E670BEM_CODBEM', '=', 'COMP-000779.00')
         ->where('E070EMP_CODEMP', '=', 1);
     $licencasassocias = $existekey->get();
-    foreach ($checkKey as $row){
+    foreach ($checkKey as $row) {
 
 
     }

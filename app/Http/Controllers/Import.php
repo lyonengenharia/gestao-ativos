@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests;
 use App\Facades\Importer;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 
 class Import extends Controller
@@ -43,7 +43,9 @@ class Import extends Controller
     }
     public function Process(Request $request)
     {
-        dispatch(new \App\Jobs\ImportData($request->get('data')));
+        dispatch(new \App\Jobs\ImportData($request->get('data'),Auth::user()));
+
+        //Importer::Process($request->get('data'),Auth::user());
         return 'O Arquivo será processado em breve.';
     }
 

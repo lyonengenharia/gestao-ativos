@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Facades\Importer;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
@@ -22,9 +23,11 @@ class ImportData implements ShouldQueue
      * @return void
      */
     protected $request;
-    public function __construct($data)
+    protected $user;
+    public function __construct($data,User $user)
     {
         $this->request = $data;
+        $this->user = $user;
     }
     /**
      * Execute the job.
@@ -33,7 +36,7 @@ class ImportData implements ShouldQueue
      */
     public function handle()
     {
-        Importer::Process($this->request);
+        Importer::Process($this->request,$this->user);
     }
 
 }
