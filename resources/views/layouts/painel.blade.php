@@ -26,7 +26,9 @@
 
     <!-- Library -->
     {{--<script src="{{asset('assets/js/app.js')}}"></script>--}}
+    <script src="{{asset('assets/js/app.js ')}}"></script>
     <script src="{{asset('assets/js/all.js ')}}"></script>
+
 
     <!-- Custom Fonts -->
     {{--<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">--}}
@@ -159,7 +161,6 @@
     <img src="{{asset("assets/img/load/gears.gif")}}">
     <h1>Carregando</h1>
 </div>
-
 
 </body>
 

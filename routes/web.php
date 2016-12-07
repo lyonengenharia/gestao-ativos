@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::post('/ativos/associar/', 'AtivosController@Connect');
     Route::post('/ativos/dissociar/', 'AtivosController@Disconnect');
     Route::get('/ativos/state/', 'AtivosController@GetState');
+    Route::get('/ativos/historico/', 'AtivosController@history');
     Route::post('/ativos/state/', 'AtivosController@State');
 
     //Licences
@@ -76,17 +77,7 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 
 });
 
-Route::get('/teste', function () {
-    $message = new \App\Mail\Information('Teste');
-    $message->to('wellington.fernandes@lyonengenharia.com.br');
-    $message->from('informatica@lyonegenharia.com.br');
-    Mail::send($message);
-    dd(Auth::user);
-    $Data = new \App\Pojo\Message();
-    $Data->setTitle("Teste Classe");
-    $Data->setSubTitle("Informação de sub titulo");
-    return View('mail.layout',['Data'=>$Data]);
-});
+Route::get('/teste','UserController@vue');
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
     $Connect = new \App\Connect();

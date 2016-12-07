@@ -118,13 +118,9 @@ Route::get('licencas/associadas/{key}',function (Request $request,$key){
         $comp[0]->NOMEMP = iconv('windows-1252','utf-8', $comp[0]->NOMEMP);
         $comp[0]->ABRESP = iconv('windows-1252','utf-8', $comp[0]->ABRESP);
         $itens[$key]->iten = $comp;
-
-
     }
     return $itens;
 });
-
-
 Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
     $colaboradores = DB::connection('vetorh')->table('R034FUN')
         ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
@@ -161,10 +157,19 @@ Route::get('devolucao/{codbem}/{codbememp}',function ($codbem,$codbememp){
             $Colaborador[0]->DESSIT = iconv('windows-1252','utf-8',$Colaborador[0]->DESSIT);
             $VerificaEmprestimo[0]->colaborador = $Colaborador[0];
             return $VerificaEmprestimo;
-
         }
-
     }
     return $VerificaEmprestimo;
+});
+
+Route::get('costscenters/{search}',function($search){
+   $CostsCenters = DB::connection('sapiens')->table('E044CCU')->where('CODCCU','like',"$search%")->get();
+   foreach ($CostsCenters as $Key => $CostCenter){
+       $CostsCenters[$Key]->DesCcu = iconv('windows-1252','utf8',$CostCenter->DesCcu);
+       $CostsCenters[$Key]->AbrCcu = iconv('windows-1252','utf8',$CostCenter->AbrCcu);
+       $CostsCenters[$Key]->id = $CostsCenters[$Key]->CodCcu;
+       $CostsCenters[$Key]->value = $CostsCenters[$Key]->CodCcu . " - " . $CostsCenters[$Key]->DesCcu ;
+   }
+   return $CostsCenters;
 });
 

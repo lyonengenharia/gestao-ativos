@@ -58,8 +58,15 @@
                 url: url,
                 data: {data:data},
                 type: 'get',
+                dataType:'json',
                 success: function (request) {
-                    console.log(request);
+                    if(request.error==0){
+                        swal(
+                                'Solicitação realizada!',
+                                request.msg,
+                                'success'
+                        );
+                    }
                 }
             });
         }

@@ -1,32 +1,57 @@
-
 function handleData(data, textStatus, jqXHR) {
+
     $('#resultOfSearch').empty();
-    if (data.length > 0) {
-        $.each(data, function (i, item) {
+    if (data.data.length > 0) {
+        $.each(data.data, function (i, item) {
+            var Emprestimo = '';
             var connection = '';
             var state = '';
             var keys = '';
             var Assoc = '';
             var Empres = '';
-            if(item.connect != null){
-                connection = "<hr>"+
-                    "<p><b>Colaborador associado</b></p>"+
-                    "<p><b>Colaborador:</b>"+item.connect[0].value+" <b>Matrícula:</b>  "+item.connect[0].id+"  <b>Situação:</b> "+item.connect[0].DESSIT+"</p>";
+            if (item.connect != null) {
+                connection = "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>";
             }
-
+            var History = null;
+            if (item.history.length > 0) {
+                History = "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
+                $.each(item.history, function (i, his) {
+                    row = "<div class='panel panel-default'>" +
+                        "<div class='panel-heading' role='tab' id='headin" + his.id + "'>" +
+                        "<h4 class=\"panel-title\">" +
+                        "<a role='button' data-toggle='collapse'  href='#" + his.id + "' aria-expanded='true' aria-controls='" + his.id + "'>" +
+                        his.Employed.value +
+                        "</a>" +
+                        "</h4>" +
+                        "</div>" +
+                        "<div id='" + his.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + his.id + "'>" +
+                        "<div class=\"panel-body\">" +
+                        "<p>Funcionário: " + his.Employed.value + " Matrícula: " + his.Employed.id + "</p>" +
+                        "<p>Data associação: " + his.data_in + " Data dissociação:" + his.data_out + " </p>" +
+                        "<p>Observação de associação:" + his.obs_in + "</p>" +
+                        "<p>Observação de dissociação:" + his.obs_in + "</p>" +
+                        "</div>" +
+                        "</div>" +
+                        "</div>";
+                    History += row;
+                });
+                History += "</div>";
+            } else {
+                History = "<p>Sem histórico de associações.</p>";
+            }
+            connection += History;
             if (item.state.length == 0) {
                 state =
-                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
+                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>" +
                     "<p><b>Estado:</b>Sem definição</p>" +
                     "<p><b>Descrição:</b>Sem definição</p>";
             } else {
-                state  =
-                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>"+
+                state =
+                    "<button type=\"button\" class=\"close glyphicon glyphicon-pencil status-ben\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button>" +
                     "<p><b>Estado:</b>" + item.state[0].state + "</p>" +
-                    "<p><b>Descrição:</b>" + item.state[0].description + "</p>"+
+                    "<p><b>Descrição:</b>" + item.state[0].description + "</p>" +
                     "<p><b>Observação:</b>" + item.state[0].desc + "</p>";
             }
-
             if (item.keys.length == 0) {
                 keys =
                     "<p>Nenhuma licença associada</p>";
@@ -39,30 +64,59 @@ function handleData(data, textStatus, jqXHR) {
                     }
                     keys +=
                         "<div class='panel panel-default'>" +
-                            "<div class='panel-heading' role='tab' id='headin" + key.id + "'>" +
-                                "<h4 class=\"panel-title\">" +
-                                    "<a role='button' data-toggle='collapse'  href='#" + key.id + "' aria-expanded='true' aria-controls='" + key.id + "'>"
-                                        + key.name + "/" + key.model +
-                                    "</a>" +
-                                "</h4>" +
-                            "</div>" +
-                            "<div id='" + key.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + key.id + "'>" +
-                                "<div class=\"panel-body\">"
-                                    +"<span class='idkey' style='display: none' >" + key.keyid + "</span>" +
-                                    "<b>Chave:</b>" + key.key + "  - <b>QTD</b> :" + key.quantity + "/<b>Em uso: </b>" + key.in_use + "<b> - Vencimento: </b>" + vencimento
-                                    + " <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>" +
-                                "</div>" +
-                            "</div>" +
+                        "<div class='panel-heading' role='tab' id='headin" + key.id + "'>" +
+                        "<h4 class=\"panel-title\">" +
+                        "<a role='button' data-toggle='collapse'  href='#" + key.id + "' aria-expanded='true' aria-controls='" + key.id + "'>"
+                        + key.name + "/" + key.model +
+                        "</a>" +
+                        "</h4>" +
+                        "</div>" +
+                        "<div id='" + key.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + key.id + "'>" +
+                        "<div class=\"panel-body\">"
+                        + "<span class='idkey' style='display: none' >" + key.keyid + "</span>" +
+                        "<b>Chave:</b>" + key.key + "  - <b>QTD</b> :" + key.quantity + "/<b>Em uso: </b>" + key.in_use + "<b> - Vencimento: </b>" + vencimento
+                        + " <button class='btn btn-xs remove-key' title='Dissociar o item da licença.' ><span class='glyphicon glyphicon-resize-full'></span> </button>" +
+                        "</div>" +
+                        "</div>" +
                         "</div>";
                 });
-                keys +="</div>";
+                keys += "</div>";
+            }
+
+            if(item.HISTEMPRST.length == 0){
+                Emprestimo = "<p>Item não tem hístorico de emprestimo</p>";
+            }else{
+                Emprestimo = "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
+                $.each(item.HISTEMPRST, function (i,his) {
+                    console.log(his);
+                    Emprestimo += "<div class='panel panel-default'>" +
+                        "<div class='panel-heading' role='tab' id='headin" + his.id + "'>" +
+                        "<h4 class=\"panel-title\">" +
+                        "<a role='button' data-toggle='collapse'  href='#" + his.id + "' aria-expanded='true' aria-controls='headin" + his.id + "'>"
+                        + his.employed.NUMCAD + "/" + his.employed.NOMFUN +
+                        "</a>" +
+                        "</h4>" +
+                        "</div>" +
+                        "<div id='" + his.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + his.id + "'>" +
+                        "<div class=\"panel-body\">"+
+                            "<p>Data emprestimo: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
+                            "<p>Data data devolução: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
+                        "</div>" +
+                        "</div>" +
+                        "</div>";
+                });
+                Emprestimo += "</div>";
             }
 
             if (item.ASSOC) {
                 Assoc += "<button class=\"btn btn-danger dissociar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Desassociar" +
                     "</button>";
-            } else {
+            } else if(item.EMPRST == 1){
+                Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\" disabled>" +
+                    "<span class='glyphicon glyphicon-user'></span> Associar" +
+                    "</button>";
+            }else {
                 Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
@@ -82,48 +136,66 @@ function handleData(data, textStatus, jqXHR) {
                     "</button>";
 
             }
-
             var row =
                 "<div class=\"panel panel-default\">" +
-                    "<div class=\"panel-heading cod-bem\">" +
-                        item.CODBEM +
-                    "</div>" +
-                    "<div class='result-emp' style='display: none'>" +
-                        item.CODEMP +
-                    "</div>" +
-                    "<div class=\"panel-body\">" +
-                        "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
-                        "<p><b>Item:</b> " + item.DESBEM + " </p>" +
-                        "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
-                        "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
-                        "<hr>"
-                        +state
-                        +connection
-                        +"<hr>"
-                        +keys+
-                    "</div>"+
-                    "<div class='panel-footer'> " +
-                        "<div class=\"btn-group\">" +
-                            "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
-                                "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
-                            "</button>"+
-                            Assoc+
-                            Empres+
-                        "</div>"+
-                    "</div>"+
+                "<div class=\"panel-heading cod-bem\">" +
+                item.CODBEM +
+                "</div>" +
+                "<div class='result-emp' style='display: none'>" +
+                item.CODEMP +
+                "</div>" +
+                "<div class=\"panel-body\">" +
+                "<p><b>Descrição</b>"+
+                "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
+                "<p><b>Item:</b> " + item.DESBEM + " </p>" +
+                "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
+                "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
+                "<p><b>Centro Custo:</b> " + item.CODCCU + " - " + item.DESCCU + " </p>" +
+                "<hr>"
+                +"<p><b>Estado do bem</b>"
+                + state
+                +"<hr>"
+                +"<p><b>Associações</b>"
+                + connection
+                + "<hr>"
+                +"<p><b>Histórico de emprestimos</b>"
+                + Emprestimo
+                + "<hr>"
+                +"<p><b>Licenças associadas</b>"
+                + keys +
+                "</div>" +
+                "<div class='panel-footer'> " +
+                "<div class=\"btn-group\">" +
+                "<button class=\"btn btn-primary localizacoes\" type=\"button\">" +
+                "<span class='glyphicon glyphicon-map-marker'></span>Localizações" +
+                "</button>" +
+                Assoc +
+                Empres +
+                "</div>" +
+                "</div>" +
                 "</div>";
             $('#resultOfSearch').append(row);
 
         });
-    }else {
+        $("#buttonSearch").empty();
+        $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
+
+        Result = "<p>Total:" + data.total + " exibindo:" + data.per_page + "</p>";
+        $('.navegation').empty();
+        $('.navegation').append(Result);
+        $('.navegation').fadeIn();
+
+    } else {
+        $("#buttonSearch").empty();
+        $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
         var alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
             "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>" +
             "<strong>Atenção!</strong> Nenhum item encontrado!" +
             "</div>";
         $('#resultOfSearch').append(alert);
+        $('.navegation').fadeOut();
     }
-    $("#buttonSearch").empty();
-    $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
+
 }
 function historyLocations(data, textStatus, jqXHR) {
     $('#historicoLocalizacoes').empty();
@@ -156,16 +228,15 @@ function historyLocations(data, textStatus, jqXHR) {
             $('#historyFinancialList').append(row);
         }
     });
-
-
 }
 function Emprestimo(url, data) {
-    console.log(data);
+
     $.ajax({
         url: url,
         data: data,
         type: 'post',
         success: function (response) {
+            console.log(response);
             var alert = "";
             if (response.erro == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -193,8 +264,9 @@ function Devolucao(url, data) {
         url: url,
         type: 'post',
         data: data,
-        dataType: 'json',
+        //dataType: 'json',
         success: function (response) {
+            console.log(response);
             var alert = "";
             if (response.error == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -229,7 +301,7 @@ function DevolucaoDados(url, data) {
                 "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
                 "<p><b>Colaborador: </b>" + response[0].colaborador.value + "</p>" +
                 "<p><b>Situação do colaborador: </b>" + response[0].colaborador.DESSIT + "</p>" +
-                "<p><b>Obs saída: </b>" + (response[0].obs_saida == ""?"Sem observação":response[0].obs_saida) + "</p>" +
+                "<p><b>Obs saída: </b>" + (response[0].obs_saida == "" ? "Sem observação" : response[0].obs_saida) + "</p>" +
                 "</div></div>";
             $('#devolucao-form').before(linha);
         }
@@ -317,7 +389,7 @@ function InsertState(url, data, callback) {
         }
     }).fail(ErroConnect).always(callback);
 }
-function GetState(url, data,callback) {
+function GetState(url, data, callback) {
     $.ajax({
         url: url,
         type: 'get',
@@ -337,7 +409,7 @@ function GetState(url, data,callback) {
         }
     }).fail(ErroConnect).always(callback);
 }
-function RemoveKey(url,data,callback) {
+function RemoveKey(url, data, callback) {
     $.ajax({
         url: url,
         type: 'delete',
@@ -365,7 +437,8 @@ function RemoveKey(url,data,callback) {
             updatesearch(url, {pat: data.pat, emp: data.emp});
             $('#search').after(alert);
         }
-    }).fail(ErroConnect).always(callback);;
+    }).fail(ErroConnect).always(callback);
+    ;
 }
 function updatesearch(url, data) {
     $.ajax({
@@ -374,11 +447,54 @@ function updatesearch(url, data) {
         type: 'get',
         dataType: 'json'
     }).done(handleData)
-      .fail(ErroConnect);
+        .fail(ErroConnect);
 }
-function DateUsTODateBr(date) {
+function DateUsTODateBr(date,time) {
     var d = new Date(date);
-    return d.toLocaleDateString();
+    var hora = time==true?d.getHours()+":"+d.getMinutes():"";
+    return d.toLocaleDateString()+" "+hora ;
 
+}
+
+function CreateFilterPat(number) {
+
+    CheckFilter = $('#filter').find('#filter-pat');
+    if (CheckFilter.length >= 1) {
+        $('#filter #filter-pat').remove();
+    }
+    if (number != '') {
+        var row = "<div id=\"filter-pat\" class=\"alert alert-info\" role=\"alert\">" +
+            "<b>Patrimônio</b>: <a href=\"#\" class=\"alert-link\">" + number + "</a>" +
+            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">" +
+            "<span aria-hidden=\"true\">&times;</span>" +
+            "</button>" +
+            "<span id='filter-pat-num' style='display: none'>" + number + "</span>" +
+            "</div>";
+        $('#filter').append(row);
+    } else {
+        $('#filter #filter-pat').remove();
+    }
+}
+function PreLoad(from,atualaryURi) {
+    atualaryURi = atualaryURi.split('#');
+    if (atualaryURi.length > 1) {
+        CreateFilterPat(atualaryURi[1]);
+        data = {
+            qtd: $('#displayNumber').val(),
+            pat: atualaryURi[1],
+            ccu: $('#filter-costcenter-num').text(),
+            employed: {
+                usr: $('#filter-nameemployed-usr').text(),
+                emp: $('#filter-nameemployed-emp').text(),
+                tip: $('#filter-nameemployed-tip').text()
+            }
+        };
+        $.ajax({
+            url: from,
+            data: data,
+            type: 'get',
+            dataType: 'json'
+        }).done(handleData).fail(ErroConnect);
+    }
 }
 //# sourceMappingURL=ativos.js.map

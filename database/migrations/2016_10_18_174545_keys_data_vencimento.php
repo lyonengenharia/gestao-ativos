@@ -13,9 +13,9 @@ class KeysDataVencimento extends Migration
      */
     public function up()
     {
-        /*Schema::table('keys', function (Blueprint $table) {
+        Schema::table('keys', function (Blueprint $table) {
             $table->dateTime('maturity_date')->nullable();
-        });*/
+        });
     }
 
     /**

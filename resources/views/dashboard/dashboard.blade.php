@@ -88,7 +88,7 @@
                 </div>
                 <div class="panel-body">
                     @forelse($ultimosEmprestimos as $emprestimo)
-                        <a href="#" class="list-group-item">
+                        <a href="{{url('ativos/')."#".$emprestimo->E670BEM_CODBEM}}" class="list-group-item">
                             <i class="fa fa-fw fa-desktop"></i> {{$emprestimo->E670BEM_CODBEM}}
                             <i class="fa fa-fw fa-calendar"></i> {{$emprestimo->data_saida->format('d/m/Y H:i')}}
                         </a>
@@ -97,7 +97,6 @@
                             <i class="fa fa-fw fa-warning"></i> Não existem itens emprestados
                         </a>
                     @endforelse
-
                 </div>
             </div>
         </div>
@@ -108,7 +107,7 @@
                 </div>
                 <div class="panel-body">
                     @forelse($devolvidos as $devolvido)
-                        <a href="#" class="list-group-item">
+                        <a href="{{url('ativos/')."#".$devolvido->E670BEM_CODBEM}}" class="list-group-item">
                             <i class="fa fa-fw fa-desktop"></i> {{$devolvido->E670BEM_CODBEM}}
                             <i class="fa fa-fw fa-calendar"></i> {{$devolvido->data_saida->format('d/m/Y H:i')}}
                         </a>
@@ -176,3 +175,4 @@
         </div>
     </div>
 @endsection
+

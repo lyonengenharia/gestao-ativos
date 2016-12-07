@@ -62,7 +62,6 @@
                                                  document.getElementById('logout-form').submit();">
                                         Logout
                                     </a>
-
                                     <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
                                         {{ csrf_field() }}
                                     </form>
@@ -76,8 +75,8 @@
     </nav>
 
     @yield('content')
-
     <!-- Scripts -->
+    <script src="{{asset('assets/js/app.js ')}}"></script>
     <script src="{{asset('assets/js/all.js ')}}"></script>
 </body>
 </html>

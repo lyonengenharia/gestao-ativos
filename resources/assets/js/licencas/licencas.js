@@ -51,19 +51,42 @@ function ErroConnect(Error) {
         location.reload();
     }
 }
-function trataRetorno(data, pat, emp, key,url) {
+function trataRetorno(data, pat, emp, key, url) {
     if (data.erro == 2) {
-        if (confirm(data.msg)) {
-            $.ajax({
-                url: url,
-                type: 'post',
-                data: {pat: pat, emp: emp, key: key, conf: 1},
-                dataType: 'json'
-            }).done(trataRetorno);
-        }
-    } else {
-        alert(data.msg);
-        location.reload();
+
+        swal({
+            title: 'Você tem certeza?',
+            text: data.msg,
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, faça isso!',
+            cancelButtonText: 'Não.', preConfirm: function () {
+                return new Promise(function (resolve) {
+                    resolve([
+                        $.ajax({
+                            url: url,
+                            type: 'post',
+                            data: {pat: pat, emp: emp, key: key, conf: 1},
+                            dataType: 'json'
+                        }).done(trataRetorno)
+                    ]);
+                });
+            },
+            allowOutsideClick: false
+        });
+    }
+    else {
+        swal({
+            type: 'success',
+            title: 'Sucesso!',
+            html: data.msg,
+            showCloseButton: true,
+            onClose: function () {
+                location.reload();
+            }
+        });
     }
 }
 function Products(data) {

@@ -13,6 +13,10 @@
         .display-emprestismo {
             display: none;
         }
+
+        .navegation {
+            display: none;
+        }
     </style>
     <div class="row">
         <div class="col-md-12">
@@ -20,18 +24,96 @@
                 <div class="panel-heading">Busca</div>
                 <div class="panel-body">
                     <form id="search-iten">
-                        <div class="form-group">
-                            <label>Patrimônio</label>
-                            <input type="text" id="patrimonio" class="form-control" required autocomplete="off">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-4 col-lg-4">
+                                    <div class="form-group">
+                                        <label>Patrimônio</label>
+                                        <div class="input-group">
+                                            <input type="text" id="patrimonio" class="form-control"
+                                                   autocomplete="off">
+                                            <div class="input-group-btn">
+                                                <button type="button" id='patrimonio-button' class="btn btn-default"
+                                                        aria-label="Help"><span class="glyphicon glyphicon-plus"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-lg-8">
+                                    <div class="form-group">
+                                        <label>Centro Custo</label>
+                                        <input type="text" id="costcenter" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-lg-4">
+                                    <label for="typeemployed">Tipo:</label>
+                                    <select class="form-control" name='typeemployed' id="typeemployed">
+                                        <option value="1">Empregado</option>
+                                        <option value="2">Terceiro</option>
+                                        <option value="3">Parceiro</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+                                    <label for="company">Empresa:</label>
+                                    <select class="form-control" name='company' id="company">
+                                        @foreach($empresas as $empresa)
+                                            <option value="{{$empresa->numemp}}">{{$empresa->apeemp}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-4 col-lg-4">
+                                    <div class="form-group">
+                                        <label for="nameemployed">Colaborador(a):</label>
+                                        <input name="nameemployed" id="nameemployed" class="form-control nameemployed"
+                                               autocomplete="off"
+                                               placeholder="Digite um nome para pesquisar"/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-info" id="buttonSearch"><span
-                                        class="glyphicon glyphicon-search"></span> Pesquisar
-                            </button>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Filtro</label>
+                                <div class="panel panel-default">
+                                    <div class="panel-body" id="filter">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2 col-lg-2">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-info" id="buttonSearch"><span
+                                                    class="glyphicon glyphicon-search"></span> Pesquisar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon">Listagem</div>
+                                            <input type="number" class="form-control" id="displayNumber" max="50" min="1"
+                                                   placeholder="Listagem" value="15">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
                     </form>
                 </div>
+                <div class="panel-footer navegation">
+
+                </div>
             </div>
+
         </div>
     </div>
     <div class="row">
@@ -43,7 +125,6 @@
                                 aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="panel-body" id="historicoLocalizacoes">
-
                 </div>
             </div>
         </div>
@@ -112,6 +193,7 @@
                         </div>
                     </form>
                 </div>
+
             </div>
         </div>
         <div class="devolucao-option display-emprestismo col-md-8">
@@ -301,11 +383,13 @@
     </div>
 
     <script>
+
         $(document).ready(function () {
             var URLUPDATE = '{{url('ativos/search')}}';
             $.ajaxSetup({
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
+            PreLoad(URLUPDATE,window.location.href);
             $('.campo-data').datepicker({
                 closeText: 'Fechar',
                 prevText: '&lt;Anterior',
@@ -386,15 +470,27 @@
                 obsemp = $('#obsemp').val();
                 dataempdev = $('#dataempdev').val();
                 if ($('#SITAFA').text() == "7") {
-                    alert('Favor verificar a situação do colaborador!');
+                    swal(
+                            'Oops...',
+                            'Favor verificar a situação do colaborador!',
+                            'error'
+                    );
                     erro++;
                 }
                 if (numcad == '') {
-                    alert('Favor pesquisar um colaborador!');
+                    swal(
+                            'Oops...',
+                            'Favor pesquisar um colaborador!',
+                            'error'
+                    );
                     erro++;
                 }
                 if (dataempdev == '') {
-                    alert('Favor preencher o campo de data!');
+                    swal(
+                            'Oops...',
+                            'Favor preencher o campo de data!',
+                            'error'
+                    );
                     erro++;
                 }
 
@@ -424,22 +520,29 @@
                 if ($('#resultOfSearch').hasClass('col-md-4')) {
                     $('#resultOfSearch').toggleClass('col-md-12');
                     $('#resultOfSearch').removeClass('col-md-4');
-
-
                 }
-
                 if (!$('.emprestimo-option').hasClass('display-emprestismo')) {
                     $('.emprestimo-option').addClass('display-emprestismo')
                 }
                 $("#buttonSearch").empty();
                 $("#buttonSearch").append("Carregando <img src=\"{{asset("img/load/microload.gif")}}\">");
+
+                data = {
+                    qtd: $('#displayNumber').val(),
+                    pat: $('#filter-pat-num').text(),
+                    ccu: $('#filter-costcenter-num').text(),
+                    employed: {
+                        usr: $('#filter-nameemployed-usr').text(),
+                        emp: $('#filter-nameemployed-emp').text(),
+                        tip: $('#filter-nameemployed-tip').text()
+                    }
+                };
                 $.ajax({
                     url: '{{url('ativos/search')}}',
-                    data: {pat: $('#patrimonio').val()},
+                    data: data,
                     type: 'get',
                     dataType: 'json'
                 }).done(handleData).fail(ErroConnect);
-
             });
             $(document).on('click', '.localizacoes', function () {
                 $(".div-load").toggleClass('div-load-hidden');
@@ -561,15 +664,27 @@
                 dataempdev = $('#dataassoc').val();
                 gerarTermo = $('#gerarTermo').is(':checked');
                 if ($('#SITAFA').text() == "7") {
-                    alert('Favor verificar a situação do colaborador!');
+                    swal(
+                            'Oops...',
+                            'Favor verificar a situação do colaborador!',
+                            'error'
+                    );
                     erro++;
                 }
                 if (numcad == '') {
-                    alert('Favor pesquisar um colaborador!');
+                    swal(
+                            'Oops...',
+                            'Favor pesquisar um colaborador!',
+                            'error'
+                    );
                     erro++;
                 }
                 if (dataempdev == '') {
-                    alert('Favor preencher o campo de data!');
+                    swal(
+                            'Oops...',
+                            'Favor preencher o campo de data!',
+                            'error'
+                    );
                     erro++;
                 }
 
@@ -615,7 +730,7 @@
             });
             $(document).on('click', '.status-ben', function () {
                 $("#form-state")[0].reset();
-                var panel = $(this).parent().parent();
+                var panel = $(this).parent().parent().parent();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
@@ -664,6 +779,86 @@
                     key: key
                 }, $('#dissoc-key').modal('hide'));
             });
+
+            $("#costcenter").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '{{url('api/costscenters/')}}' + '/' + $("#costcenter").val(),
+                        dataType: "json",
+                        type: 'get',
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                focus: function (event, ui) {
+                    $('this').val(ui.item.CODCCU);
+                    return false;
+                },
+                select: function (event, ui) {
+                    CheckFilter = $('#filter').find('#filter-costcenter');
+                    if (CheckFilter.length >= 1) {
+                        $('#filter #filter-costcenter').remove();
+                    }
+                    var row = "<div id=\"filter-costcenter\" class=\"alert alert-info\" role=\"alert\">" +
+                            "<b>Centro de custo:</b>: <a href=\"#\" class=\"alert-link\">" + ui.item.CodCcu + "</a>" +
+                            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">" +
+                            "<span aria-hidden=\"true\">&times;</span>" +
+                            "</button>" +
+                            "<span id='filter-costcenter-num' style='display: none'>" + ui.item.CodCcu + "</span>" +
+                            "</div>";
+                    $('#filter').append(row);
+
+                }
+            });
+            $("#nameemployed").autocomplete({
+                source: function (request, response) {
+                    var nome = $("#nameemployed").val();
+                    var empresa = $('#company :selected').val();
+                    var tipcol = $('#typeemployed :selected').val();
+                    $.ajax({
+                        url: '{{url('api/colaboradores/')}}' + '/' + nome + '/' + tipcol + '/' + empresa,
+                        dataType: "json",
+                        type: 'get',
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                focus: function (event, ui) {
+                    $("#nameemployed").val(ui.item.NOMFUN);
+                    return false;
+                },
+                select: function (event, ui) {
+
+                    $('#filter-nameemployed').fadeOut();
+                    //console.log(CheckFilter);
+                    /*if (CheckFilter.length >= 1) {
+                        $('#filter #nameemployed').remove();
+                    }*/
+                    var row = "<div id=\"filter-nameemployed\" class=\"alert alert-info\" role=\"alert\">" +
+                            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">" +
+                            "<span aria-hidden=\"true\">&times;</span>" +
+                            "</button>" +
+                            "<p><b>Colaborador(a):</b>: " + ui.item.value + "</a></p>" +
+                            "<p><b>Situação:</b>: " + ui.item.DESSIT + "</p>" +
+                            "<p><b>Empresa:</b>: " + $('#company :selected').text() + "</p>" +
+                            "<p><b>Tipo:</b>:" + $('#typeemployed :selected').text() + "</p>" +
+                            "<span id='filter-nameemployed-usr' style='display: none'>" + ui.item.id + "</span>" +
+                            "<span id='filter-nameemployed-emp' style='display: none'>" + $('#company :selected').val() + "</span>" +
+                            "<span id='filter-nameemployed-tip' style='display: none'>" + $('#typeemployed :selected').val() + "</span>" +
+                            "</div>";
+                    $('#filter').append(row);
+                }
+            });
+            $('#patrimonio').blur(function () {
+                CreateFilterPat($('#patrimonio').val());
+            });
+            $('#patrimonio-button').click(function () {
+                CreateFilterPat($('#patrimonio').val());
+            });
+
+
         });
     </script>
     <script src="{{asset('assets/js/ativos.js')}}"></script>

@@ -46,7 +46,7 @@ class Import extends Controller
         dispatch(new \App\Jobs\ImportData($request->get('data'),Auth::user()));
 
         //Importer::Process($request->get('data'),Auth::user());
-        return 'O Arquivo será processado em breve.';
+        return response()->json(['error'=>0,'msg'=>'O Arquivo será processado em breve.']);
     }
 
     public function Delete(Request $request)

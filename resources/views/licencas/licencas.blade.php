@@ -28,9 +28,9 @@
                                     @foreach($empresas as $empresa)
                                         @if($empresa->id== request('empresa'))
                                             <option value="{{$empresa->id}}" selected>{{$empresa->name}}</option>
-                                            @else
+                                        @else
                                             <option value="{{$empresa->id}}">{{$empresa->name}}</option>
-                                         @endif
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -38,7 +38,8 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label>Produto</label>
-                                <select type="text" name="produto" id="produto" class="form-control" value="{{request('produto')}}">
+                                <select type="text" name="produto" id="produto" class="form-control"
+                                        value="{{request('produto')}}">
                                     <option value="0"></option>
                                     @forelse($produtos as $produto)
                                         @if($produto->id==request('produto'))
@@ -46,7 +47,7 @@
                                         @else
                                             <option value="{{$produto->id}}">{{$produto->model}}</option>
                                         @endif
-                                    @endforeach
+                                        @endforeach
                                 </select>
                             </div>
                         </div>
@@ -59,7 +60,8 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label>Data vencimento</label>
-                                <input type="text" name="datavencimento" class="form-control data-picker" value="{{request('datavencimento')}}">
+                                <input type="text" name="datavencimento" class="form-control data-picker"
+                                       value="{{request('datavencimento')}}">
                             </div>
                         </div>
 
@@ -323,25 +325,60 @@
 
             });
             $(document).on('click', '.remover-associacao', function () {
-                if (confirm("Deseja realmente remover a associação ?")) {
-                    key = $('#associarkey #idkey').text();
-                    pat = $(this).parent().find('.patrimonio').text();
-                    emp = $(this).parent().find('.emppatmodal').text();
-                    $.ajax({
-                        url: '{{url('/licencas/produto/delete')}}',
-                        data: {key: key, pat: pat, emp: emp},
-                        type: 'delete',
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.error) {
-                                alert(data.msg);
-                            } else {
-                                alert(data.msg);
-                                location.reload();
-                            }
-                        }
-                    }).fail(ErroConnect);
-                }
+                key = $('#associarkey #idkey').text();
+                pat = $(this).parent().find('.patrimonio').text();
+                emp = $(this).parent().find('.emppatmodal').text();
+                swal({
+                    title: 'Você tem certeza?',
+                    text: "Que quer remover essa associação?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sim, faça isso!',
+                    cancelButtonText: 'Não.',
+                    preConfirm: function () {
+                        return new Promise(function (resolve) {
+                            resolve([
+                                $.ajax({
+                                    url: '{{url('/licencas/produto/delete')}}',
+                                    data: {key: key, pat: pat, emp: emp},
+                                    type: 'delete',
+                                    dataType: 'json'
+                                }).done(function (data) {
+                                    swal({
+                                        type: 'success',
+                                        title: 'Associação removida!',
+                                        html: data.msg,
+                                        showCloseButton: true,
+                                        onClose:function(){location.reload();}
+                                    })
+                                })
+                            ]);
+                        });
+                    },
+                    allowOutsideClick: false
+                });
+                //;
+
+
+                /*if (confirm("Deseja realmente remover a associação ?")) {
+
+                 $.ajax({
+                 url: '{{url('/licencas/produto/delete')}}',
+                 data: {key: key, pat: pat, emp: emp},
+                 type: 'delete',
+                 dataType: 'json',
+                 success: function (data) {
+                 if (data.error) {
+                 alert(data.msg);
+                 } else {
+                 alert(data.msg);
+                 location.reload();
+                 }
+                 }
+                 }).fail(ErroConnect);
+                 }*/
             });
             $('#empresa').change(function () {
                 $('#produto').empty();

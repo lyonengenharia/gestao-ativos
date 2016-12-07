@@ -21,7 +21,7 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     /**
@@ -67,5 +67,9 @@ class UserController extends Controller
         }
         return response()->json(['erro' => 0, 'msg' => 'Permissões atualizadas com sucesso!!']);
 
+    }
+    public function vue(Request $request){
+        $users = \App\User::all();
+        return view('users.index')->with(['Users'=>$users]);
     }
 }

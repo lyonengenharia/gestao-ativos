@@ -13,10 +13,10 @@ class ConnectsDataInOut extends Migration
      */
     public function up()
     {
-        /*Schema::table('connects', function (Blueprint $table) {
+        Schema::table('connects', function (Blueprint $table) {
             $table->dateTime('data_in')->nullable();
             $table->dateTime('data_out')->nullable();
-        });*/
+        });
     }
 
     /**

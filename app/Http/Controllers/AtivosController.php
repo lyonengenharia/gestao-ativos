@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
+use App\Pojo\Bem;
+use App\Pojo\Employed;
 use Carbon\Carbon;
 use Faker\Provider\cs_CZ\DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 
 
 class AtivosController extends Controller
@@ -26,7 +29,7 @@ class AtivosController extends Controller
     public function index()
     {
         $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp', 'nomemp', 'apeemp'])->get();
-        $States = \App\State::orderBy('state','ASC')->get();
+        $States = \App\State::orderBy('state', 'ASC')->get();
         foreach ($Empresas as $key => $value) {
             $Empresas[$key]->nomemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->nomemp);
             $Empresas[$key]->apeemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->apeemp);
@@ -35,15 +38,29 @@ class AtivosController extends Controller
             "page" => "Ativos",
             "explanation" => " Busca de ativos",
             "empresas" => $Empresas,
-            "states"=>$States
+            "states" => $States
 
         ]);
     }
 
     public function search(Request $request)
     {
+        $employed = $request->get('employed');
         $pat = $request->get('pat');
+        $page = null;
+        if ($request->has('qtd')) {
+            $page = $request->get('qtd');
+        } else {
+            $page = 15;
+        }
+        if ($page < 1) {
+            $page = 1;
+        }
+        if ($page > 50) {
+            $page = 50;
+        }
         $retorno = [];
+        DB::connection('sapiens')->enableQueryLog();
         $query = DB::connection('sapiens')->table("E670BEM")
             ->select([
                 'E670BEM.CODBEM',
@@ -54,10 +71,9 @@ class AtivosController extends Controller
                 'E670LOC.CTARED',
                 'E670BEM.DATAQI',
                 'E044CCU.CODEMP',
-                'E044CCU.CODCCU',
+                'E670DRA.CODCCU',
                 'E044CCU.DESCCU',
                 'E670BEM.DESBEM',
-                'E670LOC.CODCCU',
                 'E670BEM.SITPAT',
                 'E670BEM.CODEMP',
                 'E070EMP.NOMEMP',
@@ -66,10 +82,10 @@ class AtivosController extends Controller
             ])
             ->join('E670LOC', function ($join) {
                 $join->on('E670LOC.CODEMP', '=', 'E670BEM.CODEMP');
-
             })
             ->Join('E670DRA', function ($join) {
-                $join->on('E670DRA.CODEMP', '=', 'E670LOC.CODEMP');
+                $join->on('E670DRA.CODEMP', '=', 'E670BEM.CODEMP')
+                    ->whereColumn('E670DRA.CODBEM', '=', 'E670BEM.CODBEM');
             })
             ->join('E044CCU', function ($join) {
                 $join->on('E044CCU.CODEMP', '=', 'E670DRA.CODEMP');
@@ -92,55 +108,77 @@ class AtivosController extends Controller
             ->whereColumn('E044CCU.CODCCU', '=', 'E670DRA.CODCCU')
             ->where('E670LOC.ULTREG', '=', 'S')
             ->where('E670LOC.SITLOC', '=', 'A')
-            ->where('E670BEM.CODBEM', 'like', "$pat%")
             ->orderBy('E670BEM.CODEMP')
             ->orderBy('E670DRA.CODCCU')
-            ->orderBy('E670BEM.CODBEM')
-            ->limit(10);
-            if($request->has('emp')){
-                $query->where('E670LOC.CODEMP','=',$request->get('emp'));
+            ->orderBy('E670BEM.CODBEM');
+
+        //Filter per user
+        if (!empty($employed['usr']) && !empty($employed['emp']) && !empty($employed['tip'])) {
+            $employed = new \App\Pojo\Employed($employed['emp'], $employed['tip'], $employed['usr']);
+            $assoc = \App\Connect::where('data_out', '=', null)
+                ->where('R034FUN_NUMEMP', '=', $employed->NUMEMP)
+                ->where('R034FUN_TIPCOL', '=', $employed->TIPCOL)
+                ->where('R034FUN_NUMCAD', '=', $employed->NUMCAD);
+            $assoc->count();
+            if ($assoc->count() > 0) {
+                $assoc = $assoc->get();
+                $bem = [];
+
+                foreach ($assoc as $key => $asso) {
+                    array_push($bem, $asso->E670BEM_CODBEM);
+                }
+                $query->whereIn('E670BEM.CODBEM', $bem);
             }
-        $query = $query->get();
-        //dd(DB::connection('sapiens')->getQueryLog());
-        foreach ($query as $row) {
+
+        } elseif(!empty($pat)) {
+            $query->where('E670BEM.CODBEM', 'like', "$pat%");
+        }
+        if ($request->has('ccu') && !empty($request->get('ccu'))) {
+            $query->where('E670DRA.CODCCU', '=', $request->get('ccu'));
+        }
+        $query = $query->paginate($page);
+
+        foreach ($query as $Key => $row) {
             $assoc = \App\Connect::where('data_out', '=', null)
                 ->where('E670BEM_CODBEM', '=', $row->CODBEM)
                 ->where('E070EMP_CODEMP', '=', $row->CODEMP);
-            $row->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
-            $row->DESBEM = iconv("ISO-8859-1", "UTF-8", $row->DESBEM);
-            $row->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
-            $row->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
-            $row->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
+            $query[$Key]->DESCCU = iconv("ISO-8859-1", "UTF-8", $row->DESCCU);
+            $query[$Key]->DESBEM = iconv("ISO-8859-1", "UTF-8", $row->DESBEM);
+            $query[$Key]->NOMEMP = iconv("ISO-8859-1", "UTF-8", $row->NOMEMP);
+            $query[$Key]->DESESP = iconv("ISO-8859-1", "UTF-8", $row->DESESP);
+            $query[$Key]->ABRESP = iconv("ISO-8859-1", "UTF-8", $row->ABRESP);
             $data = new Carbon($row->DATAQI);
-            $row->DATAQI = $data->format('d/m/Y');
-            $row->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
-            $row->ASSOC = $assoc->count();
-            if($row->ASSOC){
+            $query[$Key]->DATAQI = $data->format('d/m/Y');
+            $query[$Key]->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
+            $Bem = new Bem($row->CODBEM,$row->CODEMP);
+            $query[$Key]->HISTEMPRST = $this->loanHistory($Bem);
+            $query[$Key]->ASSOC = $assoc->count();
+            if ($query[$Key]->ASSOC) {
                 $assoc = $assoc->get();
-                $row->connect = DB::connection('vetorh')->table('R034FUN')
-                    ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
-                    ->join('R010SIT',function ($inner){
-                        $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+                $query[$Key]->connect = DB::connection('vetorh')->table('R034FUN')
+                    ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+                    ->join('R010SIT', function ($inner) {
+                        $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
                     })
-                    ->where('NUMEMP','=',$assoc[0]->R034FUN_NUMEMP)
-                    ->where('TIPCOL','=',$assoc[0]->R034FUN_TIPCOL)
-                    ->where('NUMCAD','=',$assoc[0]->R034FUN_NUMCAD)
+                    ->where('NUMEMP', '=', $assoc[0]->R034FUN_NUMEMP)
+                    ->where('TIPCOL', '=', $assoc[0]->R034FUN_TIPCOL)
+                    ->where('NUMCAD', '=', $assoc[0]->R034FUN_NUMCAD)
                     ->get();
-            }else{
-                $row->connect = null;
+            } else {
+                $query[$Key]->connect = null;
             }
-            $row->state = \App\Complement::
-            select(['states.id','states.description','E070EMP_CODEMP','E670BEM_CODBEM','complements.created_at','complements.description as desc','states.state'])
-            ->join('states',function ($join){
-                $join->on('state_id','=','states.id');
-            })
-            ->where('E670BEM_CODBEM','=',$row->CODBEM)->where('E070EMP_CODEMP','=',$row->CODEMP)->get();
-            $row->keys = \App\BensKeys::select(["benskeys.id",
+            $query[$Key]->state = \App\Complement::
+            select(['states.id', 'states.description', 'E070EMP_CODEMP', 'E670BEM_CODBEM', 'complements.created_at', 'complements.description as desc', 'states.state'])
+                ->join('states', function ($join) {
+                    $join->on('state_id', '=', 'states.id');
+                })
+                ->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
+            $query[$Key]->keys = \App\BensKeys::select(["benskeys.id",
                 "key_id", "benskeys.E670BEM_CODBEM",
-                "E070EMP_CODEMP","keys.id as keyid" ,"keys.key",
-                "produtos.id as Proid","produtos.model",
-                "empresas.id as Empid","empresas.name",
-                "keys.quantity","keys.in_use","maturity_date"
+                "E070EMP_CODEMP", "keys.id as keyid", "keys.key",
+                "produtos.id as Proid", "produtos.model",
+                "empresas.id as Empid", "empresas.name",
+                "keys.quantity", "keys.in_use", "maturity_date"
             ])->join('keys', function ($inner) {
                 $inner->on('keys.id', '=', 'benskeys.key_id');
             })->join('produtos', function ($inner) {
@@ -148,10 +186,11 @@ class AtivosController extends Controller
             })->join('empresas', function ($inner) {
                 $inner->on('empresas.id', '=', 'produtos.empresa_id');
             })->where('E670BEM_CODBEM', '=', $row->CODBEM)
-              ->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
-            array_push($retorno, $row);
+                ->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
+            $query[$Key]->history = $this->history($row->CODBEM, $row->CODEMP);
         }
-        return response()->json($retorno);
+
+        return response()->json($query);
     }
 
     public function locations(Request $request)
@@ -183,7 +222,7 @@ class AtivosController extends Controller
             ->table('E670MOV')
             ->select(['E670MOV.CODBEM', 'E670MOV.DATMOV', 'E670MOV.DATLOC'
                 , 'E670MOV.SEQMOV', 'E670MOV.SEQLOC', 'E670MOV.NUMMAN'
-                , 'E001TNS.DESTNS', 'E001TNS.CODTNS','E670MOV.CODCCU'])
+                , 'E001TNS.DESTNS', 'E001TNS.CODTNS', 'E670MOV.CODCCU'])
             ->join('E001TNS', function ($join) {
                 $join->on('E670MOV.CODTNS', '=', 'E001TNS.CODTNS')
                     ->whereColumn('E670MOV.CODEMP', '=', 'E001TNS.CODEMP');
@@ -192,7 +231,7 @@ class AtivosController extends Controller
             ->where('E670MOV.CODBEM', '=', $pat)
             ->whereIn('E670MOV.SEQLOC', [1, 2])
             ->whereNotIn('E670MOV.CODTNS', [90815])
-            ->orderBy('E670MOV.DATMOV','DESC')
+            ->orderBy('E670MOV.DATMOV', 'DESC')
             ->get();
         foreach ($movimentationFinancial as $mov) {
             $mov->DESTNS = iconv("ISO-8859-1", "UTF-8", $mov->DESTNS);
@@ -231,26 +270,67 @@ class AtivosController extends Controller
         $Emprestimo->R034FUN_NUMCAD = $request->get("numcad");
         $Emprestimo->obs_saida = $request->get("obsemp");
         $Emprestimo->save();
-        return response()->json(["erro" => 0, "msg" => "O item foi emprestado com sucesso!"]);
-    }
 
+
+        $Employed = new \App\Pojo\Employed($request->get("numemp"), $request->get("tipcol"), $request->get("numcad"));
+        $Employed = $Employed->get();
+        $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
+        if (!empty($Employed->getEMACOM())) {
+            $To = $Employed->getEMACOM();
+        } else if (!empty($Employed->getEMAPAR())) {
+            $To = $Employed->getEMAPAR();
+        }
+        $Data = new \App\Pojo\Message();
+        $Data->setTitle("Empréstimo de Equipamento");
+        $Data->setSubTitle("Empréstimo realizado dia :" . $request->get('dataempdev'));
+        $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio " . $request->get("codbem") .
+            " encontra-se em sua responsabilidade.</p><p>Descrição de saída: " . (empty($request->get("obsemp")) ? "Nada consta." : $request->get("obsemp")) . "</p>");
+        $message = new \App\Mail\Information($Data);
+        $message->subject("Emprestimo de equipamentos");
+        $message->to($To);
+        $message->from(env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br'));
+        Mail::send($message);
+        return response()->json(["erro" => 0, "msg" => "Item emprestado com sucesso."]);
+    }
     public function Devolucao(Request $request)
     {
         $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
             ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
-            ->where('data_entrada', '=', null)->count();
-        if ($VerificaEmprestimo) {
+            ->where('data_entrada', '=', null);
+        if ($VerificaEmprestimo->count()) {
+            $VerificaEmprestimo = $VerificaEmprestimo->get();
             $data = \Carbon\Carbon::createFromFormat("d/m/Y", $request->get('data'), "America/Sao_Paulo");
-            $Emprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
+            \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
                 ->where('E070EMP_CODEMP', '=', $request->get('codbememp'))
                 ->where('data_entrada', '=', null)
-                ->update(['data_entrada' => $data->toDateTimeString(), 'obs_entrada' => $request->get("obs_entrada")]);
+                ->update(['data_entrada' => $data->toDateTimeString(), 'obs_entrada' => $request->get("obs")]);
+
+
+            //Envia email
+            $Employed = new \App\Pojo\Employed($VerificaEmprestimo[0]->R034FUN_NUMEMP, $VerificaEmprestimo[0]->R034FUN_TIPCOL, $VerificaEmprestimo[0]->R034FUN_NUMCAD);
+            $Employed = $Employed->get();
+            $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
+            if (!empty($Employed->getEMACOM())) {
+                $To = $Employed->getEMACOM();
+            } else if (!empty($Employed->getEMAPAR())) {
+                $To = $Employed->getEMAPAR();
+            }
+            $Data = new \App\Pojo\Message();
+            $Data->setTitle("Devolução de Equipamento");
+            $Data->setSubTitle("Devolução realizada dia :" . $request->get('data'));
+            $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio "
+                . $request->get("codbem") . " foi devolvido. </p><p>Segue as observações: " .
+                (empty($request->get("obs")) ? "Nada consta." : $request->get("obs")) . "</p>");
+            $message = new \App\Mail\Information($Data);
+            $message->subject("Devolução de equipamentos");
+            $message->to($To);
+            $message->from(env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br'));
+            Mail::send($message);
         } else {
             return response()->json(["error" => 1, "msg" => "Esse item não pode ser devolvido! Ele não consta como emprestado."]);
         }
         return response()->json(["error" => 0, "msg" => "O item foi devolvido com sucesso."]);
     }
-
     /**
      * @return string
      */
@@ -291,11 +371,11 @@ class AtivosController extends Controller
         $CheckConect = \App\Connect::where('data_out', '=', null)
             ->where('E670BEM_CODBEM', '=', $request->get('codbem'))
             ->where('E070EMP_CODEMP', '=', $request->get('codbememp'));
-        if($CheckConect->count()){
-            $CheckConect->update(['data_out'=>$data->toDateTimeString(),'obs_out'=>$request->get('obs')]);
-            return response()->json(['error'=>0,'msg'=>'Item desassociado com sucesso!']);
+        if ($CheckConect->count()) {
+            $CheckConect->update(['data_out' => $data->toDateTimeString(), 'obs_out' => $request->get('obs')]);
+            return response()->json(['error' => 0, 'msg' => 'Item desassociado com sucesso!']);
         }
-        return response()->json(['error'=>1,'msg'=>'O item não está associado']);
+        return response()->json(['error' => 1, 'msg' => 'O item não está associado']);
     }
 
     /**
@@ -303,28 +383,69 @@ class AtivosController extends Controller
      */
     public function State(Request $request)
     {
-        $Complement = \App\Complement::where('E670BEM_CODBEM','=',$request->get('codbem'))->where('E070EMP_CODEMP','=',$request->get('codbememp'));
-        if($Complement->count()){
-            $Complement->update(['state_id'=>$request->get('status'),'description'=>$request->get('obs')]);
-            return response()->json(['error'=>0,'msg'=>'Estado do item foi atualizado!']);
-        }else{
+        $Complement = \App\Complement::where('E670BEM_CODBEM', '=', $request->get('codbem'))->where('E070EMP_CODEMP', '=', $request->get('codbememp'));
+        if ($Complement->count()) {
+            $Complement->update(['state_id' => $request->get('status'), 'description' => $request->get('obs')]);
+            return response()->json(['error' => 0, 'msg' => 'Estado do item foi atualizado!']);
+        } else {
             $Complement = new \App\Complement();
             $Complement->E670BEM_CODBEM = $request->get('codbem');
             $Complement->E070EMP_CODEMP = $request->get('codbememp');
             $Complement->state_id = $request->get('status');
             $Complement->description = $request->get('obs');
             $Complement->save();
-            return response()->json(['error'=>0,'msg'=>'Estado do item foi inserido!']);
+            return response()->json(['error' => 0, 'msg' => 'Estado do item foi inserido!']);
         }
     }
-    public function GetState(Request $request){
-        $Complement = \App\Complement::where('E670BEM_CODBEM','=',$request->get('codbem'))->where('E070EMP_CODEMP','=',$request->get('codbememp'));
-        if($Complement->count()){
+
+    public function GetState(Request $request)
+    {
+        $Complement = \App\Complement::where('E670BEM_CODBEM', '=', $request->get('codbem'))->where('E070EMP_CODEMP', '=', $request->get('codbememp'));
+        if ($Complement->count()) {
             $Complement = $Complement->get();
             $Complement[0]->updated = $Complement[0]->updated_at->format('d/m/Y H:i');
             $Complement[0]->create = $Complement[0]->created_at->format('d/m/Y');
             return $Complement;
         }
         return null;
+    }
+
+    private function history($ben, $emp)
+    {
+        $Historyes = DB::table('connects')->where('E670BEM_CODBEM', '=', $ben)->where('E070EMP_CODEMP', '=', $emp)->where('data_out', '<>', null)->get();
+        foreach ($Historyes as $Key => $History) {
+
+            $Historyes[$Key]->data_in = new Carbon($Historyes[$Key]->data_in);
+            $Historyes[$Key]->data_in = $Historyes[$Key]->data_in->format('d/m/Y H:i');
+            $Historyes[$Key]->data_out = new Carbon($Historyes[$Key]->data_out);
+            $Historyes[$Key]->data_out = $Historyes[$Key]->data_out->format('d/m/Y H:i');
+            $Employed = DB::connection('vetorh')->table('R034FUN')
+                ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+                ->join('R010SIT', function ($inner) {
+                    $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
+                })
+                ->where('NUMEMP', '=', $History->R034FUN_NUMEMP)
+                ->where('TIPCOL', '=', $History->R034FUN_TIPCOL)
+                ->where('NUMCAD', '=', $History->R034FUN_NUMCAD)
+                ->get();
+            if (count($Employed) > 0) {
+                $Employed[0]->value = iconv('windows-1252', 'utf-8', $Employed[0]->value);
+                $Employed[0]->DESSIT = iconv('windows-1252', 'utf-8', $Employed[0]->DESSIT);
+
+                $Employed = $Employed[0];
+            } else {
+                $Employ = null;
+            }
+            $Historyes[$Key]->Employed = $Employed;
+
+        }
+        return $Historyes;
+    }
+    private  function loanHistory(Bem $Bem){
+        $Loans = \App\Emprestimo::where('E070EMP_CODEMP', '=', $Bem->getCodEmp())->where('E670BEM_CODBEM', '=', $Bem->getCodBem())->orderBy('created_at','DESC')->take(10)->get();
+        foreach ($Loans as $Key => $Loan){
+            $Loans[$Key]->employed = new Employed($Loan->R034FUN_NUMEMP,$Loan->R034FUN_TIPCOL,$Loan->R034FUN_NUMCAD);
+        }
+        return $Loans;
     }
 }

@@ -13,7 +13,7 @@ class CreateConnectsTable extends Migration
      */
     public function up()
     {
-        /*Schema::create('connects', function (Blueprint $table) {
+        Schema::create('connects', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('E670BEM_CODBEM', 20);
@@ -42,7 +42,7 @@ class CreateConnectsTable extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
             $table->timestamps();
-        });*/
+        });
     }
 
     /**
