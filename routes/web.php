@@ -77,7 +77,9 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 
 });
 
-Route::get('/teste','UserController@vue');
+Route::get('/teste',function (){
+    return view("teste");
+});
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
     $Connect = new \App\Connect();
