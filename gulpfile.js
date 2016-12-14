@@ -1,8 +1,6 @@
 const elixir = require('laravel-elixir');
-var elixirTypscript = require('elixir-typescript');
 //require('laravel-elixir-vue-2');
 require("jquery");
-
 
 
 /*
@@ -16,7 +14,7 @@ require("jquery");
  |
  */
 elixir(function (mix) {
-    /*var bootstrapPath = './node_modules/bootstrap-sass/assets';
+    var bootstrapPath = './node_modules/bootstrap-sass/assets';
     // var jqueryPath = './node_modules/jquery/dist/jquery.js';
     mix.sass('app.scss', 'public/assets/css')
         .webpack([
@@ -46,8 +44,10 @@ elixir(function (mix) {
     mix.scripts('ativos/ativos.js', 'public/assets/js/ativos.js');
     mix.scripts('fileupload/fileinput.js', 'public/assets/js/fileinput/fileinput.js');
     mix.scripts('fileupload/locales/pt-BR.js', 'public/assets/js/fileinput/locales/pt-BR.js');
+    mix.scripts('./node_modules/angular/angular.min.js', 'public/assets/js/angular.min.js');
+    mix.scripts('painel/termos.js', 'public/assets/js/termos.js');
     // Type Script
-    //mix.typescript('','public/assets/js/teste.js');*/
+    //mix.typescript('','public/assets/js/teste.js');
 
     // mix.sass('app.scss');
     //

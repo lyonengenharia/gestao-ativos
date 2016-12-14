@@ -545,7 +545,6 @@
                 }).done(handleData).fail(ErroConnect);
             });
             $(document).on('click', '.localizacoes', function () {
-                $(".div-load").toggleClass('div-load-hidden');
                 var item = $(this).parent().parent().parent().find('.cod-bem').text();
                 var panel = $(this).parent().parent().parent();
                 $(".devolucao-option").addClass('display-emprestismo');
@@ -570,6 +569,7 @@
                     $('#historyFinancial').removeClass('display-localizaoes');
                     $("#item").text(item);
                 }
+                $('#loading').modal('show');
                 $.ajax({
                     url: '{{url('ativos/locations')}}',
                     data: {pat: item},
@@ -581,7 +581,7 @@
                     panel.removeClass('panel-default');
                     panel.addClass('panel-warning');
                     $('#resultOfSearch').append(panel);
-                    $(".div-load").toggleClass('div-load-hidden');
+                    $('#loading').modal('hide');
                 }).fail(ErroConnect);
             });
             $(document).on('click', '.emprestimo', function () {

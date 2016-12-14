@@ -1,4 +1,6 @@
-function handleData(data, textStatus, jqXHR) {
+function handleData(data) {
+
+
 
     $('#resultOfSearch').empty();
     if (data.data.length > 0) {
@@ -83,12 +85,11 @@ function handleData(data, textStatus, jqXHR) {
                 keys += "</div>";
             }
 
-            if(item.HISTEMPRST.length == 0){
+            if (item.HISTEMPRST.length == 0) {
                 Emprestimo = "<p>Item não tem hístorico de emprestimo</p>";
-            }else{
+            } else {
                 Emprestimo = "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
-                $.each(item.HISTEMPRST, function (i,his) {
-                    console.log(his);
+                $.each(item.HISTEMPRST, function (i, his) {
                     Emprestimo += "<div class='panel panel-default'>" +
                         "<div class='panel-heading' role='tab' id='headin" + his.id + "'>" +
                         "<h4 class=\"panel-title\">" +
@@ -98,9 +99,9 @@ function handleData(data, textStatus, jqXHR) {
                         "</h4>" +
                         "</div>" +
                         "<div id='" + his.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + his.id + "'>" +
-                        "<div class=\"panel-body\">"+
-                            "<p>Data emprestimo: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
-                            "<p>Data data devolução: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
+                        "<div class=\"panel-body\">" +
+                        "<p>Data emprestimo: " + DateUsTODateBr(his.data_saida, true) + "</p>" +
+                        "<p>Data data devolução: " + DateUsTODateBr(his.data_saida, true) + "</p>" +
                         "</div>" +
                         "</div>" +
                         "</div>";
@@ -112,11 +113,11 @@ function handleData(data, textStatus, jqXHR) {
                 Assoc += "<button class=\"btn btn-danger dissociar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Desassociar" +
                     "</button>";
-            } else if(item.EMPRST == 1){
+            } else if (item.EMPRST == 1) {
                 Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\" disabled>" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
-            }else {
+            } else {
                 Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
@@ -145,23 +146,23 @@ function handleData(data, textStatus, jqXHR) {
                 item.CODEMP +
                 "</div>" +
                 "<div class=\"panel-body\">" +
-                "<p><b>Descrição</b>"+
+                "<p><b>Descrição</b>" +
                 "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
                 "<p><b>Item:</b> " + item.DESBEM + " </p>" +
                 "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                 "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
                 "<p><b>Centro Custo:</b> " + item.CODCCU + " - " + item.DESCCU + " </p>" +
                 "<hr>"
-                +"<p><b>Estado do bem</b>"
+                + "<p><b>Estado do bem</b>"
                 + state
-                +"<hr>"
-                +"<p><b>Associações</b>"
+                + "<hr>"
+                + "<p><b>Associações</b>"
                 + connection
                 + "<hr>"
-                +"<p><b>Histórico de emprestimos</b>"
+                + "<p><b>Histórico de emprestimos</b>"
                 + Emprestimo
                 + "<hr>"
-                +"<p><b>Licenças associadas</b>"
+                + "<p><b>Licenças associadas</b>"
                 + keys +
                 "</div>" +
                 "<div class='panel-footer'> " +
@@ -230,13 +231,13 @@ function historyLocations(data, textStatus, jqXHR) {
     });
 }
 function Emprestimo(url, data) {
-
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         data: data,
         type: 'post',
+        dataType: 'json',
         success: function (response) {
-            console.log(response);
             var alert = "";
             if (response.erro == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -256,17 +257,20 @@ function Emprestimo(url, data) {
             url = url.replace('emprestimo', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
+        },
+        complete: function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
 function Devolucao(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
         data: data,
-        //dataType: 'json',
+        dataType: 'json',
         success: function (response) {
-            console.log(response);
             var alert = "";
             if (response.error == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -285,17 +289,19 @@ function Devolucao(url, data) {
             url = url.replace('devolucao', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
-        },
+        },complete : function () {
+            $('#loading').modal('hide');
+        }
     }).fail(ErroConnect);
 }
 function DevolucaoDados(url, data) {
+
     $.ajax({
         url: url + "/" + data.codbem + "/" + data.codbememp,
         type: 'get',
         data: data,
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             $('.info-devolucao').remove();
             var linha = "<div class='panel panel-default info-devolucao'><div class='panel-body'>" +
                 "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
@@ -308,6 +314,7 @@ function DevolucaoDados(url, data) {
     }).fail(ErroConnect);
 }
 function Associar(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
@@ -331,10 +338,13 @@ function Associar(url, data) {
             url = url.replace('associar', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
+        },complete : function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
 function Dissociar(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
@@ -357,6 +367,8 @@ function Dissociar(url, data) {
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
             $('#modal-desassociar').modal('hide');
+        },complete : function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
@@ -396,7 +408,6 @@ function GetState(url, data, callback) {
         data: data,
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             if (response.length > 0) {
                 $("#form-state select").val(response[0].state_id);
                 $("#form-state textarea").val(response[0].description);
@@ -449,15 +460,14 @@ function updatesearch(url, data) {
     }).done(handleData)
         .fail(ErroConnect);
 }
-function DateUsTODateBr(date,time) {
+function DateUsTODateBr(date, time) {
     var d = new Date(date);
-    var hora = time==true?d.getHours()+":"+d.getMinutes():"";
-    return d.toLocaleDateString()+" "+hora ;
+    var hora = time == true ? d.getHours() + ":" + d.getMinutes() : "";
+    return d.toLocaleDateString() + " " + hora;
 
 }
 
 function CreateFilterPat(number) {
-
     CheckFilter = $('#filter').find('#filter-pat');
     if (CheckFilter.length >= 1) {
         $('#filter #filter-pat').remove();
@@ -475,7 +485,7 @@ function CreateFilterPat(number) {
         $('#filter #filter-pat').remove();
     }
 }
-function PreLoad(from,atualaryURi) {
+function PreLoad(from, atualaryURi) {
     atualaryURi = atualaryURi.split('#');
     if (atualaryURi.length > 1) {
         CreateFilterPat(atualaryURi[1]);
@@ -494,7 +504,8 @@ function PreLoad(from,atualaryURi) {
             data: data,
             type: 'get',
             dataType: 'json'
-        }).done(handleData).fail(ErroConnect);
+        }).done(handleData)
+            .fail(ErroConnect);
     }
 }
 //# sourceMappingURL=ativos.js.map

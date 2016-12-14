@@ -17,4 +17,11 @@ class PainelController extends Controller
             "users"=>$users
             ]);
     }
+    public function termos(){
+        return view('painel.termos',[
+            "breadcrumbs" => array("Painel Controle" => "painel","Termos"=>""),
+            "page" => "Termos",
+            "explanation" => " Listagem de todos os termos disponíveis"
+        ]);
+    }
 }

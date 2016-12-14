@@ -271,19 +271,18 @@ class AtivosController extends Controller
         $Emprestimo->obs_saida = $request->get("obsemp");
         $Emprestimo->save();
 
-
         $Employed = new \App\Pojo\Employed($request->get("numemp"), $request->get("tipcol"), $request->get("numcad"));
-        $Employed = $Employed->get();
         $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
-        if (!empty($Employed->getEMACOM())) {
-            $To = $Employed->getEMACOM();
-        } else if (!empty($Employed->getEMAPAR())) {
-            $To = $Employed->getEMAPAR();
+        if (!empty($Employed->EMACOM)) {
+            $To = $Employed->EMACOM;
+        } else if (!empty($Employed->EMAPAR)) {
+            $To = $Employed->EMAPAR;
         }
+
         $Data = new \App\Pojo\Message();
         $Data->setTitle("Empréstimo de Equipamento");
         $Data->setSubTitle("Empréstimo realizado dia :" . $request->get('dataempdev'));
-        $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio " . $request->get("codbem") .
+        $Data->setBody("Prezado(a) " . $Employed->NOMFUN . " <p>Informamos que o equipamento  com o patrimônio " . $request->get("codbem") .
             " encontra-se em sua responsabilidade.</p><p>Descrição de saída: " . (empty($request->get("obsemp")) ? "Nada consta." : $request->get("obsemp")) . "</p>");
         $message = new \App\Mail\Information($Data);
         $message->subject("Emprestimo de equipamentos");
@@ -305,20 +304,19 @@ class AtivosController extends Controller
                 ->where('data_entrada', '=', null)
                 ->update(['data_entrada' => $data->toDateTimeString(), 'obs_entrada' => $request->get("obs")]);
 
-
             //Envia email
+
             $Employed = new \App\Pojo\Employed($VerificaEmprestimo[0]->R034FUN_NUMEMP, $VerificaEmprestimo[0]->R034FUN_TIPCOL, $VerificaEmprestimo[0]->R034FUN_NUMCAD);
-            $Employed = $Employed->get();
             $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
-            if (!empty($Employed->getEMACOM())) {
-                $To = $Employed->getEMACOM();
-            } else if (!empty($Employed->getEMAPAR())) {
-                $To = $Employed->getEMAPAR();
+            if (!empty($Employed->EMACOM)) {
+                $To = $Employed->EMACOM;
+            } else if (!empty($Employed->EMAPAR)) {
+                $To = $Employed->EMAPAR;
             }
             $Data = new \App\Pojo\Message();
             $Data->setTitle("Devolução de Equipamento");
             $Data->setSubTitle("Devolução realizada dia :" . $request->get('data'));
-            $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio "
+            $Data->setBody("Prezado(a) " . $Employed->NOMFUN . " <p>Informamos que o equipamento  com o patrimônio "
                 . $request->get("codbem") . " foi devolvido. </p><p>Segue as observações: " .
                 (empty($request->get("obs")) ? "Nada consta." : $request->get("obs")) . "</p>");
             $message = new \App\Mail\Information($Data);

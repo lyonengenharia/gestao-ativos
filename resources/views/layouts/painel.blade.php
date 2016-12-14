@@ -22,18 +22,18 @@
         ]); ?>
     </script>
     <!-- Custom CSS -->
-    {{--<link href="/css/sb-admin.css" rel="stylesheet">--}}
+{{--<link href="/css/sb-admin.css" rel="stylesheet">--}}
 
-    <!-- Library -->
+<!-- Library -->
     {{--<script src="{{asset('assets/js/app.js')}}"></script>--}}
     <script src="{{asset('assets/js/app.js ')}}"></script>
     <script src="{{asset('assets/js/all.js ')}}"></script>
 
 
     <!-- Custom Fonts -->
-    {{--<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">--}}
+{{--<link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">--}}
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -98,28 +98,28 @@
                     <a href="{{url('painel')}}"><i class="fa fa-fw fa-gears"></i> Painel Controle</a>
                 </li>
                 {{--<li>--}}
-                    {{--<a href="bootstrap-elements.html"><i class="fa fa-fw fa-desktop"></i> Bootstrap Elements</a>--}}
+                {{--<a href="bootstrap-elements.html"><i class="fa fa-fw fa-desktop"></i> Bootstrap Elements</a>--}}
                 {{--</li>--}}
                 {{--<li>--}}
-                    {{--<a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Bootstrap Grid</a>--}}
+                {{--<a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Bootstrap Grid</a>--}}
                 {{--</li>--}}
                 {{--<li>--}}
-                    {{--<a href="javascript:;" data-toggle="collapse" data-target="#demo"><i--}}
-                                {{--class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>--}}
-                    {{--<ul id="demo" class="collapse">--}}
-                        {{--<li>--}}
-                            {{--<a href="#">Dropdown Item</a>--}}
-                        {{--</li>--}}
-                        {{--<li>--}}
-                            {{--<a href="#">Dropdown Item</a>--}}
-                        {{--</li>--}}
-                    {{--</ul>--}}
+                {{--<a href="javascript:;" data-toggle="collapse" data-target="#demo"><i--}}
+                {{--class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>--}}
+                {{--<ul id="demo" class="collapse">--}}
+                {{--<li>--}}
+                {{--<a href="#">Dropdown Item</a>--}}
                 {{--</li>--}}
                 {{--<li>--}}
-                    {{--<a href="blank-page.html"><i class="fa fa-fw fa-file"></i> Blank Page</a>--}}
+                {{--<a href="#">Dropdown Item</a>--}}
+                {{--</li>--}}
+                {{--</ul>--}}
                 {{--</li>--}}
                 {{--<li>--}}
-                    {{--<a href="index-rtl.html"><i class="fa fa-fw fa-dashboard"></i> RTL Dashboard</a>--}}
+                {{--<a href="blank-page.html"><i class="fa fa-fw fa-file"></i> Blank Page</a>--}}
+                {{--</li>--}}
+                {{--<li>--}}
+                {{--<a href="index-rtl.html"><i class="fa fa-fw fa-dashboard"></i> RTL Dashboard</a>--}}
                 {{--</li>--}}
             </ul>
         </div>
@@ -148,7 +148,7 @@
             </div>
         </div>
 
-    <!-- /.container-fluid -->
+        <!-- /.container-fluid -->
         @yield('content')
     </div>
     <!-- /#page-wrapper -->
@@ -160,6 +160,16 @@
 <div class="div-load div-load-show div-load-hidden">
     <img src="{{asset("assets/img/load/gears.gif")}}">
     <h1>Carregando</h1>
+</div>
+<div class="modal fade" id="loading" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Por favor, espere mais alguns instantes...</p>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
 </div>
 
 </body>

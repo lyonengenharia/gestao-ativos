@@ -1,3 +1,4 @@
-/**
- * Created by wfs on 14/12/2016.
- */
+angular.module('termo', []);
+angular.module('termo').controller('listaTelefonica', function ($scope,$http) {
+    $scope.teste = "Olá mundo";
+});
