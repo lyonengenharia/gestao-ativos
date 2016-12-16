@@ -44,7 +44,7 @@ elixir(function (mix) {
     mix.scripts('ativos/ativos.js', 'public/assets/js/ativos.js');
     mix.scripts('fileupload/fileinput.js', 'public/assets/js/fileinput/fileinput.js');
     mix.scripts('fileupload/locales/pt-BR.js', 'public/assets/js/fileinput/locales/pt-BR.js');
-    mix.scripts('./node_modules/angular/angular.min.js', 'public/assets/js/angular.min.js');
+    mix.scripts(['./node_modules/angular/angular.min.js','./node_modules/angular-messages/angular-messages.min.js'], 'public/assets/js/angular.min.js');
     mix.scripts('painel/termos.js', 'public/assets/js/termos.js');
     // Type Script
     //mix.typescript('','public/assets/js/teste.js');

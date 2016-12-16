@@ -58,6 +58,9 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/painel/usuarios/grupos', 'RolesController@index')->middleware('can:ativos');
     Route::get('/painel/importacao/', 'Import@index')->middleware('can:ativos');
     Route::get('/painel/termos/', 'PainelController@termos')->middleware('can:ativos');
+    Route::post('/painel/termo/novo', 'PainelController@termosNovo')->middleware('can:ativos');
+    Route::post('/painel/termo/update', 'PainelController@termosAtualizacao')->middleware('can:ativos');
+    Route::delete('/painel/termo/delete/{id}', 'PainelController@termosDelete')->middleware('can:ativos');
 
     //Usuários
     Route::get('/usuario/{id}', 'UserController@edit')->middleware('can:ativos');

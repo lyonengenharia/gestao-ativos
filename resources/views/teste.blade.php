@@ -36,8 +36,8 @@
                 </tr>
                 </tbody>
             </table>
-            <div ng-messages="contatoForm.nome.$error" >
-                <div  ng-show="contatoForm.nome.$dirty" ng-message="required" class="alert alert-danger">
+            <div ng-messages="contatoForm.nome.$error">
+                <div  ng-message="required" class="alert alert-danger">
                     Por favor o nome
                 </div>
                 <div ng-message="minlength" class="alert alert-danger">
@@ -53,7 +53,7 @@
                 </div>
             </div>
             <form name="contatoForm">
-                <input type="text" class="form-control" placeholder="Nome" ng-model="contato.nome" ng-required="true"
+                <input type="text" class="form-control" placeholder="Nome" ng-model="contato.nome" ng-name="true"
                        name="nome" ng-minlength="10">
                 <input type="text" class="form-control" placeholder="Telefone" ng-model="contato.telefone"
                        ng-required="true" name="telefone" ng-pattern="/^\d{4,5}-\d{4}$/">
