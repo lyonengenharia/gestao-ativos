@@ -97,7 +97,8 @@
                                         <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
                                         <div class="input-group">
                                             <div class="input-group-addon">Listagem</div>
-                                            <input type="number" class="form-control" id="displayNumber" max="50" min="1"
+                                            <input type="number" class="form-control" id="displayNumber" max="50"
+                                                   min="1"
                                                    placeholder="Listagem" value="15">
                                         </div>
                                     </div>
@@ -382,6 +383,67 @@
         </div>
     </div>
 
+
+    {{--Modal Termos--}}
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-termos">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Termos</h4>
+                </div>
+                <div class="modal-body">
+                    <h5><b>Lista de termos</b></h5>
+                    <div class="panel panel-default" style="margin-bottom: 5px">
+                        <div class="panel-body">
+                            Termo sessão - Enviado dia 12/01/2016 , devolvido dia 16/01/2016
+                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span>
+                            </button>
+                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            Termo sessão - Enviado dia 12/01/2016 , não devolvido
+                            <button class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-bullhorn"></span>
+                            </button>
+                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <h5><b>Gerar termo</b></h5>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label>Tipo</label>
+                                            <select class="form-control">
+                                                <option value="#">Sessão</option>
+                                                <option value="#">Devolução</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Observação</label>
+                                            <textarea rows="5" class="form-control"></textarea>
+                                        </div>
+                                        <button class="btn btn-primary">Salvar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     <script>
 
         $(document).ready(function () {
@@ -389,7 +451,7 @@
             $.ajaxSetup({
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
             });
-            PreLoad(URLUPDATE,window.location.href);
+            PreLoad(URLUPDATE, window.location.href);
             $('.campo-data').datepicker({
                 closeText: 'Fechar',
                 prevText: '&lt;Anterior',
@@ -834,8 +896,8 @@
                     $('#filter-nameemployed').fadeOut();
                     //console.log(CheckFilter);
                     /*if (CheckFilter.length >= 1) {
-                        $('#filter #nameemployed').remove();
-                    }*/
+                     $('#filter #nameemployed').remove();
+                     }*/
                     var row = "<div id=\"filter-nameemployed\" class=\"alert alert-info\" role=\"alert\">" +
                             "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">" +
                             "<span aria-hidden=\"true\">&times;</span>" +
@@ -857,7 +919,15 @@
             $('#patrimonio-button').click(function () {
                 CreateFilterPat($('#patrimonio').val());
             });
-
+            $(document).on('click', '.termos-modal', function () {
+                var panel = $(this).parent().parent().parent();
+                var key = $(this).parent().find('.idkey').text();
+                $('#resultOfSearch').empty();
+                panel.removeClass('panel-default');
+                panel.addClass('panel-warning');
+                $('#resultOfSearch').append(panel);
+                $('#modal-termos').modal('show');
+            });
 
         });
     </script>

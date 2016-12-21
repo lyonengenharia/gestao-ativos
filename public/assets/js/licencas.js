@@ -1,6 +1,6 @@
 function handleData(data, textStatus, jqXHR) {
     $('#resultOfSearch').empty();
-    $.each(data, function (i, item) {
+    $.each(data.data, function (i, item) {
         var row = "<div class=\"panel panel-default\">" +
             "<div class=\"panel-heading\"><b>" +
             item.CODBEM +
@@ -22,6 +22,7 @@ function handleData(data, textStatus, jqXHR) {
     $("#buttonSearch").empty();
     $("#buttonSearch").append("Pesquisar");
 }
+
 function trataModalLicenca(data, callback) {
     var LicencasAssociadas = $('#LicencasAssociadas');
     var Empresa_Produto = $('#Empresa-Produto');

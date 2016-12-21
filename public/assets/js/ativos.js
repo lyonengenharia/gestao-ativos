@@ -12,7 +12,8 @@ function handleData(data) {
             var Assoc = '';
             var Empres = '';
             if (item.connect != null) {
-                connection = "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>";
+                connection ="<button type=\"button\" class=\"close glyphicon glyphicon-file termos-modal\" data-dismiss=\"alert\" aria-label=\"Close\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"Tooltip on left\"><span aria-hidden=\"true\"></span></button>"
+                + "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>";
             }
             var History = null;
             if (item.history.length > 0) {
@@ -84,7 +85,6 @@ function handleData(data) {
                 });
                 keys += "</div>";
             }
-
             if (item.HISTEMPRST.length == 0) {
                 Emprestimo = "<p>Item não tem hístorico de emprestimo</p>";
             } else {
@@ -508,6 +508,7 @@ function PreLoad(from, atualaryURi) {
             .fail(ErroConnect);
     }
 }
+
 //# sourceMappingURL=ativos.js.map
 
 //# sourceMappingURL=ativos.js.map
