@@ -65,7 +65,7 @@
                         ng-disabled="contatoForm.$invalid">Adicionar
                     Contato
                 </button>
-                <button class="btn btn-danger btn-block" ng-click="apagarContatos(contatos)"
+                <button type="submit" class="btn btn-danger btn-block" ng-click="apagarContatos(contatos)"
                         ng-if="isContatosSelecionados(contatos)">Apagar Contatos
                 </button>
             </form>

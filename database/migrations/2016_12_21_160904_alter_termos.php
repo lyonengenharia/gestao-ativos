@@ -15,9 +15,11 @@ class AlterTermos extends Migration
     {
         Schema::table('termos', function (Blueprint $table) {
             $table->dropColumn(['maketermo', 'pathtermo']);
+            $table->dateTime('notification_of_send')->nullable();
+            $table->dateTime('receipt')->nullable();
+            $table->text('obs')->nullable();
         });
     }
-
     /**
      * Reverse the migrations.
      *

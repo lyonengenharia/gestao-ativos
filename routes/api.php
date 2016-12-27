@@ -173,3 +173,25 @@ Route::get('costscenters/{search}',function($search){
    return $CostsCenters;
 });
 
+Route::get('ativos/termos',function (Request $request){
+    $bem = new \App\Pojo\Bem($request->get('bem')['coditem'],$request->get('bem')['codemp']);
+    $employed = new \App\Pojo\Employed($request->get('employed')['numemp'],$request->get('employed')['tipcol'],$request->get('employed')['numcol']);
+
+
+    $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
+            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
+            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
+            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
+            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD);
+    if($connect->count()>0){
+       if($connect->get()[0]->Termos()->count()>0){
+           $collectionTermos =  $connect->get()[0]->Termos()->get();
+           foreach ($collectionTermos as $key =>$conn){
+               $collectionTermos[$key]->tipoTermo = $conn->getTipoTermo()->get()[0];
+           }
+           return $collectionTermos;
+       }
+    }
+    return (array) new \App\Pojo\Response(1,null,'Não existem termos');
+});
+

@@ -1,5 +1,6 @@
 @extends('layouts.painel')
 @section('content')
+
     <style>
         .load-button {
             background-image: url('{{asset("img/load/microload.gif")}}');
@@ -18,6 +19,7 @@
             display: none;
         }
     </style>
+    <div ng-app="ativos">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default" id="search">
@@ -385,52 +387,55 @@
 
 
     {{--Modal Termos--}}
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal-termos">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Termos</h4>
-                </div>
-                <div class="modal-body">
-                    <h5><b>Lista de termos</b></h5>
-                    <div class="panel panel-default" style="margin-bottom: 5px">
-                        <div class="panel-body">
-                            Termo sessão - Enviado dia 12/01/2016 , devolvido dia 16/01/2016
-                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span>
-                            </button>
-                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            Termo sessão - Enviado dia 12/01/2016 , não devolvido
-                            <button class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-bullhorn"></span>
-                            </button>
-                            <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <h5><b>Gerar termo</b></h5>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <form>
-                                        <div class="form-group">
-                                            <label>Tipo</label>
-                                            <select class="form-control">
-                                                <option value="#">Sessão</option>
-                                                <option value="#">Devolução</option>
-                                            </select>
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-termos" ng-controller="termo" ng-init="termos={{$tipoTermos}}">
+       <div class="modal-dialog" role="document">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                               aria-hidden="true">&times;</span></button>
+                   <h4 class="modal-title">Termos</h4>
+               </div>
+               <div class="modal-body">
+                   <h5><b>Lista de termos</b></h5>
+                   {{--<div class="panel panel-default" style="margin-bottom: 5px">--}}
+                       {{--<div class="panel-body">--}}
+                           {{--Termo sessão - Enviado dia 12/01/2016 , devolvido dia 16/01/2016--}}
+                           {{--<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-eye-open"></span>--}}
+                           {{--</button>--}}
+                           {{--<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>--}}
+                           {{--</button>--}}
+                       {{--</div>--}}
+                   {{--</div>--}}
+                   {{--<div class="panel panel-default">--}}
+                       {{--<div class="panel-body">--}}
+                           {{--Termo sessão - Enviado dia 12/01/2016 , não devolvido--}}
+                           {{--<button class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-bullhorn"></span>--}}
+                           {{--</button>--}}
+                           {{--<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span>--}}
+                           {{--</button>--}}
+                       {{--</div>--}}
+                   {{--</div>--}}
+                   <div id="list-termos">
+                   </div>
+                   <h5><b>Gerar termo</b></h5>
+                   <div class="row">
+                       <div class="col-md-12">
+                           <div class="panel panel-default">
+                               <div class="panel-body">
+
+                                   <form name="novoTermo">
+                                       <div class="form-group">
+                                           <label>Tipo</label>
+                                           <select class="form-control" name="tipo" ng-model="termo.tipo" ng-options="termo.name for termo in termos" ng-required="true">
+                                               <option value="">Selecione um tipo </option>
+                                           </select>
+                                           <p style="margin-top: 2px">@{{ termo.tipo.description }}</p>
                                         </div>
                                         <div class="form-group">
                                             <label>Observação</label>
-                                            <textarea rows="5" class="form-control"></textarea>
+                                            <textarea rows="5" class="form-control" name="obs" ng-model="termo.obs"></textarea>
                                         </div>
-                                        <button class="btn btn-primary">Salvar</button>
+                                        <button class="btn btn-primary" ng-click="gerarTermo(termo)">Salvar</button>
                                     </form>
                                 </div>
                             </div>
@@ -444,8 +449,8 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    </div>
     <script>
-
         $(document).ready(function () {
             var URLUPDATE = '{{url('ativos/search')}}';
             $.ajaxSetup({
@@ -921,15 +926,17 @@
             });
             $(document).on('click', '.termos-modal', function () {
                 var panel = $(this).parent().parent().parent();
-                var key = $(this).parent().find('.idkey').text();
                 $('#resultOfSearch').empty();
                 panel.removeClass('panel-default');
                 panel.addClass('panel-warning');
                 $('#resultOfSearch').append(panel);
                 $('#modal-termos').modal('show');
+                getTermos('{{url('api/ativos/termos')}}');
             });
 
         });
     </script>
+    <script src="{{ asset('assets/js/angular.min.js')}}"></script>
     <script src="{{asset('assets/js/ativos.js')}}"></script>
+
 @endsection

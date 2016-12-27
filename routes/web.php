@@ -38,6 +38,8 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/ativos/state/', 'AtivosController@GetState');
     Route::get('/ativos/historico/', 'AtivosController@history');
     Route::post('/ativos/state/', 'AtivosController@State');
+    Route::post('/ativos/termo/novo', 'AtivosController@termoNovo');
+    Route::get('/ativos/termos','AtivosController@termos');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
@@ -82,7 +84,9 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 });
 
 Route::get('/teste',function (){
-    return view("teste");
+    //return view("teste");
+    $Conect = \App\Connect::find(5035);
+    dd($Conect->Termos()->where('tipotermo_id','=',1)->count());
 });
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
