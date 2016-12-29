@@ -32,9 +32,9 @@ Route::get('/licencas/associadas/{patrimonio}/{empresa}', function (Request $req
         return [];
     $BensKeys = \App\BensKeys::select(["benskeys.id",
         "key_id", "benskeys.E670BEM_CODBEM",
-        "E070EMP_CODEMP","keys.id as keyid" ,"keys.key",
-        "produtos.id as Proid","produtos.model",
-        "empresas.id as Empid","empresas.name"
+        "E070EMP_CODEMP", "keys.id as keyid", "keys.key",
+        "produtos.id as Proid", "produtos.model",
+        "empresas.id as Empid", "empresas.name"
     ])->join('keys', function ($inner) {
         $inner->on('keys.id', '=', 'benskeys.key_id');
     })->join('produtos', function ($inner) {
@@ -47,18 +47,18 @@ Route::get('/licencas/associadas/{patrimonio}/{empresa}', function (Request $req
 /**
  * Retonar todos os bens associados para id da licença
  */
-Route::get('licencas/associadas/{key}',function (Request $request,$key){
+Route::get('licencas/associadas/{key}', function (Request $request, $key) {
     $itens = DB::table('benskeys')
-             ->select(['keys.key','keys.quantity','keys.in_use','produtos.model','empresas.name','benskeys.E670BEM_CODBEM','benskeys.E070EMP_CODEMP'])
-             ->join('keys',function ($inner){
-                 $inner->on('keys.ID','=','benskeys.key_id');
-             })->join('produtos',function ($inner){
-                 $inner->on('produtos.id','=','keys.produto_id');
-             })->join('empresas',function ($inner){
-                 $inner->on('empresas.id','=','produtos.empresa_id');
-             })->where('benskeys.key_id','=',$key)->get();
+        ->select(['keys.key', 'keys.quantity', 'keys.in_use', 'produtos.model', 'empresas.name', 'benskeys.E670BEM_CODBEM', 'benskeys.E070EMP_CODEMP'])
+        ->join('keys', function ($inner) {
+            $inner->on('keys.ID', '=', 'benskeys.key_id');
+        })->join('produtos', function ($inner) {
+            $inner->on('produtos.id', '=', 'keys.produto_id');
+        })->join('empresas', function ($inner) {
+            $inner->on('empresas.id', '=', 'produtos.empresa_id');
+        })->where('benskeys.key_id', '=', $key)->get();
 
-    foreach ($itens as $key => $iten){
+    foreach ($itens as $key => $iten) {
 
         $comp = DB::connection('sapiens')->table("E670BEM")
             ->select([
@@ -112,49 +112,49 @@ Route::get('licencas/associadas/{key}',function (Request $request,$key){
             ->where('E670BEM.CODEMP', '=', $iten->E070EMP_CODEMP)
             ->get();
 
-        $comp[0]->DESCCU = iconv('windows-1252','utf-8', $comp[0]->DESCCU);
-        $comp[0]->DESBEM = iconv('windows-1252','utf-8', $comp[0]->DESBEM);
-        $comp[0]->DESESP = iconv('windows-1252','utf-8', $comp[0]->DESESP);
-        $comp[0]->NOMEMP = iconv('windows-1252','utf-8', $comp[0]->NOMEMP);
-        $comp[0]->ABRESP = iconv('windows-1252','utf-8', $comp[0]->ABRESP);
+        $comp[0]->DESCCU = iconv('windows-1252', 'utf-8', $comp[0]->DESCCU);
+        $comp[0]->DESBEM = iconv('windows-1252', 'utf-8', $comp[0]->DESBEM);
+        $comp[0]->DESESP = iconv('windows-1252', 'utf-8', $comp[0]->DESESP);
+        $comp[0]->NOMEMP = iconv('windows-1252', 'utf-8', $comp[0]->NOMEMP);
+        $comp[0]->ABRESP = iconv('windows-1252', 'utf-8', $comp[0]->ABRESP);
         $itens[$key]->iten = $comp;
     }
     return $itens;
 });
-Route::get('colaboradores/{name}/{tipo}/{emp}',function ($name,$tipo,$emp){
+Route::get('colaboradores/{name}/{tipo}/{emp}', function ($name, $tipo, $emp) {
     $colaboradores = DB::connection('vetorh')->table('R034FUN')
-        ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
-        ->join('R010SIT',function ($inner){
-            $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+        ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+        ->join('R010SIT', function ($inner) {
+            $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
         })
-        ->where('NUMEMP','=',$emp)
-        ->where('TIPCOL','=',$tipo)
-        ->where('NOMFUN','like',"$name%")
+        ->where('NUMEMP', '=', $emp)
+        ->where('TIPCOL', '=', $tipo)
+        ->where('NOMFUN', 'like', "$name%")
         ->limit(10)->get();
-    foreach ($colaboradores as $key => $value){
-        $colaboradores[$key]->value = iconv('windows-1252','utf-8',$colaboradores[$key]->value);
+    foreach ($colaboradores as $key => $value) {
+        $colaboradores[$key]->value = iconv('windows-1252', 'utf-8', $colaboradores[$key]->value);
     }
     return ($colaboradores);
 });
-Route::get('devolucao/{codbem}/{codbememp}',function ($codbem,$codbememp){
-    $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM','=',$codbem)
-        ->where('E070EMP_CODEMP','=',$codbememp)
-        ->where('data_entrada','=',null);
-    if($VerificaEmprestimo->count()){
+Route::get('devolucao/{codbem}/{codbememp}', function ($codbem, $codbememp) {
+    $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $codbem)
+        ->where('E070EMP_CODEMP', '=', $codbememp)
+        ->where('data_entrada', '=', null);
+    if ($VerificaEmprestimo->count()) {
         $VerificaEmprestimo = $VerificaEmprestimo->get();
-        $VerificaEmprestimo[0]->data_out= $VerificaEmprestimo[0]->data_saida->format('d/m/Y H:i');
+        $VerificaEmprestimo[0]->data_out = $VerificaEmprestimo[0]->data_saida->format('d/m/Y H:i');
         $Colaborador = DB::connection('vetorh')->table('R034FUN')
-            ->select(['NUMEMP','TIPCOL','NUMCAD as id','NOMFUN as value','DESSIT','SITAFA'])
-            ->join('R010SIT',function ($inner){
-                $inner->on('R010SIT.CODSIT','=','R034FUN.SITAFA');
+            ->select(['NUMEMP', 'TIPCOL', 'NUMCAD as id', 'NOMFUN as value', 'DESSIT', 'SITAFA'])
+            ->join('R010SIT', function ($inner) {
+                $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
             })
-            ->where('NUMEMP','=',$VerificaEmprestimo[0]->R034FUN_NUMEMP)
-            ->where('TIPCOL','=',$VerificaEmprestimo[0]->R034FUN_TIPCOL)
-            ->where('NUMCAD','=',$VerificaEmprestimo[0]->R034FUN_NUMCAD);
-        if($Colaborador->count()){
+            ->where('NUMEMP', '=', $VerificaEmprestimo[0]->R034FUN_NUMEMP)
+            ->where('TIPCOL', '=', $VerificaEmprestimo[0]->R034FUN_TIPCOL)
+            ->where('NUMCAD', '=', $VerificaEmprestimo[0]->R034FUN_NUMCAD);
+        if ($Colaborador->count()) {
             $Colaborador = $Colaborador->get();
-            $Colaborador[0]->value = iconv('windows-1252','utf-8',$Colaborador[0]->value);
-            $Colaborador[0]->DESSIT = iconv('windows-1252','utf-8',$Colaborador[0]->DESSIT);
+            $Colaborador[0]->value = iconv('windows-1252', 'utf-8', $Colaborador[0]->value);
+            $Colaborador[0]->DESSIT = iconv('windows-1252', 'utf-8', $Colaborador[0]->DESSIT);
             $VerificaEmprestimo[0]->colaborador = $Colaborador[0];
             return $VerificaEmprestimo;
         }
@@ -162,36 +162,79 @@ Route::get('devolucao/{codbem}/{codbememp}',function ($codbem,$codbememp){
     return $VerificaEmprestimo;
 });
 
-Route::get('costscenters/{search}',function($search){
-   $CostsCenters = DB::connection('sapiens')->table('E044CCU')->where('CODCCU','like',"$search%")->get();
-   foreach ($CostsCenters as $Key => $CostCenter){
-       $CostsCenters[$Key]->DesCcu = iconv('windows-1252','utf8',$CostCenter->DesCcu);
-       $CostsCenters[$Key]->AbrCcu = iconv('windows-1252','utf8',$CostCenter->AbrCcu);
-       $CostsCenters[$Key]->id = $CostsCenters[$Key]->CodCcu;
-       $CostsCenters[$Key]->value = $CostsCenters[$Key]->CodCcu . " - " . $CostsCenters[$Key]->DesCcu ;
-   }
-   return $CostsCenters;
+Route::get('costscenters/{search}', function ($search) {
+    $CostsCenters = DB::connection('sapiens')->table('E044CCU')->where('CODCCU', 'like', "$search%")->get();
+    foreach ($CostsCenters as $Key => $CostCenter) {
+        $CostsCenters[$Key]->DesCcu = iconv('windows-1252', 'utf8', $CostCenter->DesCcu);
+        $CostsCenters[$Key]->AbrCcu = iconv('windows-1252', 'utf8', $CostCenter->AbrCcu);
+        $CostsCenters[$Key]->id = $CostsCenters[$Key]->CodCcu;
+        $CostsCenters[$Key]->value = $CostsCenters[$Key]->CodCcu . " - " . $CostsCenters[$Key]->DesCcu;
+    }
+    return $CostsCenters;
 });
 
-Route::get('ativos/termos',function (Request $request){
-    $bem = new \App\Pojo\Bem($request->get('bem')['coditem'],$request->get('bem')['codemp']);
-    $employed = new \App\Pojo\Employed($request->get('employed')['numemp'],$request->get('employed')['tipcol'],$request->get('employed')['numcol']);
-
-
-    $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
-            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
-            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
-            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
-            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD);
-    if($connect->count()>0){
-       if($connect->get()[0]->Termos()->count()>0){
-           $collectionTermos =  $connect->get()[0]->Termos()->get();
-           foreach ($collectionTermos as $key =>$conn){
-               $collectionTermos[$key]->tipoTermo = $conn->getTipoTermo()->get()[0];
-           }
-           return $collectionTermos;
-       }
+Route::get('ativos/termos', function (Request $request) {
+    $bem = new \App\Pojo\Bem($request->get('bem')['coditem'], $request->get('bem')['codemp']);
+    $employed = new \App\Pojo\Employed($request->get('employed')['numemp'], $request->get('employed')['tipcol'], $request->get('employed')['numcol']);
+    $connect = \App\Connect::where('E670BEM_CODBEM', '=', $bem->CodBem)
+        ->where('E070EMP_CODEMP', '=', $bem->CodEmp)
+        ->where('R034FUN_NUMEMP', '=', $employed->NUMEMP)
+        ->where('R034FUN_TIPCOL', '=', $employed->TIPCOL)
+        ->where('R034FUN_NUMCAD', '=', $employed->NUMCAD);
+    if ($connect->count() > 0) {
+        if ($connect->get()[0]->Termos()->count() > 0) {
+            $collectionTermos = $connect->get()[0]->Termos()->get();
+            foreach ($collectionTermos as $key => $conn) {
+                $collectionTermos[$key]->tipoTermo = $conn->getTipoTermo()->get()[0];
+            }
+            return (array)new \App\Pojo\Response(0, $collectionTermos, null);
+            //return $collectionTermos;
+        }
     }
-    return (array) new \App\Pojo\Response(1,null,'Não existem termos');
+    return (array)new \App\Pojo\Response(1, null, 'Não existem termos');
+});
+
+Route::get('ativos/termos/notificar/{termo}', function ($termo) {
+    $termo = \App\Termo::find($termo);
+    if (empty($termo)) {
+        return (array)new \App\Pojo\Response(1, null, 'Termo não encontrado');
+    }
+    if (empty($termo->getConnect()->count())) {
+        return (array)new \App\Pojo\Response(1, null, 'Termo não está associado');
+    }
+    if (!Storage::exists('public/termos/' . $termo->id . '.pdf')){
+        $testeGet = get_headers("http://gestaoativos.lyon.local.int/termos/" . $termo->id);
+        if ($testeGet[0] != 'HTTP/1.0 302 Found') {
+            return (array)new \App\Pojo\Response(1, null, $testeGet[0]);
+        }
+        //Gerar arquivo
+        if(empty($termo->notification_of_send)){
+            $termo->notification_of_send(new \Carbon\Carbon());
+        }else{
+            $termo->notification_of_send(new \Carbon\Carbon());
+        }
+
+        $geraFile = exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/" . $termo->id . " ../storage/app/public/termos/" . $termo->id . ".pdf");
+         if (strstr($geraFile, 'Done' != 'Done')) {
+            return (array)new \App\Pojo\Response(1, null, 'Erro na geração do arquivo.');
+        }
+    }
+    //enviar por email
+    $employed = new \App\Pojo\Employed($termo->getConnect()->get()[0]->R034FUN_NUMEMP,$termo->getConnect()->get()[0]->R034FUN_TIPCOL,$termo->getConnect()->get()[0]->R034FUN_NUMCAD);
+    $Data = new \App\Pojo\Message();
+    $Data->setTitle("Termo de ".$termo->getTipoTermo()->get()[0]->name);
+    $Data->setSubTitle($termo->getTipoTermo()->get()[0]->description);
+    $bodyMessage = $termo->getTipoTermo()->get()[0]->mail_message;
+    $bodyMessage = str_replace('<user>',$employed->NOMFUN,$bodyMessage);
+    $bodyMessage = str_replace('<item>',$termo->getConnect()->get()[0]->E670BEM_CODBEM,$bodyMessage);
+    $Data->setBody($bodyMessage);
+    $Data->setAttach("public/termos/" . $termo->id . ".pdf");
+    $message = new \App\Mail\Information($Data);
+    $message->to([$employed->EMACOM,$employed->EMAPAR]);
+    $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
+    \Illuminate\Support\Facades\Mail::send($message);
+    //echo $bodyMessage;
+
+
 });
 

@@ -933,6 +933,10 @@
                 $('#modal-termos').modal('show');
                 getTermos('{{url('api/ativos/termos')}}');
             });
+            $(document).on('click','.notification-termo',function () {
+               idTermo = $(this).parent().find('.id-termo').text();
+               notificationTermo(idTermo,'{{url('api/ativos/termos/notificar')}}');
+            });
 
         });
     </script>

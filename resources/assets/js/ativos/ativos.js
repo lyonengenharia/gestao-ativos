@@ -533,22 +533,21 @@ function getTermos(url) {
         datType: 'json',
         success: function (data) {
             $('#list-termos').empty();
-            if (data.length > 1) {
-                console.log(data.length);
-                $.each(data, function (i, item) {
-                    console.log(item);
+            console.log(data);
+            if (data.error==0) {
+                $.each(data.data, function (i, item) {
                     enviado = item.notification_of_send != null ? 'Enviado dia ' + item.notification_of_send : 'Não enviado';
                     devolvido = item.receipt != null ? 'Retornado dia ' + item.receipt : 'Não recebido';
                     row = "";
                     row += '<div class="panel panel-default" style="margin-bottom: 5px">'
                         + '<div class="panel-body">'
-                        + item.tipoTermo.description + ' /  ' + enviado + ',' + devolvido
-                        + ' <button class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-bullhorn"></span></button> '
+                        + '<span class="id-termo" style="display: none">'+item.id+'</span>'
+                        + item.tipoTermo.name + ' /  ' + enviado + ',' + devolvido
+                        + ' <button class="btn btn-warning btn-xs notification-termo"><span class="glyphicon glyphicon-bullhorn"></span></button> '
                         + ' <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span></button> '
                         + '</div>'
                         + '</div>';
                     $('#list-termos').append(row);
-
                 });
             }else{
                 $('#list-termos').append("<p>"+data.msg+"</p>");
@@ -557,6 +556,18 @@ function getTermos(url) {
     });
     //console.log(bem);
     //console.log(employed);
+}
+
+
+function notificationTermo(termo,url) {
+    $.ajax({
+        url: url+'/'+termo,
+        type: 'get',
+        //datType: 'json',
+        success: function (data) {
+           console.log(data);
+        }
+    });
 }
 
 angular.module('ativos', ['ngMessages']);

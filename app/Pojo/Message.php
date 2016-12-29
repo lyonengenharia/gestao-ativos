@@ -14,7 +14,7 @@ class Message
     private $Title;
     private $SubTitle;
     private $Body;
-    private $Attach;
+    private $Attach = null;
 
     /**
      * @return mixed

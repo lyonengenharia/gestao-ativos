@@ -11,7 +11,8 @@
 |
 */
 use \Illuminate\Support\Facades\Mail;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return view('welcome');
@@ -81,12 +82,23 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('importacao/process', 'Import@Process')->middleware('can:ativos');
     Route::delete('importacao/delete', 'Import@Delete')->middleware('can:ativos');
 
+
+
 });
 
+//Termos
+Route::get('termos/emprestimo/{id}','TermosController@supply');
+Route::get('termos/{id}','TermosController@direction');
+
 Route::get('/teste',function (){
-    //return view("teste");
-    $Conect = \App\Connect::find(5035);
-    dd($Conect->Termos()->where('tipotermo_id','=',1)->count());
+
+
+    //$view = View('dashboard.dashboard');
+    //$view = $view->render();
+    //var_dump($view);
+    //\Illuminate\Support\Facades\Storage::disk('public')->put('temp.html', $view);
+    //var_dump(exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/emprestimo termo.pdf"));
+
 });
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
