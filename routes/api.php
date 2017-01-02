@@ -186,11 +186,14 @@ Route::get('ativos/termos', function (Request $request) {
             $collectionTermos = $connect->get()[0]->Termos()->get();
             foreach ($collectionTermos as $key => $conn) {
                 $collectionTermos[$key]->tipoTermo = $conn->getTipoTermo()->get()[0];
+                $collectionTermos[$key]->notification = $conn->getNotification()->orderBy('created_at','DESC')->get();
+                $collectionTermos[$key]->notificationQtd = $conn->getNotification()->count();
             }
             return (array)new \App\Pojo\Response(0, $collectionTermos, null);
-            //return $collectionTermos;
+            //dd($collectionTermos);
         }
     }
+
     return (array)new \App\Pojo\Response(1, null, 'Não existem termos');
 });
 
@@ -208,19 +211,21 @@ Route::get('ativos/termos/notificar/{termo}', function ($termo) {
             return (array)new \App\Pojo\Response(1, null, $testeGet[0]);
         }
         //Gerar arquivo
-        if(empty($termo->notification_of_send)){
-            $termo->notification_of_send(new \Carbon\Carbon());
-        }else{
-            $termo->notification_of_send(new \Carbon\Carbon());
-        }
-
         $geraFile = exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/" . $termo->id . " ../storage/app/public/termos/" . $termo->id . ".pdf");
          if (strstr($geraFile, 'Done' != 'Done')) {
             return (array)new \App\Pojo\Response(1, null, 'Erro na geração do arquivo.');
         }
     }
-    //enviar por email
     $employed = new \App\Pojo\Employed($termo->getConnect()->get()[0]->R034FUN_NUMEMP,$termo->getConnect()->get()[0]->R034FUN_TIPCOL,$termo->getConnect()->get()[0]->R034FUN_NUMCAD);
+
+    //Notification
+    $notification = new \App\NotificationTermos();
+    $notification->termo_id = $termo->id;
+    $notification->email_notification = $employed->EMACOM;
+    $notification->save();
+
+    //enviar por email
+
     $Data = new \App\Pojo\Message();
     $Data->setTitle("Termo de ".$termo->getTipoTermo()->get()[0]->name);
     $Data->setSubTitle($termo->getTipoTermo()->get()[0]->description);
@@ -233,8 +238,8 @@ Route::get('ativos/termos/notificar/{termo}', function ($termo) {
     $message->to([$employed->EMACOM,$employed->EMAPAR]);
     $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
     \Illuminate\Support\Facades\Mail::send($message);
-    //echo $bodyMessage;
 
 
+    return (array) new \App\Pojo\Response(0,null,'Notificação enviada');
 });
 

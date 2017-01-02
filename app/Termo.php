@@ -12,4 +12,7 @@ class Termo extends Model
     public function getConnect(){
         return $this->belongsToMany('App\Connect');
     }
+    public function getNotification(){
+        return $this->hasMany('App\NotificationTermos');
+    }
 }

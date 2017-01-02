@@ -88,6 +88,8 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
 
 //Termos
 Route::get('termos/emprestimo/{id}','TermosController@supply');
+Route::get('termos/download/{id}','TermosController@download');
+Route::get('termos/devolucao/{id}','TermosController@devolution');
 Route::get('termos/{id}','TermosController@direction');
 
 Route::get('/teste',function (){

@@ -34,11 +34,12 @@ class Information extends Mailable
      */
     public function build()
     {
+        $this->subject($this->Data->getTitle());
         if(empty($this->Data->getAttach()))
             return $this->view('mail.layout');
 
         return $this->view('mail.layout')
-            ->attachData(Storage::get($this->Data->getAttach()),'termpo.pdf',[
+            ->attachData(Storage::get($this->Data->getAttach()),'termo.pdf',[
                 'mime' => 'application/pdf',
             ]);
 

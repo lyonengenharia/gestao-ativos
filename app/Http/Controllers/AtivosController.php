@@ -411,6 +411,7 @@ class AtivosController extends Controller
     }
 
     public function termoNovo(Request $request){
+
         $bem = new Bem($request->get(1)['coditem'],$request->get(1)['codemp']);
         $employed = new Employed($request->get(2)['numemp'],$request->get(2)['tipcol'],$request->get(2)['numcol']);
         $tipoTermo = \App\tipotermo::find($request->get(0)['tipo']['id']);
@@ -431,7 +432,7 @@ class AtivosController extends Controller
 
         $termo = new \App\Termo();
         $termo->tipotermo_id = $tipoTermo->id;
-        $termo->obs = $request->get(0)['tipo']['description'];
+        $termo->obs = $request->get(0)['obs'];
         $termo->save();
         $connect->get()[0]->Termos()->attach($termo);
         return (array) (new \App\Pojo\Response(0,null,'Termo inserido com sucesso!'));

@@ -462,9 +462,8 @@ function updatesearch(url, data) {
 }
 function DateUsTODateBr(date, time) {
     var d = new Date(date);
-    var hora = time == true ? d.getHours() + ":" + d.getMinutes() : "";
+    var hora = time == true ? d.getHours() + ":" + (d.getMinutes() <= 9? '0'+d.getMinutes():d.getMinutes()) : "";
     return d.toLocaleDateString() + " " + hora;
-
 }
 
 function CreateFilterPat(number) {
@@ -533,18 +532,25 @@ function getTermos(url) {
         datType: 'json',
         success: function (data) {
             $('#list-termos').empty();
-            console.log(data);
             if (data.error==0) {
                 $.each(data.data, function (i, item) {
-                    enviado = item.notification_of_send != null ? 'Enviado dia ' + item.notification_of_send : 'Não enviado';
+                    enviado = 'Não enviado';
+                    if(item.notification.length >0){
+                        enviado = 'Enviado dia ' + DateUsTODateBr(item.notification[0].created_at,true);
+                    }
                     devolvido = item.receipt != null ? 'Retornado dia ' + item.receipt : 'Não recebido';
                     row = "";
                     row += '<div class="panel panel-default" style="margin-bottom: 5px">'
                         + '<div class="panel-body">'
                         + '<span class="id-termo" style="display: none">'+item.id+'</span>'
                         + item.tipoTermo.name + ' /  ' + enviado + ',' + devolvido
-                        + ' <button class="btn btn-warning btn-xs notification-termo"><span class="glyphicon glyphicon-bullhorn"></span></button> '
-                        + ' <button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-print"></span></button> '
+                        + '<div class="row">'
+                        + '<div class="col-lg-12">'
+                        + ' <button class="btn btn-default notification-termo btn-sm"><span class="glyphicon glyphicon-bullhorn"> <span class="badge">'+item.notificationQtd+'</span></span></button> '
+                        + ' <button class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-upload"></span></button> '
+                        + ' <a target="_blank" href="/termos/download/'+item.id+'" class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a> '
+                        + '</div>'
+                        + '</div>'
                         + '</div>'
                         + '</div>';
                     $('#list-termos').append(row);
@@ -563,9 +569,24 @@ function notificationTermo(termo,url) {
     $.ajax({
         url: url+'/'+termo,
         type: 'get',
-        //datType: 'json',
+        datType: 'json',
         success: function (data) {
-           console.log(data);
+           if(data.error){
+               swal(
+                   'Oops...',
+                   data.msg
+                   ,
+                   'error'
+               )
+           }else{
+               swal(
+                   'Good job!',
+                   data.msg,
+                   'success'
+               );
+               getTermos('api/ativos/termos');
+           }
+
         }
     });
 }
