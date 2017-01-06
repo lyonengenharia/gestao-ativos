@@ -180,7 +180,8 @@ Route::get('ativos/termos', function (Request $request) {
         ->where('E070EMP_CODEMP', '=', $bem->CodEmp)
         ->where('R034FUN_NUMEMP', '=', $employed->NUMEMP)
         ->where('R034FUN_TIPCOL', '=', $employed->TIPCOL)
-        ->where('R034FUN_NUMCAD', '=', $employed->NUMCAD);
+        ->where('R034FUN_NUMCAD', '=', $employed->NUMCAD)
+        ->where('data_out','=',null);
     if ($connect->count() > 0) {
         if ($connect->get()[0]->Termos()->count() > 0) {
             $collectionTermos = $connect->get()[0]->Termos()->get();
@@ -206,12 +207,14 @@ Route::get('ativos/termos/notificar/{termo}', function ($termo) {
         return (array)new \App\Pojo\Response(1, null, 'Termo não está associado');
     }
     if (!Storage::exists('public/termos/' . $termo->id . '.pdf')){
-        $testeGet = get_headers("http://gestaoativos.lyon.local.int/termos/" . $termo->id);
+        //$testeGet = get_headers("http://gestaoativos.lyon.local.int/termos/" . $termo->id);
+        $testeGet = get_headers(url('termos')."/" . $termo->id);
         if ($testeGet[0] != 'HTTP/1.0 302 Found') {
             return (array)new \App\Pojo\Response(1, null, $testeGet[0]);
         }
         //Gerar arquivo
-        $geraFile = exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/" . $termo->id . " ../storage/app/public/termos/" . $termo->id . ".pdf");
+        //$geraFile = exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/" . $termo->id . " ../storage/app/public/termos/" . $termo->id . ".pdf");
+        $geraFile = exec("xvfb-run wkhtmltopdf ".url('termos/')."/". $termo->id . " ../storage/app/public/termos/" . $termo->id . ".pdf");
          if (strstr($geraFile, 'Done' != 'Done')) {
             return (array)new \App\Pojo\Response(1, null, 'Erro na geração do arquivo.');
         }
@@ -225,7 +228,6 @@ Route::get('ativos/termos/notificar/{termo}', function ($termo) {
     $notification->save();
 
     //enviar por email
-
     $Data = new \App\Pojo\Message();
     $Data->setTitle("Termo de ".$termo->getTipoTermo()->get()[0]->name);
     $Data->setSubTitle($termo->getTipoTermo()->get()[0]->description);
@@ -235,11 +237,19 @@ Route::get('ativos/termos/notificar/{termo}', function ($termo) {
     $Data->setBody($bodyMessage);
     $Data->setAttach("public/termos/" . $termo->id . ".pdf");
     $message = new \App\Mail\Information($Data);
-    $message->to([$employed->EMACOM,$employed->EMAPAR]);
+    $from = [];
+    if(!empty(trim($employed->EMACOM))){
+        array_push($from,$employed->EMACOM);
+    }
+    if(!empty(trim($employed->EMAPAR))){
+        array_push($from,$employed->EMAPAR);
+    }
+    if(count($from)==0){
+        return (array)new \App\Pojo\Response(1, null, 'Usuário sem e-mail cadastrado no gestaão de pessoas.');
+    }
+    $message->to($from);
     $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
     \Illuminate\Support\Facades\Mail::send($message);
-
-
     return (array) new \App\Pojo\Response(0,null,'Notificação enviada');
 });
 

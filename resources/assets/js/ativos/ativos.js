@@ -522,7 +522,7 @@ function getTermos(url) {
     employed = {
         numemp: numemp[0].innerHTML,
         sitafa: sitafa[0].innerHTML,
-        tipcol: sitafa[0].innerHTML,
+        tipcol: tipcol[0].innerHTML,
         numcol: numcol[0].innerHTML
     };
     $.ajax({
@@ -608,7 +608,7 @@ angular.module('ativos').controller('termo', function ($http, $scope) {
         employed = {
             numemp: numemp[0].innerHTML,
             sitafa: sitafa[0].innerHTML,
-            tipcol: sitafa[0].innerHTML,
+            tipcol: tipcol[0].innerHTML,
             numcol: numcol[0].innerHTML
         };
         if (!$scope.novoTermo.tipo.$error.required) {

@@ -1,7 +1,6 @@
 function handleData(data) {
 
 
-
     $('#resultOfSearch').empty();
     if (data.data.length > 0) {
         $.each(data.data, function (i, item) {
@@ -12,8 +11,9 @@ function handleData(data) {
             var Assoc = '';
             var Empres = '';
             if (item.connect != null) {
-                connection ="<button type=\"button\" class=\"close glyphicon glyphicon-file termos-modal\" data-dismiss=\"alert\" aria-label=\"Close\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"Tooltip on left\"><span aria-hidden=\"true\"></span></button>"
-                + "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>";
+                connection = "<button type=\"button\" class=\"close glyphicon glyphicon-file termos-modal\" data-dismiss=\"alert\" aria-label=\"Close\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"Tooltip on left\"><span aria-hidden=\"true\"></span></button>"
+                    + "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>"
+                    + "<div style='display: none'><span class='assoc-numemp'>" + item.connect[0].NUMEMP + "</span><span class='assoc-sitafa'>" + item.connect[0].SITAFA + "</span><span class='assoc-tipcol'>" + item.connect[0].TIPCOL + "</span><span class='assoc-id'>" + item.connect[0].id + "</span> </div> ";
             }
             var History = null;
             if (item.history.length > 0) {
@@ -289,7 +289,7 @@ function Devolucao(url, data) {
             url = url.replace('devolucao', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
-        },complete : function () {
+        }, complete: function () {
             $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
@@ -338,7 +338,7 @@ function Associar(url, data) {
             url = url.replace('associar', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
-        },complete : function () {
+        }, complete: function () {
             $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
@@ -367,7 +367,7 @@ function Dissociar(url, data) {
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
             $('#modal-desassociar').modal('hide');
-        },complete : function () {
+        }, complete: function () {
             $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
@@ -462,9 +462,8 @@ function updatesearch(url, data) {
 }
 function DateUsTODateBr(date, time) {
     var d = new Date(date);
-    var hora = time == true ? d.getHours() + ":" + d.getMinutes() : "";
+    var hora = time == true ? d.getHours() + ":" + (d.getMinutes() <= 9? '0'+d.getMinutes():d.getMinutes()) : "";
     return d.toLocaleDateString() + " " + hora;
-
 }
 
 function CreateFilterPat(number) {
@@ -483,6 +482,7 @@ function CreateFilterPat(number) {
         $('#filter').append(row);
     } else {
         $('#filter #filter-pat').remove();
+
     }
 }
 function PreLoad(from, atualaryURi) {
@@ -508,7 +508,138 @@ function PreLoad(from, atualaryURi) {
             .fail(ErroConnect);
     }
 }
+function getTermos(url) {
+    item = document.getElementsByClassName('cod-bem');
+    codbememp = document.getElementsByClassName('result-emp');
+    numemp = document.getElementsByClassName('assoc-numemp');
+    sitafa = document.getElementsByClassName('assoc-sitafa');
+    tipcol = document.getElementsByClassName('assoc-tipcol');
+    numcol = document.getElementsByClassName('assoc-id');
+    bem = {
+        coditem: item[0].innerHTML,
+        codemp: codbememp[0].innerHTML
+    };
+    employed = {
+        numemp: numemp[0].innerHTML,
+        sitafa: sitafa[0].innerHTML,
+        tipcol: tipcol[0].innerHTML,
+        numcol: numcol[0].innerHTML
+    };
+    $.ajax({
+        url: url,
+        type: 'get',
+        data: {bem, employed},
+        datType: 'json',
+        success: function (data) {
+            $('#list-termos').empty();
+            if (data.error==0) {
+                $.each(data.data, function (i, item) {
+                    enviado = 'Não enviado';
+                    if(item.notification.length >0){
+                        enviado = 'Enviado dia ' + DateUsTODateBr(item.notification[0].created_at,true);
+                    }
+                    devolvido = item.receipt != null ? 'Retornado dia ' + item.receipt : 'Não recebido';
+                    row = "";
+                    row += '<div class="panel panel-default" style="margin-bottom: 5px">'
+                        + '<div class="panel-body">'
+                        + '<span class="id-termo" style="display: none">'+item.id+'</span>'
+                        + item.tipoTermo.name + ' /  ' + enviado + ',' + devolvido
+                        + '<div class="row">'
+                        + '<div class="col-lg-12">'
+                        + ' <button class="btn btn-default notification-termo btn-sm"><span class="glyphicon glyphicon-bullhorn"> <span class="badge">'+item.notificationQtd+'</span></span></button> '
+                        + ' <button class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-upload"></span></button> '
+                        + ' <a target="_blank" href="/termos/download/'+item.id+'" class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a> '
+                        + '</div>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+                    $('#list-termos').append(row);
+                });
+            }else{
+                $('#list-termos').append("<p>"+data.msg+"</p>");
+            }
+        }
+    });
+    //console.log(bem);
+    //console.log(employed);
+}
 
+
+function notificationTermo(termo,url) {
+    $.ajax({
+        url: url+'/'+termo,
+        type: 'get',
+        datType: 'json',
+        success: function (data) {
+           if(data.error){
+               swal(
+                   'Oops...',
+                   data.msg
+                   ,
+                   'error'
+               )
+           }else{
+               swal(
+                   'Good job!',
+                   data.msg,
+                   'success'
+               );
+               getTermos('api/ativos/termos');
+           }
+
+        }
+    });
+}
+
+angular.module('ativos', ['ngMessages']);
+angular.module('ativos').controller('termo', function ($http, $scope) {
+    $scope.gerarTermo = function (termo) {
+
+        item = angular.element(document.getElementsByClassName('cod-bem'));
+        codbememp = angular.element(document.getElementsByClassName('result-emp'));
+        numemp = angular.element(document.getElementsByClassName('assoc-numemp'));
+        sitafa = angular.element(document.getElementsByClassName('assoc-sitafa'));
+        tipcol = angular.element(document.getElementsByClassName('assoc-tipcol'));
+        numcol = angular.element(document.getElementsByClassName('assoc-id'));
+        bem = {
+            coditem: item[0].innerHTML,
+            codemp: codbememp[0].innerHTML
+        };
+        employed = {
+            numemp: numemp[0].innerHTML,
+            sitafa: sitafa[0].innerHTML,
+            tipcol: tipcol[0].innerHTML,
+            numcol: numcol[0].innerHTML
+        };
+        if (!$scope.novoTermo.tipo.$error.required) {
+            $http.post('ativos/termo/novo', [termo, bem, employed]).then(function successCallback(response) {
+                if(response.data.error){
+                    angular.element(
+                        swal(
+                            'Oops...',
+                            response.data.msg
+                            ,
+                            'error'
+                        )
+                    );
+                }else{
+                    angular.element(
+                        swal(
+                            'Good job!',
+                            response.data.msg,
+                            'success'
+                        )
+                    );
+                    getTermos('api/ativos/termos');
+
+                }
+            });
+        }
+    }
+});
+angular.module('ativos').controller('dataSearch', function ($http, $scope) {
+
+});
 //# sourceMappingURL=ativos.js.map
 
 //# sourceMappingURL=ativos.js.map

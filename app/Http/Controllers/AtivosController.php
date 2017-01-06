@@ -421,15 +421,12 @@ class AtivosController extends Controller
             ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
             ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
             ->where('data_out','=',null);
-
         if($connect->count()==0){
             return (array) (new \App\Pojo\Response(1,null,'Esse item e o colaborador não estão associados.'));
-
         }
         if($connect->get()[0]->Termos()->where('tipotermo_id','=',$tipoTermo->id)->count()> 0){
             return (array) (new \App\Pojo\Response(1,null,'Já existe esse tipo de termo cadastrado.'));
         }
-
         $termo = new \App\Termo();
         $termo->tipotermo_id = $tipoTermo->id;
         $termo->obs = $request->get(0)['obs'];
