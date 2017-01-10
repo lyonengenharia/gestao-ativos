@@ -42,6 +42,9 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::post('/ativos/termo/novo', 'AtivosController@termoNovo');
     Route::get('/ativos/termos','AtivosController@termos');
 
+    //Termos
+    Route::post('/termos/upload/','TermosController@import');
+
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
     Route::get('/licencas/licenca', ['uses' => 'LicencasController@licenca'])->middleware('can:ativos');

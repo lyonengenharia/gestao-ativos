@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "scripts": {
     "prod": "gulp --production",
     "dev": "gulp watch",
@@ -12,12 +12,11 @@
     "jquery": "^3.1.0",
     "laravel-elixir": "^6.0.0-9",
     "laravel-elixir-vue-2": "^0.2.0",
-    "laravel-elixir-webpack-official": "^1.0.2",
+    "laravel-elixir-webpack-official": "^1.0.10",
     "lodash": "^4.16.2",
     "vue": "^2.0.1",
     "vue-resource": "^1.0.3",
     "sweetalert2": "6.1.1",
-
     "angular": "^1.6.0",
     "angular-messages":"^1.6.0"
 

@@ -538,7 +538,9 @@ function getTermos(url) {
                     if(item.notification.length >0){
                         enviado = 'Enviado dia ' + DateUsTODateBr(item.notification[0].created_at,true);
                     }
-                    devolvido = item.receipt != null ? 'Retornado dia ' + item.receipt : 'Não recebido';
+                    devolvido = item.signtermo != 0 ? 'Recebido' : 'Não recebido';
+                    buttonDevolvidoDisabled = item.signtermo != 0 ? 'disabled' : '';
+                    buttonDevolvido = item.signtermo != 0 ? ' <a title="download termo assinado" target="_blank" href="/termos/download/'+item.id+'-'+item.tipotermo_id+'" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a>' : '';
                     row = "";
                     row += '<div class="panel panel-default" style="margin-bottom: 5px">'
                         + '<div class="panel-body">'
@@ -546,9 +548,10 @@ function getTermos(url) {
                         + item.tipoTermo.name + ' /  ' + enviado + ',' + devolvido
                         + '<div class="row">'
                         + '<div class="col-lg-12">'
-                        + ' <button class="btn btn-default notification-termo btn-sm"><span class="glyphicon glyphicon-bullhorn"> <span class="badge">'+item.notificationQtd+'</span></span></button> '
-                        + ' <button class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-upload"></span></button> '
-                        + ' <a target="_blank" href="/termos/download/'+item.id+'" class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a> '
+                        + '<button title="download de termo gerado" class="btn btn-default notification-termo btn-sm" '+buttonDevolvidoDisabled+' ><span class="glyphicon glyphicon-bullhorn"> <span class="badge">'+item.notificationQtd+'</span></span></button> '
+                        + '<button title="upload de termo assinado" class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-upload"></span></button> '
+                        + '<a target="_blank" href="/termos/download/'+item.id+'" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a> '
+                        + buttonDevolvido
                         + '</div>'
                         + '</div>'
                         + '</div>'

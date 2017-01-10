@@ -24,6 +24,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $termosNotSing = \App\Termo::where('signtermo','=',0)->count();
         $user = \App\User::count();
         $equipamentos = DB::connection('sapiens')->table("E670BEM")
             ->join('E670LOC', function ($join) {
@@ -86,7 +87,8 @@ class HomeController extends Controller
                 "ultimosEmprestimos"=>$emprestimo->orderBy('data_saida', 'desc')->limit(10)->get(),
                 "devolvidos"=>$devolvidos,
                 "vencimentolicencas"=>$licencas,
-                "vencidaslicencas"=>$vencidas
+                "vencidaslicencas"=>$vencidas,
+                "termosnaoasinados"=>$termosNotSing
             ]
         );
     }

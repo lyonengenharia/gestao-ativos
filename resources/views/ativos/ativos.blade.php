@@ -1,6 +1,6 @@
 @extends('layouts.painel')
 @section('content')
-
+    <link href="{{asset('assets/css/fileupload/fileinput.min.css')}}" rel="stylesheet">
     <style>
         .load-button {
             background-image: url('{{asset("img/load/microload.gif")}}');
@@ -369,6 +369,8 @@
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+        {{--Dissociar termo--}}
         <div class="modal fade" role="dialog" id="dissoc-key">
             <div class="modal-dialog" role="document">
                 <div class="alert alert-warning alert-dismissible fade in" role="alert">
@@ -448,12 +450,38 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
                     </div>
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+
+        {{--Modal upload termo--}}
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal-upload-termo">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Upload de termo assinado</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form enctype="multipart/form-data" id="formimagens">
+                        {{ csrf_field() }}
+                        <div class="form-group">
+                            <input id="file" name="file" type="file" class="form-control">
+                            <input type="hidden" name="id-termo" id="id-termo">
+                        </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
     </div>
     <script>
         $(document).ready(function () {
@@ -851,7 +879,6 @@
                     key: key
                 }, $('#dissoc-key').modal('hide'));
             });
-
             $("#costcenter").autocomplete({
                 source: function (request, response) {
                     $.ajax({
@@ -944,10 +971,59 @@
                 $(this).append("Enviado <img src=\"{{asset("img/load/microload.gif")}}\">");
                 notificationTermo(idTermo, '{{url('api/ativos/termos/notificar')}}')
             });
-
+            $(document).on('click','.upload-termo ',function () {
+                $('#file').fileinput('reset');
+                idTermo = $(this).parent().parent().parent().find('.id-termo').text();
+                $('#id-termo').val(idTermo);
+                $('#modal-termos').modal('hide');
+                $('#modal-upload-termo').modal('show');
+            });
+            $(document).on('hidden.bs.modal','#modal-upload-termo',function(){
+                $('#modal-termos').modal('show');
+            });
+            $(document).on('click','.fileinput-upload-button',function () {
+                var formData = new FormData(document.getElementById('formimagens'));
+                $.ajax({
+                    url: '{{url('/termos/upload/')}}',
+                    type: 'POST',
+                    data: formData,
+                    dataType:'json',
+                    success: function (data) {
+                        if(data.error){
+                            swal(
+                                'Good job!',
+                                 data.msg,
+                                'success'
+                            )
+                        }else{
+                            swal(
+                                'Oops...',
+                                 data.msg,
+                                'error'
+                            )
+                        }
+                        getTermos('{{url('api/ativos/termos')}}');
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    xhr: function() {  // Custom XMLHttpRequest
+                        var myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) { // Avalia se tem suporte a propriedade upload
+                            myXhr.upload.addEventListener('progress', function () {
+                                /* faz alguma coisa durante o progresso do upload */
+                            }, false);
+                        }
+                        return myXhr;
+                    }
+                });
+            })
         });
     </script>
     <script src="{{ asset('assets/js/angular.min.js')}}"></script>
     <script src="{{asset('assets/js/ativos.js')}}"></script>
+
+    <script src="{{asset('assets/js/fileinput/fileinput.js')}}"></script>
+    <script src="{{asset('assets/js/fileinput/locales/pt-BR.js')}}"></script>
 
 @endsection
