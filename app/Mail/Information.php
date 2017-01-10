@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Storage;
 
 class Information extends Mailable
 {
@@ -33,6 +34,14 @@ class Information extends Mailable
      */
     public function build()
     {
-        return $this->view('mail.layout');
+        $this->subject($this->Data->getTitle());
+        if(empty($this->Data->getAttach()))
+            return $this->view('mail.layout');
+
+        return $this->view('mail.layout')
+            ->attachData(Storage::get($this->Data->getAttach()),'termo.pdf',[
+                'mime' => 'application/pdf',
+            ]);
+
     }
 }

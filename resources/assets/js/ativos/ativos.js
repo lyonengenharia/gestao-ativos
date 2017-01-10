@@ -1,4 +1,5 @@
-function handleData(data, textStatus, jqXHR) {
+function handleData(data) {
+
 
     $('#resultOfSearch').empty();
     if (data.data.length > 0) {
@@ -10,7 +11,9 @@ function handleData(data, textStatus, jqXHR) {
             var Assoc = '';
             var Empres = '';
             if (item.connect != null) {
-                connection = "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>";
+                connection = "<button type=\"button\" class=\"close glyphicon glyphicon-file termos-modal\" data-dismiss=\"alert\" aria-label=\"Close\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"Tooltip on left\"><span aria-hidden=\"true\"></span></button>"
+                    + "<p><b>Colaborador:</b>" + item.connect[0].value + " <b>Matrícula:</b>  " + item.connect[0].id + "  <b>Situação:</b> " + item.connect[0].DESSIT + "</p>"
+                    + "<div style='display: none'><span class='assoc-numemp'>" + item.connect[0].NUMEMP + "</span><span class='assoc-sitafa'>" + item.connect[0].SITAFA + "</span><span class='assoc-tipcol'>" + item.connect[0].TIPCOL + "</span><span class='assoc-id'>" + item.connect[0].id + "</span> </div> ";
             }
             var History = null;
             if (item.history.length > 0) {
@@ -82,13 +85,11 @@ function handleData(data, textStatus, jqXHR) {
                 });
                 keys += "</div>";
             }
-
-            if(item.HISTEMPRST.length == 0){
+            if (item.HISTEMPRST.length == 0) {
                 Emprestimo = "<p>Item não tem hístorico de emprestimo</p>";
-            }else{
+            } else {
                 Emprestimo = "<div class=\"panel-group\" id=\"accordion\" role=\"tablist\" aria-multiselectable=\"true\">";
-                $.each(item.HISTEMPRST, function (i,his) {
-                    console.log(his);
+                $.each(item.HISTEMPRST, function (i, his) {
                     Emprestimo += "<div class='panel panel-default'>" +
                         "<div class='panel-heading' role='tab' id='headin" + his.id + "'>" +
                         "<h4 class=\"panel-title\">" +
@@ -98,9 +99,9 @@ function handleData(data, textStatus, jqXHR) {
                         "</h4>" +
                         "</div>" +
                         "<div id='" + his.id + "' class=\"panel-collapse collapsing\" role=\"tabpanel\" aria-labelledby='headin" + his.id + "'>" +
-                        "<div class=\"panel-body\">"+
-                            "<p>Data emprestimo: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
-                            "<p>Data data devolução: " +DateUsTODateBr(his.data_saida, true)+"</p>"+
+                        "<div class=\"panel-body\">" +
+                        "<p>Data emprestimo: " + DateUsTODateBr(his.data_saida, true) + "</p>" +
+                        "<p>Data data devolução: " + DateUsTODateBr(his.data_saida, true) + "</p>" +
                         "</div>" +
                         "</div>" +
                         "</div>";
@@ -112,11 +113,11 @@ function handleData(data, textStatus, jqXHR) {
                 Assoc += "<button class=\"btn btn-danger dissociar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Desassociar" +
                     "</button>";
-            } else if(item.EMPRST == 1){
+            } else if (item.EMPRST == 1) {
                 Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\" disabled>" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
-            }else {
+            } else {
                 Assoc += "<button class=\"btn btn-default associar-colaborador\" type=\"button\">" +
                     "<span class='glyphicon glyphicon-user'></span> Associar" +
                     "</button>";
@@ -145,23 +146,23 @@ function handleData(data, textStatus, jqXHR) {
                 item.CODEMP +
                 "</div>" +
                 "<div class=\"panel-body\">" +
-                "<p><b>Descrição</b>"+
+                "<p><b>Descrição</b>" +
                 "<p><b>Data Aquisição:</b> " + item.DATAQI + " </p>" +
                 "<p><b>Item:</b> " + item.DESBEM + " </p>" +
                 "<p><b>Descrição:</b> " + item.DESESP + " </p>" +
                 "<p><b>Empresa:</b> " + item.NOMEMP + " </p>" +
                 "<p><b>Centro Custo:</b> " + item.CODCCU + " - " + item.DESCCU + " </p>" +
                 "<hr>"
-                +"<p><b>Estado do bem</b>"
+                + "<p><b>Estado do bem</b>"
                 + state
-                +"<hr>"
-                +"<p><b>Associações</b>"
+                + "<hr>"
+                + "<p><b>Associações</b>"
                 + connection
                 + "<hr>"
-                +"<p><b>Histórico de emprestimos</b>"
+                + "<p><b>Histórico de emprestimos</b>"
                 + Emprestimo
                 + "<hr>"
-                +"<p><b>Licenças associadas</b>"
+                + "<p><b>Licenças associadas</b>"
                 + keys +
                 "</div>" +
                 "<div class='panel-footer'> " +
@@ -230,13 +231,13 @@ function historyLocations(data, textStatus, jqXHR) {
     });
 }
 function Emprestimo(url, data) {
-
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         data: data,
         type: 'post',
+        dataType: 'json',
         success: function (response) {
-            console.log(response);
             var alert = "";
             if (response.erro == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -256,17 +257,20 @@ function Emprestimo(url, data) {
             url = url.replace('emprestimo', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
+        },
+        complete: function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
 function Devolucao(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
         data: data,
-        //dataType: 'json',
+        dataType: 'json',
         success: function (response) {
-            console.log(response);
             var alert = "";
             if (response.error == 1) {
                 alert = "<div class=\"alert alert-danger alert-dismissible search\" role=\"alert\">" +
@@ -285,17 +289,19 @@ function Devolucao(url, data) {
             url = url.replace('devolucao', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
-        },
+        }, complete: function () {
+            $('#loading').modal('hide');
+        }
     }).fail(ErroConnect);
 }
 function DevolucaoDados(url, data) {
+
     $.ajax({
         url: url + "/" + data.codbem + "/" + data.codbememp,
         type: 'get',
         data: data,
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             $('.info-devolucao').remove();
             var linha = "<div class='panel panel-default info-devolucao'><div class='panel-body'>" +
                 "<p><b>Data empréstimo: </b>" + response[0].data_out + "</p>" +
@@ -308,6 +314,7 @@ function DevolucaoDados(url, data) {
     }).fail(ErroConnect);
 }
 function Associar(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
@@ -331,10 +338,13 @@ function Associar(url, data) {
             url = url.replace('associar', 'search');
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
+        }, complete: function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
 function Dissociar(url, data) {
+    $('#loading').modal('show');
     $.ajax({
         url: url,
         type: 'post',
@@ -357,6 +367,8 @@ function Dissociar(url, data) {
             updatesearch(url, {pat: data.codbem, emp: data.codbememp});
             $('#search').after(alert);
             $('#modal-desassociar').modal('hide');
+        }, complete: function () {
+            $('#loading').modal('hide');
         }
     }).fail(ErroConnect);
 }
@@ -396,7 +408,6 @@ function GetState(url, data, callback) {
         data: data,
         dataType: 'json',
         success: function (response) {
-            console.log(response);
             if (response.length > 0) {
                 $("#form-state select").val(response[0].state_id);
                 $("#form-state textarea").val(response[0].description);
@@ -449,15 +460,13 @@ function updatesearch(url, data) {
     }).done(handleData)
         .fail(ErroConnect);
 }
-function DateUsTODateBr(date,time) {
+function DateUsTODateBr(date, time) {
     var d = new Date(date);
-    var hora = time==true?d.getHours()+":"+d.getMinutes():"";
-    return d.toLocaleDateString()+" "+hora ;
-
+    var hora = time == true ? d.getHours() + ":" + (d.getMinutes() <= 9? '0'+d.getMinutes():d.getMinutes()) : "";
+    return d.toLocaleDateString() + " " + hora;
 }
 
 function CreateFilterPat(number) {
-
     CheckFilter = $('#filter').find('#filter-pat');
     if (CheckFilter.length >= 1) {
         $('#filter #filter-pat').remove();
@@ -473,9 +482,10 @@ function CreateFilterPat(number) {
         $('#filter').append(row);
     } else {
         $('#filter #filter-pat').remove();
+
     }
 }
-function PreLoad(from,atualaryURi) {
+function PreLoad(from, atualaryURi) {
     atualaryURi = atualaryURi.split('#');
     if (atualaryURi.length > 1) {
         CreateFilterPat(atualaryURi[1]);
@@ -494,7 +504,143 @@ function PreLoad(from,atualaryURi) {
             data: data,
             type: 'get',
             dataType: 'json'
-        }).done(handleData).fail(ErroConnect);
+        }).done(handleData)
+            .fail(ErroConnect);
     }
 }
+function getTermos(url) {
+    item = document.getElementsByClassName('cod-bem');
+    codbememp = document.getElementsByClassName('result-emp');
+    numemp = document.getElementsByClassName('assoc-numemp');
+    sitafa = document.getElementsByClassName('assoc-sitafa');
+    tipcol = document.getElementsByClassName('assoc-tipcol');
+    numcol = document.getElementsByClassName('assoc-id');
+    bem = {
+        coditem: item[0].innerHTML,
+        codemp: codbememp[0].innerHTML
+    };
+    employed = {
+        numemp: numemp[0].innerHTML,
+        sitafa: sitafa[0].innerHTML,
+        tipcol: tipcol[0].innerHTML,
+        numcol: numcol[0].innerHTML
+    };
+    $.ajax({
+        url: url,
+        type: 'get',
+        data: {bem, employed},
+        datType: 'json',
+        success: function (data) {
+            $('#list-termos').empty();
+            if (data.error==0) {
+                $.each(data.data, function (i, item) {
+                    enviado = 'Não enviado';
+                    if(item.notification.length >0){
+                        enviado = 'Enviado dia ' + DateUsTODateBr(item.notification[0].created_at,true);
+                    }
+                    devolvido = item.signtermo != 0 ? 'Recebido' : 'Não recebido';
+                    buttonDevolvidoDisabled = item.signtermo != 0 ? 'disabled' : '';
+                    buttonDevolvido = item.signtermo != 0 ? ' <a title="download termo assinado" target="_blank" href="/termos/download/'+item.id+'-'+item.tipotermo_id+'" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a>' : '';
+                    row = "";
+                    row += '<div class="panel panel-default" style="margin-bottom: 5px">'
+                        + '<div class="panel-body">'
+                        + '<span class="id-termo" style="display: none">'+item.id+'</span>'
+                        + item.tipoTermo.name + ' /  ' + enviado + ',' + devolvido
+                        + '<div class="row">'
+                        + '<div class="col-lg-12">'
+                        + '<button title="download de termo gerado" class="btn btn-default notification-termo btn-sm" '+buttonDevolvidoDisabled+' ><span class="glyphicon glyphicon-bullhorn"> <span class="badge">'+item.notificationQtd+'</span></span></button> '
+                        + '<button title="upload de termo assinado" class="btn btn-default upload-termo btn-sm"><span class="glyphicon glyphicon-cloud-upload"></span></button> '
+                        + '<a target="_blank" href="/termos/download/'+item.id+'" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-cloud-download"></span></a> '
+                        + buttonDevolvido
+                        + '</div>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+                    $('#list-termos').append(row);
+                });
+            }else{
+                $('#list-termos').append("<p>"+data.msg+"</p>");
+            }
+        }
+    });
+    //console.log(bem);
+    //console.log(employed);
+}
+
+
+function notificationTermo(termo,url) {
+    $.ajax({
+        url: url+'/'+termo,
+        type: 'get',
+        datType: 'json',
+        success: function (data) {
+           if(data.error){
+               swal(
+                   'Oops...',
+                   data.msg
+                   ,
+                   'error'
+               )
+           }else{
+               swal(
+                   'Good job!',
+                   data.msg,
+                   'success'
+               );
+               getTermos('api/ativos/termos');
+           }
+
+        }
+    });
+}
+
+angular.module('ativos', ['ngMessages']);
+angular.module('ativos').controller('termo', function ($http, $scope) {
+    $scope.gerarTermo = function (termo) {
+
+        item = angular.element(document.getElementsByClassName('cod-bem'));
+        codbememp = angular.element(document.getElementsByClassName('result-emp'));
+        numemp = angular.element(document.getElementsByClassName('assoc-numemp'));
+        sitafa = angular.element(document.getElementsByClassName('assoc-sitafa'));
+        tipcol = angular.element(document.getElementsByClassName('assoc-tipcol'));
+        numcol = angular.element(document.getElementsByClassName('assoc-id'));
+        bem = {
+            coditem: item[0].innerHTML,
+            codemp: codbememp[0].innerHTML
+        };
+        employed = {
+            numemp: numemp[0].innerHTML,
+            sitafa: sitafa[0].innerHTML,
+            tipcol: tipcol[0].innerHTML,
+            numcol: numcol[0].innerHTML
+        };
+        if (!$scope.novoTermo.tipo.$error.required) {
+            $http.post('ativos/termo/novo', [termo, bem, employed]).then(function successCallback(response) {
+                if(response.data.error){
+                    angular.element(
+                        swal(
+                            'Oops...',
+                            response.data.msg
+                            ,
+                            'error'
+                        )
+                    );
+                }else{
+                    angular.element(
+                        swal(
+                            'Good job!',
+                            response.data.msg,
+                            'success'
+                        )
+                    );
+                    getTermos('api/ativos/termos');
+
+                }
+            });
+        }
+    }
+});
+angular.module('ativos').controller('dataSearch', function ($http, $scope) {
+
+});
 //# sourceMappingURL=ativos.js.map

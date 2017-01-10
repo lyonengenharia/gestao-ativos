@@ -30,6 +30,7 @@ class AtivosController extends Controller
     {
         $Empresas = DB::connection('vetorh')->table('R030EMP')->select(['numemp', 'nomemp', 'apeemp'])->get();
         $States = \App\State::orderBy('state', 'ASC')->get();
+        $tipoTermos = \App\tipotermo::all();
         foreach ($Empresas as $key => $value) {
             $Empresas[$key]->nomemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->nomemp);
             $Empresas[$key]->apeemp = iconv('windows-1252', 'utf-8', $Empresas[$key]->apeemp);
@@ -38,7 +39,8 @@ class AtivosController extends Controller
             "page" => "Ativos",
             "explanation" => " Busca de ativos",
             "empresas" => $Empresas,
-            "states" => $States
+            "states" => $States,
+            "tipoTermos" =>$tipoTermos
 
         ]);
     }
@@ -271,19 +273,18 @@ class AtivosController extends Controller
         $Emprestimo->obs_saida = $request->get("obsemp");
         $Emprestimo->save();
 
-
         $Employed = new \App\Pojo\Employed($request->get("numemp"), $request->get("tipcol"), $request->get("numcad"));
-        $Employed = $Employed->get();
         $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
-        if (!empty($Employed->getEMACOM())) {
-            $To = $Employed->getEMACOM();
-        } else if (!empty($Employed->getEMAPAR())) {
-            $To = $Employed->getEMAPAR();
+        if (!empty($Employed->EMACOM)) {
+            $To = $Employed->EMACOM;
+        } else if (!empty($Employed->EMAPAR)) {
+            $To = $Employed->EMAPAR;
         }
+
         $Data = new \App\Pojo\Message();
         $Data->setTitle("Empréstimo de Equipamento");
         $Data->setSubTitle("Empréstimo realizado dia :" . $request->get('dataempdev'));
-        $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio " . $request->get("codbem") .
+        $Data->setBody("Prezado(a) " . $Employed->NOMFUN . " <p>Informamos que o equipamento  com o patrimônio " . $request->get("codbem") .
             " encontra-se em sua responsabilidade.</p><p>Descrição de saída: " . (empty($request->get("obsemp")) ? "Nada consta." : $request->get("obsemp")) . "</p>");
         $message = new \App\Mail\Information($Data);
         $message->subject("Emprestimo de equipamentos");
@@ -305,20 +306,19 @@ class AtivosController extends Controller
                 ->where('data_entrada', '=', null)
                 ->update(['data_entrada' => $data->toDateTimeString(), 'obs_entrada' => $request->get("obs")]);
 
-
             //Envia email
+
             $Employed = new \App\Pojo\Employed($VerificaEmprestimo[0]->R034FUN_NUMEMP, $VerificaEmprestimo[0]->R034FUN_TIPCOL, $VerificaEmprestimo[0]->R034FUN_NUMCAD);
-            $Employed = $Employed->get();
             $To = env('MAIL_DEFAULT_TI', 'informatica@lyonegenharia.com.br');
-            if (!empty($Employed->getEMACOM())) {
-                $To = $Employed->getEMACOM();
-            } else if (!empty($Employed->getEMAPAR())) {
-                $To = $Employed->getEMAPAR();
+            if (!empty($Employed->EMACOM)) {
+                $To = $Employed->EMACOM;
+            } else if (!empty($Employed->EMAPAR)) {
+                $To = $Employed->EMAPAR;
             }
             $Data = new \App\Pojo\Message();
             $Data->setTitle("Devolução de Equipamento");
             $Data->setSubTitle("Devolução realizada dia :" . $request->get('data'));
-            $Data->setBody("Prezado(a) " . $Employed->getNOMFUN() . " <p>Informamos que o equipamento  com o patrimônio "
+            $Data->setBody("Prezado(a) " . $Employed->NOMFUN . " <p>Informamos que o equipamento  com o patrimônio "
                 . $request->get("codbem") . " foi devolvido. </p><p>Segue as observações: " .
                 (empty($request->get("obs")) ? "Nada consta." : $request->get("obs")) . "</p>");
             $message = new \App\Mail\Information($Data);
@@ -410,6 +410,31 @@ class AtivosController extends Controller
         return null;
     }
 
+    public function termoNovo(Request $request){
+
+        $bem = new Bem($request->get(1)['coditem'],$request->get(1)['codemp']);
+        $employed = new Employed($request->get(2)['numemp'],$request->get(2)['tipcol'],$request->get(2)['numcol']);
+        $tipoTermo = \App\tipotermo::find($request->get(0)['tipo']['id']);
+        $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
+            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
+            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
+            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
+            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
+            ->where('data_out','=',null);
+        if($connect->count()==0){
+            return (array) (new \App\Pojo\Response(1,null,'Esse item e o colaborador não estão associados.'));
+        }
+        if($connect->get()[0]->Termos()->where('tipotermo_id','=',$tipoTermo->id)->count()> 0){
+            return (array) (new \App\Pojo\Response(1,null,'Já existe esse tipo de termo cadastrado.'));
+        }
+        $termo = new \App\Termo();
+        $termo->tipotermo_id = $tipoTermo->id;
+        $termo->obs = $request->get(0)['obs'];
+        $termo->save();
+        $connect->get()[0]->Termos()->attach($termo);
+        return (array) (new \App\Pojo\Response(0,null,'Termo inserido com sucesso!'));
+    }
+
     private function history($ben, $emp)
     {
         $Historyes = DB::table('connects')->where('E670BEM_CODBEM', '=', $ben)->where('E070EMP_CODEMP', '=', $emp)->where('data_out', '<>', null)->get();
@@ -442,10 +467,20 @@ class AtivosController extends Controller
         return $Historyes;
     }
     private  function loanHistory(Bem $Bem){
-        $Loans = \App\Emprestimo::where('E070EMP_CODEMP', '=', $Bem->getCodEmp())->where('E670BEM_CODBEM', '=', $Bem->getCodBem())->orderBy('created_at','DESC')->take(10)->get();
+        $Loans = \App\Emprestimo::where('E070EMP_CODEMP', '=', $Bem->CodEmp)->where('E670BEM_CODBEM', '=', $Bem->CodBem)->orderBy('created_at','DESC')->take(10)->get();
         foreach ($Loans as $Key => $Loan){
             $Loans[$Key]->employed = new Employed($Loan->R034FUN_NUMEMP,$Loan->R034FUN_TIPCOL,$Loan->R034FUN_NUMCAD);
         }
         return $Loans;
+    }
+    public function termos (Request $request){
+       /* $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
+            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
+            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
+            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
+            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
+            ->where('data_out','=',null);*/
+
+       return $request->get('bem');
     }
 }

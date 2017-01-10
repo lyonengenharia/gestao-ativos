@@ -44,9 +44,31 @@ elixir(function (mix) {
     mix.scripts('ativos/ativos.js', 'public/assets/js/ativos.js');
     mix.scripts('fileupload/fileinput.js', 'public/assets/js/fileinput/fileinput.js');
     mix.scripts('fileupload/locales/pt-BR.js', 'public/assets/js/fileinput/locales/pt-BR.js');
-    // //Teste VUE
+    mix.scripts(['./node_modules/angular/angular.min.js','./node_modules/angular-messages/angular-messages.min.js'], 'public/assets/js/angular.min.js');
+    mix.scripts('painel/termos.js', 'public/assets/js/termos.js');
+    // Type Script
+    //mix.typescript('','public/assets/js/teste.js');
+
+    // mix.sass('app.scss');
     //
-    // mix.scripts('main.js','public/assets/js/main.js');
+    // mix.typescript('/app.component.ts','public/componente.js');
+    // mix.typescript('app.js','public/','/**/*.ts',{
+    //     "target": "ES5",
+    //     "module": "system",
+    //     "moduleResolution": "node",
+    //     "sourceMap": true,
+    //     "emitDecoratorMetadata": true,
+    //     "experimentalDecorators": true,
+    //     "removeComments": false,
+    //     "noImplicitAny": false,
+    // });
+    //
+    // mix.copy('node_modules/angular2', 'public/angular2');
+    // mix.copy('node_modules/rxjs', 'public/rxjs');
+    // mix.copy('node_modules/systemjs', 'public/systemjs');
+    // mix.copy('node_modules/es6-promise', 'public/es6-promise');
+    // mix.copy('node_modules/es6-shim', 'public/es6-shim');
+    // mix.copy('node_modules/zone.js', 'public/zone.js');
 
 
 });

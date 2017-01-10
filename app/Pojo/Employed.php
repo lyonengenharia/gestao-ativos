@@ -24,6 +24,7 @@ class Employed
     public $DATADM;
     public $DATAFA;
     public $SITAFA;
+    public $NUMCPF;
     public function __construct($NUMEMP = null,$TIPCOL=null,$NUMCAD=null)
     {
         $this->NUMEMP = empty($NUMEMP)?null:$NUMEMP;
@@ -42,7 +43,7 @@ class Employed
                 'R034FUN.NUMCAD', 'R034CPL.EMACOM', 'R034CPL.EMAPAR',
                 'R034FUN.NOMFUN', 'R010SIT.DESSIT', 'R034FUN.CODCCU',
                 'R018CCU.NOMCCU', 'R034FUN.DATADM', 'R034FUN.DATAFA',
-                'R034FUN.SITAFA'
+                'R034FUN.SITAFA', 'R034FUN.NUMCPF'
             ])
             ->join('R998LSF', function ($inner) {
                 $inner->on('R998LSF.KEYNAM', '=', 'R034FUN.TIPCOL')
@@ -78,6 +79,7 @@ class Employed
                 $this->DATADM = $Employed[0]->DATADM;
                 $this->DATAFA = $Employed[0]->DATAFA;
                 $this->SITAFA = $Employed[0]->SITAFA;
+                $this->NUMCPF = $Employed[0]->NUMCPF;
             }
             return $this;
 

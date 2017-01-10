@@ -56,30 +56,14 @@
                             <i class="fa fa-support fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div class="huge">13</div>
-                            <div>Support Tickets!</div>
+                            <div class="huge">{{$termosnaoasinados}}</div>
+                            <div>Termos sem assinar</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- /.row -->
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Area Chart</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="morris-area-chart"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- /.row -->
-
     <div class="row">
         <div class="col-lg-4">
             <div class="panel panel-default">

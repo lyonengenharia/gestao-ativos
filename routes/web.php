@@ -11,7 +11,8 @@
 |
 */
 use \Illuminate\Support\Facades\Mail;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,6 +39,11 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/ativos/state/', 'AtivosController@GetState');
     Route::get('/ativos/historico/', 'AtivosController@history');
     Route::post('/ativos/state/', 'AtivosController@State');
+    Route::post('/ativos/termo/novo', 'AtivosController@termoNovo');
+    Route::get('/ativos/termos','AtivosController@termos');
+
+    //Termos
+    Route::post('/termos/upload/','TermosController@import');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
@@ -57,6 +63,10 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/painel/usuarios', 'UserController@index')->middleware('can:ativos');
     Route::get('/painel/usuarios/grupos', 'RolesController@index')->middleware('can:ativos');
     Route::get('/painel/importacao/', 'Import@index')->middleware('can:ativos');
+    Route::get('/painel/termos/', 'PainelController@termos')->middleware('can:ativos');
+    Route::post('/painel/termo/novo', 'PainelController@termosNovo')->middleware('can:ativos');
+    Route::post('/painel/termo/update', 'PainelController@termosAtualizacao')->middleware('can:ativos');
+    Route::delete('/painel/termo/delete/{id}', 'PainelController@termosDelete')->middleware('can:ativos');
 
     //Usuários
     Route::get('/usuario/{id}', 'UserController@edit')->middleware('can:ativos');
@@ -75,9 +85,26 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('importacao/process', 'Import@Process')->middleware('can:ativos');
     Route::delete('importacao/delete', 'Import@Delete')->middleware('can:ativos');
 
+
+
 });
 
-Route::get('/teste','UserController@vue');
+//Termos
+Route::get('termos/emprestimo/{id}','TermosController@supply');
+Route::get('termos/download/{id}','TermosController@download');
+Route::get('termos/devolucao/{id}','TermosController@devolution');
+Route::get('termos/{id}','TermosController@direction');
+
+Route::get('/teste',function (){
+
+
+    //$view = View('dashboard.dashboard');
+    //$view = $view->render();
+    //var_dump($view);
+    //\Illuminate\Support\Facades\Storage::disk('public')->put('temp.html', $view);
+    //var_dump(exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/emprestimo termo.pdf"));
+
+});
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
     $Connect = new \App\Connect();
