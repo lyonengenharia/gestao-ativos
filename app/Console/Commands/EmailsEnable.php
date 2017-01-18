@@ -78,7 +78,7 @@ class EmailsEnable extends Command
 
             foreach ($Employed as $Employ):
                 $employed = new \App\Pojo\Employed($Employ->NUMEMP, $Employ->TIPCOL, $Employ->NUMCAD);
-                $row = "<p>".$employed->NOMFUN. ", data admissão ".$employed->DATADM->format('d/m/Y')."</p><p style='line-height: 0.1'>" . substr($Employ->CODCCU . "-" . iconv('windows-1252','utf-8', $Employ->NOMCCU),0,100)."</p>";
+                $row = "<p>".$employed->NOMFUN. ", data admissão ".$employed->DATADM->format('d/m/Y')."</p><p>" . $Employ->CODCCU."-". iconv('windows-1252','utf-8',$Employ->NOMCCU)."</p>";
                 if (empty(trim($employed->EMACOM))) {
                     $listExistente .= $row;
                 } elseif ($employed->EMACOM == 'Favor verificar esse e-mail') {
