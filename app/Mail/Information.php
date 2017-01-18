@@ -38,8 +38,9 @@ class Information extends Mailable
         if(empty($this->Data->getAttach()))
             return $this->view('mail.layout');
 
+        $nameFile = empty($this->Data->getAttachName())?'termo.pdf':$this->Data->getAttachName();
         return $this->view('mail.layout')
-            ->attachData(Storage::get($this->Data->getAttach()),'termo.pdf',[
+            ->attachData(Storage::get($this->Data->getAttach()),$nameFile,[
                 'mime' => 'application/pdf',
             ]);
 

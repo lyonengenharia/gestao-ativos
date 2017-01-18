@@ -185,6 +185,7 @@ return [
          */
         App\Providers\LogCustonProvider::class,
         App\Providers\ImportFileProvider::class,
+        App\Providers\LdapFunctionsProvider::class,
 
     ],
 
@@ -234,6 +235,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Logging'=> App\Facades\Logging::class,
         'Importer'=>App\Facades\Importer::class,
+        'Ldap'=>App\Facades\Ldap::class,
 
     ],
 

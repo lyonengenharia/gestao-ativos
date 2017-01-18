@@ -40,10 +40,10 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::get('/ativos/historico/', 'AtivosController@history');
     Route::post('/ativos/state/', 'AtivosController@State');
     Route::post('/ativos/termo/novo', 'AtivosController@termoNovo');
-    Route::get('/ativos/termos','AtivosController@termos');
+    Route::get('/ativos/termos', 'AtivosController@termos');
 
     //Termos
-    Route::post('/termos/upload/','TermosController@import');
+    Route::post('/termos/upload/', 'TermosController@import');
 
     //Licences
     Route::get('/licencas', ['uses' => 'LicencasController@index'])->middleware('can:ativos');
@@ -86,23 +86,17 @@ Route::group(['middleware' => ['auth', 'acess']], function () {
     Route::delete('importacao/delete', 'Import@Delete')->middleware('can:ativos');
 
 
-
 });
 
 //Termos
-Route::get('termos/emprestimo/{id}','TermosController@supply');
-Route::get('termos/download/{id}','TermosController@download');
-Route::get('termos/devolucao/{id}','TermosController@devolution');
-Route::get('termos/{id}','TermosController@direction');
+Route::get('termos/emprestimo/{id}', 'TermosController@supply');
+Route::get('termos/download/{id}', 'TermosController@download');
+Route::get('termos/devolucao/{id}', 'TermosController@devolution');
+Route::get('termos/{id}', 'TermosController@direction');
 
-Route::get('/teste',function (){
+Route::get('/teste', function () {
 
-
-    //$view = View('dashboard.dashboard');
-    //$view = $view->render();
-    //var_dump($view);
-    //\Illuminate\Support\Facades\Storage::disk('public')->put('temp.html', $view);
-    //var_dump(exec("xvfb-run wkhtmltopdf http://gestaoativos.lyon.local.int/termos/emprestimo termo.pdf"));
+    return "Nothing for you, my dear";
 
 });
 Route::get('/data/', function () {

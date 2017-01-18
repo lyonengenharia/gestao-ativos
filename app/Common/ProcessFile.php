@@ -197,7 +197,7 @@ class ProcessFile
      * @param $string_2 wish text
      * @return float Percentage of equality
      */
-    private function getLCS($string_1, $string_2)
+    public function getLCS($string_1, $string_2)
     {
         $string_1_length = strlen($string_1);
         $string_2_length = strlen($string_2);

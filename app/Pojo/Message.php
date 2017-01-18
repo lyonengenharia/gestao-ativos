@@ -15,6 +15,7 @@ class Message
     private $SubTitle;
     private $Body;
     private $Attach = null;
+    private $AttachName = null;
 
     /**
      * @return mixed
@@ -79,6 +80,24 @@ class Message
     {
         $this->Attach = $Attach;
     }
+
+    /**
+     * @return null
+     */
+    public function getAttachName()
+    {
+        return $this->AttachName;
+    }
+
+    /**
+     * @param null $AttachName
+     */
+    public function setAttachName($AttachName)
+    {
+        $this->AttachName = $AttachName;
+    }
+
+
 
 
 

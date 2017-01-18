@@ -23,4 +23,10 @@ class LogCustom
     public function AppEnd($File,$Message){
         Storage::disk('public')->append($File.'.log', $Message);
     }
+    public function Create($File){
+        Storage::disk('public')->put($File, "");
+    }
+    public function AppEndFile($File,$Message){
+        Storage::disk('public')->append($File, $Message);
+    }
 }
