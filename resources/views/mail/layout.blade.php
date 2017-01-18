@@ -27,7 +27,7 @@
         </td>
     </tr>
     <tr>
-        <td align="right">
+        <td>
             <table border="0" cellpadding="10" cellspacing="10" style="padding-bottom: 100px">
                 <tr>
                     <td>

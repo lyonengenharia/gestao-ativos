@@ -95,9 +95,7 @@ Route::get('termos/devolucao/{id}', 'TermosController@devolution');
 Route::get('termos/{id}', 'TermosController@direction');
 
 Route::get('/teste', function () {
-
-    return "Nothing for you, my dear";
-
+   return "nothing here for you my dear ;)";
 });
 Route::get('/data/', function () {
     $dataassoc = \Carbon\Carbon::createFromFormat("d/m/Y", '21/10/2016', "America/Sao_Paulo");
