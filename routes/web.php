@@ -96,64 +96,7 @@ Route::get('termos/{id}', 'TermosController@direction');
 
 Route::get('/teste', function () {
 
-    /*$domain = "lyonengenharia";
-    $ldap['user'] = 'wellington.fernandes';
-    $ldap['pass'] = 'Html#2016';
-    $ldap['host'] = 'ldap.lyonengenharia.com.br';
-    $ldap['port'] = 389;
-    $ldap['dn'] = 'uid=' . $ldap['user'] . ',ou=people,dc=' . $domain . ',dc=com,dc=br';
-    $ldap['base'] = '';
-    $ldap['conn'] = ldap_connect($ldap['host'], $ldap['port']);
-    ldap_set_option($ldap['conn'], LDAP_OPT_PROTOCOL_VERSION, 3);
-    ldap_bind($ldap['conn'], $ldap['dn'], $ldap['pass']);
-    $result = ldap_search( $ldap['conn'],$ldap, "(uid=gilberto.oliveira)") or die ("Error in search query: ".ldap_error($ldap['conn']));
-    $data = ldap_get_entries($ldap['conn'], $result);
-    $entry = ldap_first_entry($ldap['conn'], $result);
-    $attrs = ldap_get_attributes($ldap['conn'], $entry);
-    //Modify
-    echo '<pre>';
-    echo "entries<br>";
-    print_r($data);*/
-
-
-    $Employed = \Illuminate\Support\Facades\DB::connection('vetorh')
-        ->table('R034FUN')
-        ->select([
-            'R034FUN.NUMEMP', 'R034FUN.TIPCOL', 'R998LSF.VALKEY',
-            'R034FUN.NUMCAD', 'R034CPL.EMACOM', 'R034CPL.EMAPAR',
-            'R034FUN.NOMFUN', 'R010SIT.DESSIT', 'R034FUN.CODCCU',
-            'R018CCU.NOMCCU', 'R034FUN.DATADM', 'R034FUN.DATAFA',
-            'R034FUN.SITAFA', 'R034FUN.NUMCPF'
-        ])
-        ->join('R998LSF', function ($inner) {
-            $inner->on('R998LSF.KEYNAM', '=', 'R034FUN.TIPCOL')
-                ->where('R998LSF.LSTNAM', '=', 'LTipCol');
-        })
-        ->join('R018CCU', function ($inner) {
-            $inner->on('R018CCU.NUMEMP', '=', 'R034FUN.NUMEMP')
-                ->whereColumn('R018CCU.CODCCU', '=', 'R034FUN.CODCCU');
-        })
-        ->join('R010SIT', function ($inner) {
-            $inner->on('R010SIT.CODSIT', '=', 'R034FUN.SITAFA');
-        })
-        ->join('R034CPL', function ($inner) {
-            $inner->on('R034FUN.NUMEMP', '=', 'R034CPL.NUMEMP')
-                ->whereColumn('R034FUN.TIPCOL', '=', 'R034CPL.TIPCOL')
-                ->whereColumn('R034FUN.NUMCAD', '=', 'R034CPL.NUMCAD');
-        })
-        ->where('DATAFA', '>=', '2017-01-09')
-        ->where('R034FUN.SITAFA', '=', 7);
-
-    if ($Employed->count() > 0) {
-        \App\Facades\Logging::Create('disableemail.cvs');
-        $Employed = $Employed->get();
-        foreach ($Employed as $Employ):
-            //dd($Employ);
-            $row = $Employ->NOMFUN.";".$Employ->EMACOM.";".$Employ->CODCCU.";".$Employ->NOMCCU.";".$Employ->DATAFA;
-            \App\Facades\Logging::AppEndFile('disableemail.cvs',$row);
-        endforeach;
-    }
-
+    return "Nothing for you, my dear";
 
 });
 Route::get('/data/', function () {

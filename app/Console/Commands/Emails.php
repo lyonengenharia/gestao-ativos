@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 class Emails extends Command
 {
@@ -12,7 +13,7 @@ class Emails extends Command
      *
      * @var string
      */
-    protected $signature = 'emails:disable';
+    protected $signature = 'emails:disable {data?}';
 
     /**
      * The console command description.
@@ -38,6 +39,8 @@ class Emails extends Command
      */
     public function handle()
     {
+        $data = $this->argument('data');
+        $data = empty($data) ? Carbon::now()->format('Y-m-d') : $data;
         $Employed = \Illuminate\Support\Facades\DB::connection('vetorh')
             ->table('R034FUN')
             ->select([
@@ -63,11 +66,11 @@ class Emails extends Command
                     ->whereColumn('R034FUN.TIPCOL', '=', 'R034CPL.TIPCOL')
                     ->whereColumn('R034FUN.NUMCAD', '=', 'R034CPL.NUMCAD');
             })
-            ->where('DATAFA', '>=', Carbon::now())
+            ->where('DATAFA', '>=', $data)
             ->where('R034FUN.SITAFA', '=', 7);
-
         if ($Employed->count() > 0) {
-            \App\Facades\Logging::Create('disableemail.cvs');
+            File::delete(storage_path('app/public') . '/disableemail.csv');
+            //\App\Facades\Logging::Create('disableemail.cvs');
             $Employed = $Employed->get();
             foreach ($Employed as $Employ):
                 //dd($Employ);
@@ -83,7 +86,7 @@ class Emails extends Command
             $Data->setAttach("public/disableemail.csv");
             $Data->setAttachName("DisableEmails.csv");
             $message = new \App\Mail\Information($Data);
-            $message->to('wellington.fernandes@lyonengenharia.com.br');
+            $message->to(env('NOTIFICATION_TI'));
             $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
             \Illuminate\Support\Facades\Mail::send($message);
         }else{
@@ -93,10 +96,11 @@ class Emails extends Command
             $bodyMessage = "<p>Não existe e-mails para desabilitar</p>";
             $Data->setBody($bodyMessage);
             $message = new \App\Mail\Information($Data);
-            $message->to('wellington.fernandes@lyonengenharia.com.br');
+            $message->to(env('NOTIFICATION_TI'));
             $message->from(env('MAIL_DEFAULT_TI','informatica@lyonegenharia.com.br'));
             \Illuminate\Support\Facades\Mail::send($message);
         }
+        $this->info("Notificação enviada para :".env('NOTIFICATION_TI'));
 
     }
 }
