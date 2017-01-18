@@ -84,8 +84,10 @@ class Employed
             $this->DESSIT = $Employed[0]->DESSIT;
             $this->CODCCU = $Employed[0]->CODCCU;
             $this->NOMCCU = iconv('windows-1252', 'utf-8', $Employed[0]->NOMCCU);
-            $this->DATADM = $Employed[0]->DATADM;
-            $this->DATAFA = $Employed[0]->DATAFA;
+            $dataAdm = new \DateTime($Employed[0]->DATADM);
+            $this->DATADM = $dataAdm;
+            $dataAfa = new \DateTime($Employed[0]->DATAFA);
+            $this->DATAFA = $dataAfa;
             $this->SITAFA = $Employed[0]->SITAFA;
             $this->NUMCPF = $Employed[0]->NUMCPF;
         }
@@ -95,12 +97,12 @@ class Employed
     {
         $firtName = null;
         $lastName = null;
-        $auxName = explode(" ", $this->tirarAcentos($this->NOMFUN));
+        $auxName = explode(" ", trim($this->tirarAcentos($this->NOMFUN)));
         $firtName = strtolower($auxName[0]);
         $lastName = strtolower($auxName[count($auxName) - 1]);
         $domain = null;
         if (\App\Facades\Importer::getLCS($this->NOMCCU, 'Facilities') > 55) {
-            $domain = 'facilities';
+            $domain = 'lyonfacilities';
         } else {
             $domain = 'lyonengenharia';
         }

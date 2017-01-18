@@ -78,29 +78,29 @@ class EmailsEnable extends Command
 
             foreach ($Employed as $Employ):
                 $employed = new \App\Pojo\Employed($Employ->NUMEMP, $Employ->TIPCOL, $Employ->NUMCAD);
-                $row = iconv('utf-8', 'windows-1252', $employed->NOMFUN) . ";" . $employed->EMACOM . ";Lyon2016" . ";" . $Employ->CODCCU . "-" . $Employ->NOMCCU . ";";
+                $row = "<p>".$employed->NOMFUN. ", data admissão ".$employed->DATADM->format('d/m/Y')."</p><p style='line-height: 0.1'>" . substr($Employ->CODCCU . "-" . iconv('windows-1252','utf-8', $Employ->NOMCCU),0,100)."</p>";
                 if (empty(trim($employed->EMACOM))) {
-                    $listExistente .= $row . "<br>";
+                    $listExistente .= $row;
                 } elseif ($employed->EMACOM == 'Favor verificar esse e-mail') {
-                    $listIncositencia .= $row . "<br>";
+                    $listIncositencia .= $row;
                 } else {
-
+                    $row = iconv('utf-8', 'windows-1252', $employed->NOMFUN) . ";" . $employed->EMACOM . ";Lyon2016" . ";" . $Employ->CODCCU . "-" . $Employ->NOMCCU . ";";
                     \App\Facades\Logging::AppEndFile('enable-emails.csv', $row);
                 }
 
             endforeach;
             if(!empty($listExistente)){
-                $listExistente = "<br><br><p>Lista de existentes</p><p>$listExistente</p>";
+                $listExistente = "<br><br><p><h4>Lista de existentes</h4></p>$listExistente";
             }
             if(!empty($listIncositencia)){
-                $listIncositencia = "<br><br><p>Lista de inconsistência</p><p>$listIncositencia</p>";
+                $listIncositencia = "<br><br><p><h4>Lista de inconsistência</h4></p>$listIncositencia";
             }
             //enviar por email
             $data = new \DateTime($data);
             $Data = new \App\Pojo\Message();
             $Data->setTitle('E-mail de funcionários admitidos');
             $Data->setSubTitle("Lista do dia " . $data->format('d/m/y') . "  à " . Carbon::now()->format('d/m/Y'));
-            $bodyMessage = "<p>Prezados segue anexo</p>";
+            $bodyMessage = "<p>Prezados,</p><p>Em anexo está listagem de e-mail para criação.</p>";
             $Data->setBody($bodyMessage.$listExistente.$listIncositencia);
             $Data->setAttach("public/enable-emails.csv");
             $Data->setAttachName("enable-emails.csv");

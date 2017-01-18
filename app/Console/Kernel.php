@@ -17,7 +17,6 @@ class Kernel extends ConsoleKernel
        'App\Console\Commands\Emails',
        'App\Console\Commands\EmailsEnable'
     ];
-
     /**
      * Define the application's command schedule.
      *
@@ -29,7 +28,6 @@ class Kernel extends ConsoleKernel
          $schedule->command('emails:disable')->dailyAt('23:00');
          $schedule->command('emails:enable')->dailyAt('23:00');
     }
-
     /**
      * Register the Closure based commands for the application.
      *

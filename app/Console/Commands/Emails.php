@@ -41,6 +41,7 @@ class Emails extends Command
     {
         $data = $this->argument('data');
         $data = empty($data) ? Carbon::now()->format('Y-m-d') : $data;
+        $dateFilter = new \DateTime($data);
         $Employed = \Illuminate\Support\Facades\DB::connection('vetorh')
             ->table('R034FUN')
             ->select([
@@ -70,19 +71,20 @@ class Emails extends Command
             ->where('R034FUN.SITAFA', '=', 7);
         if ($Employed->count() > 0) {
             File::delete(storage_path('app/public') . '/disableemail.csv');
-            //\App\Facades\Logging::Create('disableemail.cvs');
             $Employed = $Employed->get();
+            $rowEmail = "";
             foreach ($Employed as $Employ):
-                //dd($Employ);
-                $row = $Employ->NOMFUN.";".$Employ->EMACOM.";".$Employ->CODCCU.";".$Employ->NOMCCU.";".$Employ->DATAFA;
+                $dataAfa = new \Datetime($Employ->DATAFA);
+                $rowEmail .= "<p>".$Employ->NOMFUN.", ".$Employ->EMACOM.", ".$Employ->CODCCU."-". iconv('windows-1252','utf-8',$Employ->NOMCCU).", ".$dataAfa->format('d/m/Y')."</p>";
+                $row = $Employ->NOMFUN.";".$Employ->EMACOM.";".$Employ->CODCCU.";".$Employ->NOMCCU.";".$dataAfa->format('d/m/Y');
                 \App\Facades\Logging::AppEndFile('disableemail.csv',$row);
             endforeach;
             //enviar por email
             $Data = new \App\Pojo\Message();
-            $Data->setTitle('E-mail de funcionários demitidos');
+            $Data->setTitle('E-mail de funcionários demitidos '.$dateFilter->format('d/m/Y').' á '.Carbon::now()->format('d/m/Y'));
             $Data->setSubTitle('Desabilitar e-mails');
-            $bodyMessage = "Prezados segue anexo";
-            $Data->setBody($bodyMessage);
+            $bodyMessage = "<p>Prezados,</p><p>Em anexo está a listagem de funcionarios demitidos,abaixo os detalhes:</p>";
+            $Data->setBody($bodyMessage."<p><h4>Detalhes das contas</h4></p>".$rowEmail);
             $Data->setAttach("public/disableemail.csv");
             $Data->setAttachName("DisableEmails.csv");
             $message = new \App\Mail\Information($Data);
@@ -91,7 +93,7 @@ class Emails extends Command
             \Illuminate\Support\Facades\Mail::send($message);
         }else{
             $Data = new \App\Pojo\Message();
-            $Data->setTitle('E-mail de funcionários demitidos');
+            $Data->setTitle('E-mail de funcionários demitidos '.$dateFilter->format('d/m/Y').' á '.Carbon::now()->format('d/m/Y'));
             $Data->setSubTitle('Desabilitar e-mails');
             $bodyMessage = "<p>Não existe e-mails para desabilitar</p>";
             $Data->setBody($bodyMessage);
