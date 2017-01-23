@@ -25,8 +25,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('emails:disable')->dailyAt('23:00');
-         $schedule->command('emails:enable')->dailyAt('23:00');
+         $schedule->command('emails:disable')->weekdays('23:00');
+         $schedule->command('emails:enable')->weekdays('23:00');
     }
     /**
      * Register the Closure based commands for the application.
