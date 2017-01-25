@@ -133,8 +133,9 @@ Route::get('colaboradores/{name}/{tipo}/{emp}', function ($name, $tipo, $emp) {
         ->limit(10)->get();
     foreach ($colaboradores as $key => $value) {
         $colaboradores[$key]->value = iconv('windows-1252', 'utf-8', $colaboradores[$key]->value);
+        $colaboradores[$key]->DESSIT = iconv('windows-1252', 'utf-8', $colaboradores[$key]->DESSIT);
     }
-    return ($colaboradores);
+    return response()->json($colaboradores);
 });
 Route::get('devolucao/{codbem}/{codbememp}', function ($codbem, $codbememp) {
     $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $codbem)
