@@ -1,6 +1,4 @@
 function handleData(data) {
-
-
     $('#resultOfSearch').empty();
     if (data.data.length > 0) {
         $.each(data.data, function (i, item) {
@@ -465,7 +463,6 @@ function DateUsTODateBr(date, time) {
     var hora = time == true ? d.getHours() + ":" + (d.getMinutes() <= 9? '0'+d.getMinutes():d.getMinutes()) : "";
     return d.toLocaleDateString() + " " + hora;
 }
-
 function CreateFilterPat(number) {
     CheckFilter = $('#filter').find('#filter-pat');
     if (CheckFilter.length >= 1) {
@@ -528,7 +525,7 @@ function getTermos(url) {
     $.ajax({
         url: url,
         type: 'get',
-        data: {bem, employed},
+        data: [bem, employed],
         datType: 'json',
         success: function (data) {
             $('#list-termos').empty();
@@ -563,11 +560,7 @@ function getTermos(url) {
             }
         }
     });
-    //console.log(bem);
-    //console.log(employed);
 }
-
-
 function notificationTermo(termo,url) {
     $.ajax({
         url: url+'/'+termo,
@@ -593,7 +586,6 @@ function notificationTermo(termo,url) {
         }
     });
 }
-
 angular.module('ativos', ['ngMessages']);
 angular.module('ativos').controller('termo', function ($http, $scope) {
     $scope.gerarTermo = function (termo) {

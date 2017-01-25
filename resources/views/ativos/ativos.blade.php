@@ -642,7 +642,16 @@
                     data: data,
                     type: 'get',
                     dataType: 'json'
-                }).done(handleData).fail(ErroConnect);
+                }).done(handleData).fail(function(){
+                    $("#buttonSearch").empty();
+                    $("#buttonSearch").append("<span class=\"glyphicon glyphicon-search\"></span> Pesquisar");
+                    swal(
+                        'Oops...',
+                        'Ocorreu um erro interno, favor importar ao desenvolvedor!'
+                        ,
+                        'error'
+                    )
+                });
             });
             $(document).on('click', '.localizacoes', function () {
                 var item = $(this).parent().parent().parent().find('.cod-bem').text();
@@ -918,9 +927,21 @@
                     $.ajax({
                         url: '{{url('api/colaboradores/')}}' + '/' + nome + '/' + tipcol + '/' + empresa,
                         dataType: "json",
-                        type: 'get',
-                        success: function (data) {
-                            response(data);
+                        type: 'get'
+                    }).done(function(data){
+                        response(data);
+                    }).fail(function(status){
+                        console.log(status);
+                        if (Error.status == 401) {
+                            location.reload();
+                        }
+                        if (Error.status == 500) {
+                            swal(
+                                'Oops...',
+                                'Ocorreu um erro interno, favor importar ao desenvolvedor!'
+                                ,
+                                'error'
+                            )
                         }
                     });
                 },

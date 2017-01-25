@@ -40,7 +40,7 @@ class AtivosController extends Controller
             "explanation" => " Busca de ativos",
             "empresas" => $Empresas,
             "states" => $States,
-            "tipoTermos" =>$tipoTermos
+            "tipoTermos" => $tipoTermos
 
         ]);
     }
@@ -132,7 +132,7 @@ class AtivosController extends Controller
                 $query->whereIn('E670BEM.CODBEM', $bem);
             }
 
-        } elseif(!empty($pat)) {
+        } elseif (!empty($pat)) {
             $query->where('E670BEM.CODBEM', 'like', "$pat%");
         }
         if ($request->has('ccu') && !empty($request->get('ccu'))) {
@@ -152,7 +152,7 @@ class AtivosController extends Controller
             $data = new Carbon($row->DATAQI);
             $query[$Key]->DATAQI = $data->format('d/m/Y');
             $query[$Key]->EMPRST = \App\Emprestimo::where('E070EMP_CODEMP', '=', $row->CODEMP)->where('E670BEM_CODBEM', '=', $row->CODBEM)->where('data_entrada', '=', null)->count();
-            $Bem = new Bem($row->CODBEM,$row->CODEMP);
+            $Bem = new Bem($row->CODBEM, $row->CODEMP);
             $query[$Key]->HISTEMPRST = $this->loanHistory($Bem);
             $query[$Key]->ASSOC = $assoc->count();
             if ($query[$Key]->ASSOC) {
@@ -166,6 +166,12 @@ class AtivosController extends Controller
                     ->where('TIPCOL', '=', $assoc[0]->R034FUN_TIPCOL)
                     ->where('NUMCAD', '=', $assoc[0]->R034FUN_NUMCAD)
                     ->get();
+                if ($query[$Key]->connect->count() > 0) {
+                    foreach ($query[$Key]->connect as $index => $Value) {
+                        $query[$Key]->connect[$index]->DESSIT = iconv("ISO-8859-1", "UTF-8", $Value->DESSIT);
+                        $query[$Key]->connect[$index]->value = iconv("ISO-8859-1", "UTF-8", $Value->value);
+                    }
+                }
             } else {
                 $query[$Key]->connect = null;
             }
@@ -191,7 +197,6 @@ class AtivosController extends Controller
                 ->where('E070EMP_CODEMP', '=', $row->CODEMP)->get();
             $query[$Key]->history = $this->history($row->CODBEM, $row->CODEMP);
         }
-
         return response()->json($query);
     }
 
@@ -293,6 +298,7 @@ class AtivosController extends Controller
         Mail::send($message);
         return response()->json(["erro" => 0, "msg" => "Item emprestado com sucesso."]);
     }
+
     public function Devolucao(Request $request)
     {
         $VerificaEmprestimo = \App\Emprestimo::where('E670BEM_CODBEM', '=', $request->get("codbem"))
@@ -331,6 +337,7 @@ class AtivosController extends Controller
         }
         return response()->json(["error" => 0, "msg" => "O item foi devolvido com sucesso."]);
     }
+
     /**
      * @return string
      */
@@ -410,29 +417,30 @@ class AtivosController extends Controller
         return null;
     }
 
-    public function termoNovo(Request $request){
+    public function termoNovo(Request $request)
+    {
 
-        $bem = new Bem($request->get(1)['coditem'],$request->get(1)['codemp']);
-        $employed = new Employed($request->get(2)['numemp'],$request->get(2)['tipcol'],$request->get(2)['numcol']);
+        $bem = new Bem($request->get(1)['coditem'], $request->get(1)['codemp']);
+        $employed = new Employed($request->get(2)['numemp'], $request->get(2)['tipcol'], $request->get(2)['numcol']);
         $tipoTermo = \App\tipotermo::find($request->get(0)['tipo']['id']);
-        $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
-            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
-            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
-            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
-            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
-            ->where('data_out','=',null);
-        if($connect->count()==0){
-            return (array) (new \App\Pojo\Response(1,null,'Esse item e o colaborador não estão associados.'));
+        $connect = \App\Connect::where('E670BEM_CODBEM', '=', $bem->CodBem)
+            ->where('E070EMP_CODEMP', '=', $bem->CodEmp)
+            ->where('R034FUN_NUMEMP', '=', $employed->NUMEMP)
+            ->where('R034FUN_TIPCOL', '=', $employed->TIPCOL)
+            ->where('R034FUN_NUMCAD', '=', $employed->NUMCAD)
+            ->where('data_out', '=', null);
+        if ($connect->count() == 0) {
+            return (array)(new \App\Pojo\Response(1, null, 'Esse item e o colaborador não estão associados.'));
         }
-        if($connect->get()[0]->Termos()->where('tipotermo_id','=',$tipoTermo->id)->count()> 0){
-            return (array) (new \App\Pojo\Response(1,null,'Já existe esse tipo de termo cadastrado.'));
+        if ($connect->get()[0]->Termos()->where('tipotermo_id', '=', $tipoTermo->id)->count() > 0) {
+            return (array)(new \App\Pojo\Response(1, null, 'Já existe esse tipo de termo cadastrado.'));
         }
         $termo = new \App\Termo();
         $termo->tipotermo_id = $tipoTermo->id;
         $termo->obs = $request->get(0)['obs'];
         $termo->save();
         $connect->get()[0]->Termos()->attach($termo);
-        return (array) (new \App\Pojo\Response(0,null,'Termo inserido com sucesso!'));
+        return (array)(new \App\Pojo\Response(0, null, 'Termo inserido com sucesso!'));
     }
 
     private function history($ben, $emp)
@@ -466,21 +474,25 @@ class AtivosController extends Controller
         }
         return $Historyes;
     }
-    private  function loanHistory(Bem $Bem){
-        $Loans = \App\Emprestimo::where('E070EMP_CODEMP', '=', $Bem->CodEmp)->where('E670BEM_CODBEM', '=', $Bem->CodBem)->orderBy('created_at','DESC')->take(10)->get();
-        foreach ($Loans as $Key => $Loan){
-            $Loans[$Key]->employed = new Employed($Loan->R034FUN_NUMEMP,$Loan->R034FUN_TIPCOL,$Loan->R034FUN_NUMCAD);
+
+    private function loanHistory(Bem $Bem)
+    {
+        $Loans = \App\Emprestimo::where('E070EMP_CODEMP', '=', $Bem->CodEmp)->where('E670BEM_CODBEM', '=', $Bem->CodBem)->orderBy('created_at', 'DESC')->take(10)->get();
+        foreach ($Loans as $Key => $Loan) {
+            $Loans[$Key]->employed = new Employed($Loan->R034FUN_NUMEMP, $Loan->R034FUN_TIPCOL, $Loan->R034FUN_NUMCAD);
         }
         return $Loans;
     }
-    public function termos (Request $request){
-       /* $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
-            ->where('E070EMP_CODEMP','=',$bem->CodEmp)
-            ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
-            ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
-            ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
-            ->where('data_out','=',null);*/
 
-       return $request->get('bem');
+    public function termos(Request $request)
+    {
+        /* $connect = \App\Connect::where('E670BEM_CODBEM','=',$bem->CodBem)
+             ->where('E070EMP_CODEMP','=',$bem->CodEmp)
+             ->where('R034FUN_NUMEMP','=',$employed->NUMEMP)
+             ->where('R034FUN_TIPCOL','=',$employed->TIPCOL)
+             ->where('R034FUN_NUMCAD','=',$employed->NUMCAD)
+             ->where('data_out','=',null);*/
+
+        return $request->get('bem');
     }
 }
